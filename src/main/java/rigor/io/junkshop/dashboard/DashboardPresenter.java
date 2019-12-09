@@ -18,6 +18,7 @@ import rigor.io.junkshop.materials.MaterialsProvider;
 import rigor.io.junkshop.utils.GuiManager;
 
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -57,10 +58,19 @@ public class DashboardPresenter implements Initializable {
     junkTable.getColumns().addAll(material,
                                   price,
                                   weight);
-    junkTable.setItems(FXCollections.observableList(junkCollector.getJunk()
-                                                   .stream()
-                                                   .map(JunkFX::new)
-                                                   .collect(Collectors.toList())));
+    fillTableData();
+  }
+
+  private void fillTableData() {
+    junkTable.setItems(FXCollections.observableList(getJunk()
+                                                        .stream()
+                                                        .filter(j -> j.getDate()!= null && j.getDate().equalsIgnoreCase(LocalDate.now().toString()))
+                                                        .map(JunkFX::new)
+                                                        .collect(Collectors.toList())));
+  }
+
+  private List<Junk> getJunk() {
+    return junkCollector.getJunk();
   }
 
   private void fillMaterialBox() {
@@ -88,10 +98,7 @@ public class DashboardPresenter implements Initializable {
                          price,
                          weight);
     junkCollector.sendJunk(junk);
-    junkTable.setItems(FXCollections.observableList(junkCollector.getJunk()
-                                                        .stream()
-                                                        .map(JunkFX::new)
-                                                        .collect(Collectors.toList())));
+    fillTableData();
   }
 
   @FXML

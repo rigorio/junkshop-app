@@ -13,6 +13,7 @@ import rigor.io.junkshop.junk.JunkFX;
 import rigor.io.junkshop.materials.MaterialsProvider;
 
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -47,6 +48,12 @@ public class JunkSummaryPresenter implements Initializable {
                                      weight,
                                      price);
 
+    datePicker.setValue(LocalDate.now());
+
+    initTable();
+  }
+
+  private void initTable() {
     summaryTable.setItems(FXCollections.observableList(summarizeJunk()
                                                            .stream()
                                                            .map(JunkFX::new)
@@ -55,22 +62,26 @@ public class JunkSummaryPresenter implements Initializable {
 
   @FXML
   public void changeDate() {
-    String date = datePicker.getValue().toString();
-
+    initTable();
   }
 
   private List<Junk> summarizeJunk() {
     List<Junk> allJunk = getAllJunk();
     List<Junk> summarizedJunk = new ArrayList<>();
     materialsProvider.getMaterials().forEach(material -> {
-      List<Junk> tempJunk = allJunk.stream().filter(e -> e.getMaterial().equalsIgnoreCase(material.getMaterial()))
+      List<Junk> tempJunk = allJunk.stream().filter(e -> e.getMaterial().equalsIgnoreCase(material.getMaterial()) && e.getDate() != null && e.getDate().equalsIgnoreCase(datePicker.getValue().toString()))
           .collect(Collectors.toList());
-      summarizedJunk.add(new Junk(material.getMaterial(),
-                                  "" + tempJunk.stream()
-                                      .mapToDouble(j -> Double.parseDouble(j.getPrice())*Double.parseDouble(j.getWeight()))
-                                      .sum(),
-                                  "" + tempJunk.stream().mapToDouble(j -> Double.parseDouble(j.getWeight()))
-                                      .sum()));
+      String price = "" + tempJunk.stream()
+          .mapToDouble(j -> Double.parseDouble(j.getPrice()) * Double.parseDouble(j.getWeight()))
+          .sum();
+      String weight = "" + tempJunk.stream().mapToDouble(j -> Double.parseDouble(j.getWeight()))
+          .sum();
+      Junk junk = Junk.builder()
+          .material(material.getMaterial())
+          .price(price)
+          .weight(weight)
+          .build();
+      summarizedJunk.add(junk);
     });
 
     return summarizedJunk;

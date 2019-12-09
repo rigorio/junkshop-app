@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class JunkCollector {
   public void sendJunk(Junk junk) {
     OkHttpClient client = new OkHttpClient();
     try {
+      junk.setDate(LocalDate.now().toString());
       String jsonString = new ObjectMapper().writeValueAsString(junk);
       RequestBody reqbody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
