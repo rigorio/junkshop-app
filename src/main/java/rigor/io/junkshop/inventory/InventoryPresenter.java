@@ -1,10 +1,9 @@
-package rigor.io.junkshop.dashboard;
+package rigor.io.junkshop.inventory;
 
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
@@ -26,7 +25,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-public class DashboardPresenter implements Initializable {
+public class InventoryPresenter implements Initializable {
   @FXML
   private JFXComboBox<String> materialBox;
   @FXML
@@ -38,7 +37,7 @@ public class DashboardPresenter implements Initializable {
   private MaterialsProvider materialsProvider;
   private JunkCollector junkCollector;
 
-  public DashboardPresenter() {
+  public InventoryPresenter() {
     materialsProvider = new MaterialsProvider();
     junkCollector = new JunkCollector();
   }
