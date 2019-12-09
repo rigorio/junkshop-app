@@ -12,22 +12,22 @@
 <?import javafx.scene.text.Font?>
 
 <HBox fx:id="mainPane" prefHeight="669.0" prefWidth="1019.0" xmlns="http://javafx.com/javafx/8.0.999-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.dashboard.DashboardPresenter">
-  <VBox prefHeight="669.0" prefWidth="193.0" style="-fx-background-color: #546E7A;">
+  <VBox prefHeight="669.0" prefWidth="193.0" style="-fx-background-color: #8BC34A;">
     <Label alignment="CENTER" prefHeight="86.0" prefWidth="193.0" style="-fx-background-color: #ffffff;" text="Steelman Junk Shop" textFill="#455a64">
          <font>
             <Font name="System Bold" size="13.0" />
          </font></Label>
-    <JFXButton mnemonicParsing="false" prefHeight="60.0" prefWidth="193.0" style="-fx-background-color: #546E7A;" text="Inventory" textFill="WHITE">
+    <JFXButton mnemonicParsing="false" prefHeight="60.0" prefWidth="193.0" style="-fx-background-color: #8BC34A;" text="Inventory" textFill="WHITE">
       <font>
         <Font name="System Bold" size="12.0" />
       </font>
     </JFXButton>
-    <JFXButton mnemonicParsing="false" prefHeight="60.0" prefWidth="193.0" style="-fx-background-color: #546E7A;" text="Sales Summary" textFill="WHITE">
+    <JFXButton mnemonicParsing="false" prefHeight="60.0" prefWidth="193.0" style="-fx-background-color: #8BC34A;" text="Cashier" textFill="WHITE">
       <font>
         <Font name="System Bold" size="12.0" />
       </font>
     </JFXButton>
-    <JFXButton mnemonicParsing="false" prefHeight="60.0" prefWidth="193.0" style="-fx-background-color: #546E7A;" text="Button" textFill="WHITE">
+    <JFXButton mnemonicParsing="false" prefHeight="60.0" prefWidth="193.0" style="-fx-background-color: #8BC34A;" text="Sales Summary" textFill="WHITE">
       <font>
         <Font name="System Bold" size="12.0" />
       </font>
@@ -38,14 +38,14 @@
       <JFXComboBox fx:id="materialBox" layoutX="14.0" layoutY="19.0" onAction="#selectMaterial" prefWidth="150.0" promptText="Material" />
       <JFXTextField fx:id="priceText" layoutX="179.0" layoutY="19.0" promptText="Price" />
       <JFXTextField fx:id="weightText" layoutX="330.0" layoutY="19.0" promptText="Weight" />
-      <JFXButton layoutX="479.0" layoutY="19.0" mnemonicParsing="false" onAction="#addItem" style="-fx-background-color: #546E7A;" text="Add Item" textFill="WHITE">
+      <JFXButton layoutX="479.0" layoutY="19.0" mnemonicParsing="false" onAction="#addItem" style="-fx-background-color: #8BC34A;" text="Add Item" textFill="WHITE">
         <font>
           <Font name="System Bold" size="12.0" />
         </font>
       </JFXButton>
          <Hyperlink layoutX="14.0" layoutY="55.0" onAction="#viewDailySummaries" text="View Daily Summaries" />
     </AnchorPane>
-    <TableView fx:id="junkTable" prefHeight="176.0" prefWidth="873.0" VBox.vgrow="ALWAYS">
+    <TableView fx:id="junkTable" prefHeight="584.0" prefWidth="873.0" VBox.vgrow="ALWAYS">
       <columnResizePolicy>
         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
       </columnResizePolicy>

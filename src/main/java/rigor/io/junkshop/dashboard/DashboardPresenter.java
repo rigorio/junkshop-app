@@ -12,8 +12,10 @@ import javafx.scene.control.TableView;
 import rigor.io.junkshop.junk.Junk;
 import rigor.io.junkshop.junk.JunkCollector;
 import rigor.io.junkshop.junk.JunkFX;
+import rigor.io.junkshop.junkSummary.JunkSummaryView;
 import rigor.io.junkshop.materials.Material;
 import rigor.io.junkshop.materials.MaterialsProvider;
+import rigor.io.junkshop.utils.GuiManager;
 
 import java.net.URL;
 import java.util.List;
@@ -106,6 +108,6 @@ public class DashboardPresenter implements Initializable {
 
   @FXML
   public void viewDailySummaries() {
-
+    GuiManager.getInstance().displayView(new JunkSummaryView());
   }
 }
