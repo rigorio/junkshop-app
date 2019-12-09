@@ -1,3 +1,4 @@
+/*
 package rigor.io.junkshop.newGown;
 
 import com.jfoenix.controls.JFXComboBox;
@@ -82,3 +83,4 @@ public class NewGownPresenter implements Initializable {
   public void cancel() {
   }
 }
+*/
