@@ -2,6 +2,8 @@ package rigor.io.junkshop.inventory;
 
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -58,6 +60,23 @@ public class InventoryPresenter implements Initializable {
                                   price,
                                   weight);
     fillTableData();
+
+    priceText.textProperty().addListener(new ChangeListener<String>() {
+      @Override
+      public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+        if (!newValue.matches("\\d*(\\.\\d*)?")) {
+          priceText.setText(oldValue);
+        }
+      }
+    });
+    weightText.textProperty().addListener(new ChangeListener<String>() {
+      @Override
+      public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+        if (!newValue.matches("\\d*(\\.\\d*)?")) {
+          weightText.setText(oldValue);
+        }
+      }
+    });
   }
 
   private void fillTableData() {
@@ -90,6 +109,9 @@ public class InventoryPresenter implements Initializable {
 
   @FXML
   public void addItem() {
+    if (priceText.getText().length() < 1 || weightText.getText().length() < 1 || materialBox.getValue() == null) {
+      return;
+    }
     String materialName = materialBox.getValue();
     String price = priceText.getText();
     String weight = weightText.getText();

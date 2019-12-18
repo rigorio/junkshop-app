@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.layout.AnchorPane;
+import rigor.io.junkshop.cashier.CashierView;
 import rigor.io.junkshop.inventory.InventoryView;
 
 import java.net.URL;
@@ -22,12 +23,12 @@ public class DashboardPresenter implements Initializable {
 
   @FXML
   public void viewInventory() {
-    updateDynamicPaneContent(new InventoryView());
+    updateDynamicPaneContent(new InventoryView().getView());
   }
 
   @FXML
   public void viewCashier() {
-
+    updateDynamicPaneContent(new CashierView().getView());
   }
 
   @FXML

@@ -23,9 +23,9 @@
           <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="NEVER" />
           <RowConstraints minHeight="10.0" prefHeight="351.0" vgrow="NEVER" />
         </rowConstraints>
-        <Label alignment="CENTER" prefHeight="86.0" prefWidth="193.0" style="-fx-background-color: #ffffff;" text="Steelman Junk Shop" textFill="#455a64" GridPane.hgrow="NEVER" GridPane.valignment="TOP" GridPane.vgrow="NEVER">
+        <Label alignment="CENTER" prefHeight="86.0" prefWidth="193.0" style="-fx-background-color: #8BC34A;" text="Steelman JunkShop" textAlignment="CENTER" textFill="WHITE" wrapText="true" GridPane.hgrow="NEVER" GridPane.valignment="TOP" GridPane.vgrow="NEVER">
           <font>
-            <Font name="System Bold" size="13.0" />
+            <Font name="System Bold" size="21.0" />
           </font>
         </Label>
         <JFXButton mnemonicParsing="false" onAction="#viewInventory" prefHeight="60.0" prefWidth="193.0" style="-fx-background-color: #8BC34A;" text="Inventory" textFill="WHITE" GridPane.hgrow="NEVER" GridPane.rowIndex="1" GridPane.valignment="TOP" GridPane.vgrow="NEVER">
