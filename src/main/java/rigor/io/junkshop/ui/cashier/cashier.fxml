@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="550" prefWidth="825" xmlns="http://javafx.com/javafx/8.0.999-ea"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.ui.cashier.CashierPresenter">
+  <BorderPane prefHeight="550" prefWidth="640" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <top>
+      <AnchorPane prefHeight="92.0" prefWidth="825.0" style="-fx-background-color: #ffffff;"
+                  BorderPane.alignment="CENTER">
+        <JFXComboBox fx:id="materialBox" layoutX="14.0" layoutY="19.0" onAction="#selectMaterial" prefWidth="150.0"
+                     promptText="Material"/>
+        <JFXTextField fx:id="priceText" layoutX="179.0" layoutY="54.0" prefHeight="25.0" prefWidth="150.0"
+                      promptText="Price"/>
+        <JFXTextField fx:id="weightText" layoutX="14.0" layoutY="54.0" prefHeight="25.0" prefWidth="150.0"
+                      promptText="Weight"/>
+        <JFXButton layoutX="344.0" layoutY="24.0" mnemonicParsing="false" onAction="#addItem"
+                   style="-fx-background-color: #8BC34A;" text="Add Item" textFill="WHITE">
+          <font>
+            <Font name="System Bold" size="12.0"/>
+          </font>
+        </JFXButton>
+        <Hyperlink layoutX="431.0" layoutY="60.0" onAction="#viewPurchaseHistory" prefHeight="23.0" prefWidth="100.0"
+                   text="Purchase History"/>
+        <JFXButton layoutX="343.0" layoutY="59.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="71.0"
+                   style="-fx-background-color: #8BC34A;" text="Purchase" textFill="WHITE">
+          <font>
+            <Font name="System Bold" size="12.0"/>
+          </font>
+        </JFXButton>
+        <JFXComboBox fx:id="typeBox" layoutX="179.0" layoutY="19.0" prefWidth="150.0" promptText="Type"/>
+        <JFXButton fx:id="deleteButton" layoutX="431.0" layoutY="24.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0"
+                   style="-fx-background-color: #FF3D00;" text="Delete" textFill="WHITE">
+          <font>
+            <Font name="System Bold" size="12.0"/>
+          </font>
+        </JFXButton>
+      </AnchorPane>
+    </top>
+    <center>
+      <TableView fx:id="junkTable" prefHeight="472.0" prefWidth="640.0" BorderPane.alignment="CENTER">
+        <columnResizePolicy>
+          <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+        <BorderPane.margin>
+          <Insets bottom="10.0" left="10.0" right="10.0"/>
+        </BorderPane.margin>
+      </TableView>
+    </center>
+  </BorderPane>
+</AnchorPane>

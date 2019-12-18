@@ -2,8 +2,7 @@ package rigor.io.junkshop;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import rigor.io.junkshop.dashboard.DashboardView;
-import rigor.io.junkshop.inventory.InventoryView;
+import rigor.io.junkshop.ui.dashboard.DashboardView;
 import rigor.io.junkshop.utils.GuiManager;
 
 public class JunkshopApp extends Application {
