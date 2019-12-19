@@ -3,10 +3,12 @@ package rigor.io.junkshop.models.purchase;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.StringProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class PurchaseItem {
