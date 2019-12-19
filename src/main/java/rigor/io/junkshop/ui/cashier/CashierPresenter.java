@@ -13,6 +13,8 @@ import rigor.io.junkshop.models.purchase.Purchase;
 import rigor.io.junkshop.models.purchase.PurchaseHandler;
 import rigor.io.junkshop.models.purchase.PurchaseItem;
 import rigor.io.junkshop.models.purchase.PurchaseItemFX;
+import rigor.io.junkshop.ui.purchaseHistory.PurchaseHistoryView;
+import rigor.io.junkshop.utils.GuiManager;
 
 import java.net.URL;
 import java.time.LocalDate;
@@ -21,7 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 public class CashierPresenter implements Initializable {
   @FXML
@@ -121,7 +122,6 @@ public class CashierPresenter implements Initializable {
     double totalPrice = purchaseItems.stream()
         .mapToDouble(item -> Double.parseDouble(item.getPrice()))
         .sum();
-    System.out.println(totalPrice);
 
     Purchase purchase = Purchase.builder()
         .purchaseItems(purchaseItems)
@@ -138,7 +138,7 @@ public class CashierPresenter implements Initializable {
 
   @FXML
   public void viewPurchaseHistory() {
-
+    GuiManager.getInstance().displayView(new PurchaseHistoryView());
   }
 
   private void fillTypeBox() {

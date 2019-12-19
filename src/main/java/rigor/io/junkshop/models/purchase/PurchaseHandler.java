@@ -37,7 +37,6 @@ public class PurchaseHandler {
     try {
       purchase.setDate(LocalDate.now().toString());
       String jsonString = new ObjectMapper().writeValueAsString(purchase);
-      System.out.println(jsonString);
       RequestBody reqbody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
           .url(URL)
@@ -46,7 +45,6 @@ public class PurchaseHandler {
       Call call = client.newCall(request);
       ResponseBody body = call.execute().body();
       String string = body.string();
-      System.out.println(string);
     } catch (IOException e) {
       e.printStackTrace();
     }
