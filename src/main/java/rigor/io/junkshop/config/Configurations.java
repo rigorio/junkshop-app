@@ -18,6 +18,7 @@ public class Configurations {
   private static final String TEMPDIR = System.getProperty("java.io.tmpdir");
   private static final String DEFAULT_FILENAME = "config.json";
   private static final String DIR_NAME = "steelman";
+  public static String HOST = "http://localhost:8080/api";
 
   private ObjectMapper mapper = new ObjectMapper();
 

@@ -3,6 +3,8 @@ package rigor.io.junkshop.models.junk;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
+import rigor.io.junkshop.config.Configurations;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -12,11 +14,12 @@ import java.util.List;
 public class JunkCollector {
   private static final MediaType JSON
       = MediaType.parse("application/json; charset=utf-8");
+  private String URL = Configurations.HOST + "/junk";
 
   public List<Junk> getJunk() {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
-        .url("http://localhost:8080/api/junk")
+        .url(URL)
         .build();
     Call call = client.newCall(request);
     List<Junk> junks = new ArrayList<>();
@@ -37,7 +40,7 @@ public class JunkCollector {
       String jsonString = new ObjectMapper().writeValueAsString(junk);
       RequestBody reqbody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
-          .url("http://localhost:8080/api/junk")
+          .url(URL)
           .post(reqbody)
           .build();
       Call call = client.newCall(request);
