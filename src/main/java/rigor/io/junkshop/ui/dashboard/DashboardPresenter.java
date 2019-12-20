@@ -1,11 +1,14 @@
 package rigor.io.junkshop.ui.dashboard;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.layout.AnchorPane;
 import rigor.io.junkshop.ui.cashier.CashierView;
 import rigor.io.junkshop.ui.inventory.InventoryView;
+import rigor.io.junkshop.ui.salesSummary.SalesSummaryView;
+import rigor.io.junkshop.ui.settings.SettingsView;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -32,7 +35,7 @@ public class DashboardPresenter implements Initializable {
 
   @FXML
   public void viewSales() {
-
+    updateDynamicPaneContent(new SalesSummaryView().getView());
   }
 
   private void updateDynamicPaneContent(Parent child) { // shut up
@@ -43,5 +46,10 @@ public class DashboardPresenter implements Initializable {
 
     dynamicContentPane.getChildren().clear();
     dynamicContentPane.getChildren().add(child);
+  }
+
+  @FXML
+  public void viewSettings(ActionEvent actionEvent) {
+    updateDynamicPaneContent(new SettingsView().getView());
   }
 }

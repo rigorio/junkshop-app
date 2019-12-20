@@ -14,7 +14,7 @@ import java.util.List;
 
 public class MaterialsProvider {
 
-  private String url = Configurations.HOST +  "/materials";
+  private String url = Configurations.getInstance().getHost() +  "/materials";
 
   public List<Material> getMaterials() {
     OkHttpClient client = new OkHttpClient();

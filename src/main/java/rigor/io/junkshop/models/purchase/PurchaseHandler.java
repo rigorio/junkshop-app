@@ -13,7 +13,7 @@ import java.util.List;
 public class PurchaseHandler {
   private static final MediaType JSON
       = MediaType.parse("application/json; charset=utf-8");
-  private String URL = Configurations.HOST + "/purchase";
+  private String URL = Configurations.getInstance().getHost() + "/purchase";
 
   public List<Purchase> getPurchases() {
     OkHttpClient client = new OkHttpClient();

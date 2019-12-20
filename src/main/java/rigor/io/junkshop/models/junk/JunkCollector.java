@@ -14,7 +14,7 @@ import java.util.List;
 public class JunkCollector {
   private static final MediaType JSON
       = MediaType.parse("application/json; charset=utf-8");
-  private String URL = Configurations.HOST + "/junk";
+  private String URL = Configurations.getInstance().getHost() + "/junk";
 
   public List<Junk> getJunk() {
     OkHttpClient client = new OkHttpClient();

@@ -17,13 +17,15 @@
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
         <rowConstraints>
-          <RowConstraints minHeight="10.0" prefHeight="80.0" vgrow="NEVER" />
-          <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="NEVER" />
-          <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="NEVER" />
-          <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="NEVER" />
-          <RowConstraints minHeight="10.0" prefHeight="351.0" vgrow="NEVER" />
+          <RowConstraints maxHeight="96.0" minHeight="10.0" prefHeight="79.0" vgrow="NEVER" />
+          <RowConstraints maxHeight="95.0" minHeight="10.0" prefHeight="43.0" vgrow="NEVER" />
+          <RowConstraints maxHeight="95.0" minHeight="10.0" prefHeight="42.0" vgrow="NEVER" />
+          <RowConstraints maxHeight="95.0" minHeight="10.0" prefHeight="45.0" vgrow="NEVER" />
+          <RowConstraints maxHeight="95.0" minHeight="10.0" prefHeight="34.0" vgrow="NEVER" />
+          <RowConstraints maxHeight="360.0" minHeight="10.0" prefHeight="319.0" vgrow="NEVER" />
+               <RowConstraints maxHeight="321.0" minHeight="0.0" prefHeight="0.0" vgrow="NEVER" />
         </rowConstraints>
-        <Label alignment="CENTER" prefHeight="86.0" prefWidth="193.0" style="-fx-background-color: #8BC34A;" text="Steelman JunkShop" textAlignment="CENTER" textFill="WHITE" wrapText="true" GridPane.hgrow="NEVER" GridPane.valignment="TOP" GridPane.vgrow="NEVER">
+        <Label alignment="CENTER" prefHeight="86.0" prefWidth="185.0" style="-fx-background-color: #8BC34A;" text="Steelman JunkShop" textAlignment="CENTER" textFill="WHITE" wrapText="true" GridPane.hgrow="NEVER" GridPane.valignment="TOP" GridPane.vgrow="NEVER">
           <font>
             <Font name="System Bold" size="21.0" />
           </font>
@@ -43,7 +45,12 @@
             <Font name="System Bold" size="12.0" />
           </font>
         </JFXButton>
-        <AnchorPane prefHeight="338.0" prefWidth="185.0" style="-fx-background-color: #8BC34A;" GridPane.rowIndex="4" />
+        <JFXButton mnemonicParsing="false" onAction="#viewSettings" prefHeight="60.0" prefWidth="193.0" style="-fx-background-color: #8BC34A;" text="Settings" textFill="WHITE" GridPane.rowIndex="4">
+          <font>
+            <Font name="System Bold" size="12.0" />
+          </font>
+        </JFXButton>
+        <AnchorPane prefHeight="10.0" prefWidth="185.0" style="-fx-background-color: #8BC34A;" GridPane.rowIndex="5" />
       </GridPane>
     </left>
     <center>
