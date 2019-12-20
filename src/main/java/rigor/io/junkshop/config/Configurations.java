@@ -2,12 +2,14 @@ package rigor.io.junkshop.config;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -32,14 +34,46 @@ public class Configurations {
    * @param host
    */
   public void setHost(String host) {
-    String stringContent = getAsString(getConfigFile().getAbsoluteFile().toString());
-    Map map = null;
+    Map map = getData();
+    map.put(ConfigKeys.DB_HOST, host); // TODO now host is being put to map, need to save to file
+    File file = getConfigFile();
     try {
-      map = mapper.readValue(stringContent, new TypeReference<Map>(){});
+      mapper.writeValue(file, map);
     } catch (IOException e) {
       e.printStackTrace();
     }
-    map.put(ConfigKeys.DB_HOST, host); // TODO now host is being put to map, need to save to file
+  }
+
+  public String getHost() {
+    Map<String, Object> map = getData();
+    System.out.println(map);
+    Object o = map.get(ConfigKeys.DB_HOST.toString());
+    return o != null ? o.toString() : null;
+  }
+
+  public void save(ConfigKeys key, Object value) {
+    save(key.name(), value);
+  }
+
+  public void save(String key, Object value) {
+    File configFile = getConfigFile();
+
+  }
+
+  @Nullable
+  private Map<String, Object> getData() {
+    File configFile = getConfigFile();
+    Map<String, Object> map = new HashMap<>();
+    try {
+      if (!configFile.exists())
+        configFile.createNewFile();
+      String stringContent = getAsString(configFile.getAbsoluteFile().toString());
+      if (stringContent.length() > 0)
+        map = mapper.readValue(stringContent, new TypeReference<Map<String, Object>>() {});
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return map;
   }
 
   private String getAsString(String filePath) {
@@ -52,17 +86,9 @@ public class Configurations {
     return contentBuilder.toString();
   }
 
-  public void save(ConfigKeys key, Object value) {
-    save(key.name(), value);
-  }
-
-  public void save(String key, Object value) {
-    File configFile = getConfigFile();
-
-  }
-
   private File getConfigFile() {
     String absoluteFileName = getFilePath() + S + DEFAULT_FILENAME;
+    System.out.println(absoluteFileName);
     return new File(absoluteFileName);
   }
 

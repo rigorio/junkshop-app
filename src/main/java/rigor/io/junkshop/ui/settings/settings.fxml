@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="550" prefWidth="825" xmlns="http://javafx.com/javafx/8.0.999-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.ui.settings.SettingsPresenter">
+  <JFXTextField fx:id="hostTextBox" layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="425.0" />
+   <JFXButton layoutX="458.0" layoutY="14.0" mnemonicParsing="false" onAction="#updateHost" text="Update" />
+</AnchorPane>
