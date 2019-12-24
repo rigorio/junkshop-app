@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Junk {
-  private Long id;
+  private String id;
   private String material;
   private String price;
   private String weight;

@@ -1,6 +1,5 @@
 package rigor.io.junkshop.models.purchase;
 
-import javafx.beans.property.LongProperty;
 import javafx.beans.property.StringProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,14 +11,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PurchaseItem {
-  private Long id;
+  private String id;
   private String material;
   private String type;
   private String price;
   private String weight;
 
   public PurchaseItem(PurchaseItemFX purchaseItem) {
-    LongProperty id = purchaseItem.getId();
+    StringProperty id = purchaseItem.getId();
     this.id = id != null ? id.get() : null;
 
     StringProperty material = purchaseItem.getMaterial();

@@ -1,6 +1,5 @@
 package rigor.io.junkshop.models.junk;
 
-import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -12,14 +11,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class JunkFX {
-  private LongProperty id;
+  private StringProperty id;
   private StringProperty material;
   private StringProperty price;
   private StringProperty weight;
 
   public JunkFX(Junk junk) {
-    Long id = junk.getId();
-    this.id = id != null ? new SimpleLongProperty(id) : null;
+    String id = junk.getId();
+    this.id = id != null ? new SimpleStringProperty(id) : null;
 
     String material = junk.getMaterial();
     this.material = material != null ? new SimpleStringProperty(material) : null;
