@@ -25,3 +25,9 @@
 .hyperlink #startLink{
     -fx-text-fill: #1DE9B6;
 }
+.combo-box-popup .list-view {
+    -fx-font-size : 15pt;
+}
+.combo-box-popup .list-view .list-cell {
+    -fx-padding: -1 -1 -1 -1;
+}

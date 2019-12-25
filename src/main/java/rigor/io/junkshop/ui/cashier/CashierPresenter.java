@@ -4,11 +4,15 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import rigor.io.junkshop.models.materials.Material;
+import rigor.io.junkshop.models.materials.MaterialsProvider;
 import rigor.io.junkshop.models.purchase.Purchase;
 import rigor.io.junkshop.models.purchase.PurchaseHandler;
 import rigor.io.junkshop.models.purchase.PurchaseItem;
@@ -18,19 +22,18 @@ import rigor.io.junkshop.utils.GuiManager;
 
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class CashierPresenter implements Initializable {
   @FXML
+  private Label quantityLabel;
+  @FXML
   private JFXButton purchaseButton;
   @FXML
   private TableView<PurchaseItemFX> purchaseTable;
-  @FXML
-  private JFXComboBox<String> typeBox;
   @FXML
   private JFXComboBox<String> materialBox;
   @FXML
@@ -43,9 +46,11 @@ public class CashierPresenter implements Initializable {
   private PurchaseHandler purchaseHandler;
 
   private List<PurchaseItemFX> purchaseItemList = new ArrayList<>();
+  private MaterialsProvider materialsProvider;
 
   public CashierPresenter() {
     purchaseHandler = new PurchaseHandler();
+    materialsProvider = new MaterialsProvider();
   }
 
   @Override
@@ -53,52 +58,26 @@ public class CashierPresenter implements Initializable {
     TableColumn<PurchaseItemFX, String> material = new TableColumn<>("Material");
     material.setCellValueFactory(e -> e.getValue().getMaterial());
 
-    TableColumn<PurchaseItemFX, String> type = new TableColumn<>("Type");
-    type.setCellValueFactory(e -> e.getValue().getType());
-
     TableColumn<PurchaseItemFX, String> price = new TableColumn<>("Price");
     price.setCellValueFactory(e -> e.getValue().getPrice());
 
     TableColumn<PurchaseItemFX, String> weight = new TableColumn<>("Weight");
     weight.setCellValueFactory(e -> e.getValue().getWeight());
 
-    purchaseTable.getColumns().addAll(type,
-                                      material,
+    purchaseTable.getColumns().addAll(material,
                                       weight,
                                       price);
     purchaseTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
-    materialBox.setDisable(true);
-    fillTypeBox();
+    fillMaterialBox();
   }
 
-  @FXML
-  public void selectType() {
-    String type = typeBox.getValue();
-    List<String> materials = new ArrayList<>();
-    switch (type) {
-      case "Wood":
-        materials = getWood();
-        break;
-      case "Metal":
-        materials = getMetal();
-        break;
-      case "Plastic":
-        materials = getPlastic();
-        break;
-    }
-    materialBox.setDisable(false);
-    materialBox.setItems(FXCollections.observableList(materials));
-  }
 
   @FXML
   public void addItem() {
-    String type = typeBox.getValue();
     String material = materialBox.getValue();
     String weight = weightText.getText();
     String price = priceText.getText();
     PurchaseItem item = PurchaseItem.builder()
-        .type(type)
         .material(material)
         .weight(weight)
         .price(price)
@@ -129,11 +108,20 @@ public class CashierPresenter implements Initializable {
         .totalPrice("" + totalPrice)
         .build();
     purchaseHandler.sendPurchase(purchase);
+    selectMaterial();
   }
 
   @FXML
   public void selectMaterial() {
-
+    String materialName = materialBox.getValue();
+    Optional<Material> any = materialsProvider.getMaterials().stream()
+        .filter(material -> material.getMaterial().equalsIgnoreCase(materialName))
+        .findAny();
+    if (any.isPresent()) {
+      Material material = any.get();
+      priceText.setText(material.getStandardPrice());
+      quantityLabel.setText(material.getWeight());
+    }
   }
 
   @FXML
@@ -141,11 +129,22 @@ public class CashierPresenter implements Initializable {
     GuiManager.getInstance().displayView(new PurchaseHistoryView());
   }
 
-  private void fillTypeBox() {
-    List<String> types = new ArrayList<>(
-        Arrays.asList("Wood", "Metal", "Plastic"));
-    typeBox.setItems(FXCollections.observableList(types));
+  private void fillMaterialBox() {
+    Task<List<Material>> getMaterials = new Task<List<Material>>() {
+      @Override
+      protected List<Material> call() {
+        return materialsProvider.getMaterials();
+      }
+    };
+    getMaterials.setOnSucceeded(e -> materialBox.setItems(FXCollections.observableList(getMaterials.getValue().stream().map(Material::getMaterial).collect(Collectors.toList()))));
+    Executor exec = Executors.newCachedThreadPool(runnable -> {
+      Thread t = new Thread(runnable);
+      t.setDaemon(true);
+      return t;
+    });
+    exec.execute(getMaterials);
   }
+
 
   private List<String> getWood() {
     return new ArrayList<>(

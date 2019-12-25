@@ -47,8 +47,6 @@ public class JunkCollector {
       Junk junks = new Junk();
       ResponseBody body = call.execute().body();
       String string = body.string();
-      System.out.println("ah yeah");
-      System.out.println(string);
       junks = new ObjectMapper().readValue(string, new TypeReference<Junk>() {});
     } catch (IOException e) {
       e.printStackTrace();

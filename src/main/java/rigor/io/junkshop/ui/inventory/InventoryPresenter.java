@@ -13,9 +13,9 @@ import javafx.scene.control.TableView;
 import rigor.io.junkshop.models.junk.Junk;
 import rigor.io.junkshop.models.junk.JunkCollector;
 import rigor.io.junkshop.models.junk.JunkFX;
-import rigor.io.junkshop.ui.junkSummary.JunkSummaryView;
 import rigor.io.junkshop.models.materials.Material;
 import rigor.io.junkshop.models.materials.MaterialsProvider;
+import rigor.io.junkshop.ui.junkSummary.JunkSummaryView;
 import rigor.io.junkshop.utils.GuiManager;
 
 import java.net.URL;
@@ -82,7 +82,7 @@ public class InventoryPresenter implements Initializable {
   private void fillTableData() {
     junkTable.setItems(FXCollections.observableList(getJunk()
                                                         .stream()
-                                                        .filter(j -> j.getDate()!= null && j.getDate().equalsIgnoreCase(LocalDate.now().toString()))
+                                                        .filter(j -> j.getDate() != null && j.getDate().equalsIgnoreCase(LocalDate.now().toString()))
                                                         .map(JunkFX::new)
                                                         .collect(Collectors.toList())));
   }
@@ -94,7 +94,7 @@ public class InventoryPresenter implements Initializable {
   private void fillMaterialBox() {
     Task<List<Material>> getMaterials = new Task<List<Material>>() {
       @Override
-      protected List<Material> call() throws Exception {
+      protected List<Material> call() {
         return materialsProvider.getMaterials();
       }
     };

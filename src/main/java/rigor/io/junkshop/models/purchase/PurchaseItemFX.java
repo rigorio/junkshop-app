@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 public class PurchaseItemFX {
   private StringProperty id;
   private StringProperty material;
-  private StringProperty type;
   private StringProperty price;
   private StringProperty weight;
 
@@ -23,9 +22,6 @@ public class PurchaseItemFX {
 
     String material = purchaseItem.getMaterial();
     this.material = material != null ? new SimpleStringProperty(material) : null;
-
-    String type = purchaseItem.getType();
-    this.type = type != null ? new SimpleStringProperty(type) : null;
 
     String price = purchaseItem.getPrice();
     this.price = price != null ? new SimpleStringProperty(price) : null;

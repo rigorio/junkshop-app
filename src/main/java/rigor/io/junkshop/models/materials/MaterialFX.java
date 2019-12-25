@@ -1,6 +1,5 @@
 package rigor.io.junkshop.models.materials;
 
-import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import lombok.AllArgsConstructor;
@@ -14,6 +13,7 @@ public class MaterialFX {
   private StringProperty id;
   private StringProperty material;
   private StringProperty standardPrice;
+  private StringProperty weight;
 
   public MaterialFX(Material material) {
     String id = material.getId();
@@ -24,5 +24,8 @@ public class MaterialFX {
 
     String standardPrice = material.getStandardPrice();
     this.standardPrice = standardPrice != null ? new SimpleStringProperty(standardPrice) : null;
+
+    String weight = material.getWeight();
+    this.weight = weight != null ? new SimpleStringProperty(weight) : null;
   }
 }
