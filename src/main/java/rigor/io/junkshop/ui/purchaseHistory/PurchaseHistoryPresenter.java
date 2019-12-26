@@ -3,6 +3,7 @@ package rigor.io.junkshop.ui.purchaseHistory;
 import com.jfoenix.controls.JFXDatePicker;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
@@ -10,15 +11,17 @@ import javafx.scene.control.TableView;
 import rigor.io.junkshop.models.purchase.Purchase;
 import rigor.io.junkshop.models.purchase.PurchaseFX;
 import rigor.io.junkshop.models.purchase.PurchaseHandler;
+import rigor.io.junkshop.utils.TaskTool;
 
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PurchaseHistoryPresenter implements Initializable {
   @FXML
-  private TableView historyTable;
+  private TableView<PurchaseFX> historyTable;
   @FXML
   private JFXDatePicker datePicker;
 
@@ -54,10 +57,17 @@ public class PurchaseHistoryPresenter implements Initializable {
   }
 
   private void initTable() {
-    historyTable.setItems(FXCollections.observableList(purchaseHistory()
-                                                           .stream()
-                                                           .map(PurchaseFX::new)
-                                                           .collect(Collectors.toList())));
+    TaskTool<List<Purchase>> tool = new TaskTool<>();
+    Task<List<Purchase>> task = tool.createTask(this::purchaseHistory);
+    task.setOnSucceeded(e -> {
+      Stream<Purchase> purchaseStream = task.getValue()
+          .stream();
+      List<PurchaseFX> purchases = purchaseStream
+          .map(PurchaseFX::new)
+          .collect(Collectors.toList());
+      historyTable.setItems(FXCollections.observableList(purchases));
+    });
+    tool.execute(task);
   }
 
   private List<Purchase> purchaseHistory() {

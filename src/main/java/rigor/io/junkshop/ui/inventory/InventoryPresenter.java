@@ -2,8 +2,6 @@ package rigor.io.junkshop.ui.inventory;
 
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -17,15 +15,16 @@ import rigor.io.junkshop.models.materials.Material;
 import rigor.io.junkshop.models.materials.MaterialsProvider;
 import rigor.io.junkshop.ui.junkSummary.JunkSummaryView;
 import rigor.io.junkshop.utils.GuiManager;
+import rigor.io.junkshop.utils.TaskTool;
+import rigor.io.junkshop.utils.UITools;
 
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class InventoryPresenter implements Initializable {
   @FXML
@@ -35,7 +34,7 @@ public class InventoryPresenter implements Initializable {
   @FXML
   private JFXTextField weightText;
   @FXML
-  private TableView junkTable;
+  private TableView<JunkFX> junkTable;
   private MaterialsProvider materialsProvider;
   private JunkCollector junkCollector;
 
@@ -61,30 +60,26 @@ public class InventoryPresenter implements Initializable {
                                   weight);
     fillTableData();
 
-    priceText.textProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-        if (!newValue.matches("\\d*(\\.\\d*)?")) {
-          priceText.setText(oldValue);
-        }
-      }
-    });
-    weightText.textProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-        if (!newValue.matches("\\d*(\\.\\d*)?")) {
-          weightText.setText(oldValue);
-        }
-      }
-    });
+    UITools.numberOnlyTextField(priceText);
+    UITools.numberOnlyTextField(weightText);
   }
 
+
   private void fillTableData() {
-    junkTable.setItems(FXCollections.observableList(getJunk()
-                                                        .stream()
-                                                        .filter(j -> j.getDate() != null && j.getDate().equalsIgnoreCase(LocalDate.now().toString()))
-                                                        .map(JunkFX::new)
-                                                        .collect(Collectors.toList())));
+    TaskTool<List<Junk>> tool = new TaskTool<>();
+    Task<List<Junk>> task = tool.createTask(this::getJunk);
+    task.setOnSucceeded(e -> {
+      Stream<Junk> junkStream = task.getValue().stream();
+      List<JunkFX> junk = junkStream
+          .filter(j -> {
+            String today = LocalDate.now().toString();
+            return j.getDate() != null && j.getDate().equalsIgnoreCase(today);
+          })
+          .map(JunkFX::new)
+          .collect(Collectors.toList());
+      junkTable.setItems(FXCollections.observableList(junk));
+    });
+    tool.execute(task);
   }
 
   private List<Junk> getJunk() {
@@ -92,19 +87,20 @@ public class InventoryPresenter implements Initializable {
   }
 
   private void fillMaterialBox() {
-    Task<List<Material>> getMaterials = new Task<List<Material>>() {
-      @Override
-      protected List<Material> call() {
-        return materialsProvider.getMaterials();
-      }
-    };
-    getMaterials.setOnSucceeded(e -> materialBox.setItems(FXCollections.observableList(getMaterials.getValue().stream().map(Material::getMaterial).collect(Collectors.toList()))));
-    Executor exec = Executors.newCachedThreadPool(runnable -> {
-      Thread t = new Thread(runnable);
-      t.setDaemon(true);
-      return t;
+    TaskTool<List<Material>> tool = new TaskTool<>();
+    Task<List<Material>> task = tool.createTask(this::getMaterials);
+    task.setOnSucceeded(e -> {
+      Stream<Material> materialStream = task.getValue().stream();
+      List<String> materials = materialStream
+          .map(Material::getMaterial)
+          .collect(Collectors.toList());
+      materialBox.setItems(FXCollections.observableList(materials));
     });
-    exec.execute(getMaterials);
+    tool.execute(task);
+  }
+
+  private List<Material> getMaterials() {
+    return materialsProvider.getMaterials();
   }
 
   @FXML
@@ -118,14 +114,19 @@ public class InventoryPresenter implements Initializable {
     Junk junk = new Junk(materialName,
                          price,
                          weight);
-    junkCollector.sendJunk(junk);
-    fillTableData();
+    TaskTool<Object> tool = new TaskTool<>();
+    Task<Object> task = tool.createTask(() -> {
+      junkCollector.sendJunk(junk);
+      fillTableData();
+      return null;
+    });
+    tool.execute(task);
   }
 
   @FXML
   public void selectMaterial() {
     String materialName = materialBox.getValue();
-    Optional<Material> any = materialsProvider.getMaterials().stream()
+    Optional<Material> any = getMaterials().stream()
         .filter(material -> material.getMaterial().equalsIgnoreCase(materialName))
         .findAny();
     if (any.isPresent()) {

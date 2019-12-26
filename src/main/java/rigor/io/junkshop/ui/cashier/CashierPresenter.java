@@ -7,6 +7,8 @@ import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.print.*;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
@@ -19,15 +21,23 @@ import rigor.io.junkshop.models.purchase.PurchaseItem;
 import rigor.io.junkshop.models.purchase.PurchaseItemFX;
 import rigor.io.junkshop.ui.purchaseHistory.PurchaseHistoryView;
 import rigor.io.junkshop.utils.GuiManager;
+import rigor.io.junkshop.utils.TaskTool;
+import rigor.io.junkshop.utils.UITools;
 
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CashierPresenter implements Initializable {
+  @FXML
+  private Label loadingLabel;
+  @FXML
+  private Label jobStatus;
   @FXML
   private Label quantityLabel;
   @FXML
@@ -69,6 +79,8 @@ public class CashierPresenter implements Initializable {
                                       price);
     purchaseTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     fillMaterialBox();
+    UITools.numberOnlyTextField(weightText);
+    UITools.numberOnlyTextField(priceText);
   }
 
 
@@ -94,34 +106,52 @@ public class CashierPresenter implements Initializable {
 
   @FXML
   public void purchaseItems() {
-    List<PurchaseItem> purchaseItems = purchaseTable.getItems()
-        .stream()
-        .map(PurchaseItem::new)
-        .collect(Collectors.toList());
-    double totalPrice = purchaseItems.stream()
-        .mapToDouble(item -> Double.parseDouble(item.getPrice()))
-        .sum();
+    purchaseButton.setText("Purchasing...");
+    TaskTool<Object> tool = new TaskTool<>();
+    Task<Object> task = tool.createTask(() -> {
+      List<PurchaseItem> purchaseItems = purchaseTable.getItems()
+          .stream()
+          .map(PurchaseItem::new)
+          .collect(Collectors.toList());
+      double totalPrice = purchaseItems.stream()
+          .mapToDouble(item -> Double.parseDouble(item.getPrice()))
+          .sum();
 
-    Purchase purchase = Purchase.builder()
-        .purchaseItems(purchaseItems)
-        .date(LocalDate.now().toString())
-        .totalPrice("" + totalPrice)
-        .build();
-    purchaseHandler.sendPurchase(purchase);
+//    print(purchaseTable); TODO print function when purchasing
+
+      Purchase purchase = Purchase.builder()
+          .purchaseItems(purchaseItems)
+          .date(LocalDate.now().toString())
+          .totalPrice("" + totalPrice)
+          .build();
+      purchaseHandler.sendPurchase(purchase);
+      return null;
+    });
+    task.setOnSucceeded(e -> purchaseButton.setText("Purchase"));
+    tool.execute(task);
     selectMaterial();
   }
 
   @FXML
   public void selectMaterial() {
-    String materialName = materialBox.getValue();
-    Optional<Material> any = materialsProvider.getMaterials().stream()
-        .filter(material -> material.getMaterial().equalsIgnoreCase(materialName))
-        .findAny();
-    if (any.isPresent()) {
-      Material material = any.get();
-      priceText.setText(material.getStandardPrice());
-      quantityLabel.setText(material.getWeight());
-    }
+    loadingLabel.setVisible(true);
+    TaskTool<List<Material>> tool = new TaskTool<>();
+    Task<List<Material>> task = tool.createTask(this::getMaterials);
+    task.setOnSucceeded(e -> {
+      String materialName = materialBox.getValue();
+      Optional<Material> any = task.getValue().stream()
+          .filter(material -> material.getMaterial().equalsIgnoreCase(materialName))
+          .findAny();
+      if (any.isPresent()) {
+        Material material = any.get();
+        priceText.setText(material.getStandardPrice());
+        quantityLabel.setText(material.getWeight());
+        loadingLabel.setVisible(false);
+      } else {
+        loadingLabel.setText("Error!");
+      }
+    });
+    tool.execute(task);
   }
 
   @FXML
@@ -129,35 +159,52 @@ public class CashierPresenter implements Initializable {
     GuiManager.getInstance().displayView(new PurchaseHistoryView());
   }
 
-  private void fillMaterialBox() {
-    Task<List<Material>> getMaterials = new Task<List<Material>>() {
-      @Override
-      protected List<Material> call() {
-        return materialsProvider.getMaterials();
+  private void print(Node node) {
+    // Define the Job Status Message
+    jobStatus.textProperty().unbind();
+    jobStatus.setText("Creating a printer job...");
+
+    // Create a printer job for the default printer
+    PrinterJob job = PrinterJob.createPrinterJob();
+
+    if (job != null) {
+      // Show the printer job status
+      jobStatus.textProperty().bind(job.jobStatusProperty().asString());
+
+      // Print the node
+      PageLayout pageLayout = Printer.getDefaultPrinter().createPageLayout(Paper.A6, PageOrientation.PORTRAIT, Printer.MarginType.DEFAULT);
+      boolean printed = job.printPage(pageLayout, node);
+
+      if (printed) {
+        // End the printer job
+        job.endJob();
+      } else {
+        // Write Error Message
+        jobStatus.textProperty().unbind();
+        jobStatus.setText("Printing failed.");
       }
-    };
-    getMaterials.setOnSucceeded(e -> materialBox.setItems(FXCollections.observableList(getMaterials.getValue().stream().map(Material::getMaterial).collect(Collectors.toList()))));
-    Executor exec = Executors.newCachedThreadPool(runnable -> {
-      Thread t = new Thread(runnable);
-      t.setDaemon(true);
-      return t;
+    } else {
+      // Write Error Message
+      jobStatus.setText("Could not create a printer job.");
+    }
+  }
+
+  private void fillMaterialBox() {
+    TaskTool<List<Material>> tool = new TaskTool<>();
+    Task<List<Material>> task = tool.createTask(this::getMaterials);
+    task.setOnSucceeded(e -> {
+      Stream<Material> materialStream = task.getValue().stream();
+      List<String> materials = materialStream
+          .map(Material::getMaterial)
+          .collect(Collectors.toList());
+      materialBox.setItems(FXCollections.observableList(materials));
+      loadingLabel.setVisible(false);
     });
-    exec.execute(getMaterials);
+    tool.execute(task);
   }
 
-
-  private List<String> getWood() {
-    return new ArrayList<>(
-        Arrays.asList("Wood A", "Wood B", "Wood C"));
+  private List<Material> getMaterials() {
+    return materialsProvider.getMaterials();
   }
 
-  private List<String> getMetal() {
-    return new ArrayList<>(
-        Arrays.asList("Metal A", "Metal B", "Metal C"));
-  }
-
-  private List<String> getPlastic() {
-    return new ArrayList<>(
-        Arrays.asList("Plastic A", "Plastic B", "Plastic C"));
-  }
 }

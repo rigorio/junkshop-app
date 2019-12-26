@@ -4,34 +4,64 @@
 <?import com.jfoenix.controls.JFXComboBox?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Hyperlink?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.text.Font?>
-
-<AnchorPane fx:id="mainPane" prefHeight="550" prefWidth="640" xmlns="http://javafx.com/javafx/8.0.999-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.ui.inventory.InventoryPresenter">
-  <BorderPane prefHeight="550" prefWidth="640" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<AnchorPane fx:id="mainPane" prefHeight="550" prefWidth="825" xmlns="http://javafx.com/javafx/8.0.999-ea"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.ui.inventory.InventoryPresenter">
+  <BorderPane prefHeight="550" prefWidth="640" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
     <top>
-      <AnchorPane prefHeight="86.0" prefWidth="640" style="-fx-background-color: #ffffff;" BorderPane.alignment="CENTER">
-        <JFXComboBox fx:id="materialBox" layoutX="14.0" layoutY="19.0" onAction="#selectMaterial" prefWidth="150.0" promptText="Material" />
-        <JFXTextField fx:id="priceText" layoutX="179.0" layoutY="19.0" promptText="Price" />
-        <JFXTextField fx:id="weightText" layoutX="330.0" layoutY="19.0" promptText="Weight" />
-        <JFXButton layoutX="479.0" layoutY="19.0" mnemonicParsing="false" onAction="#addItem" style="-fx-background-color: #8BC34A;" text="Add Item" textFill="WHITE">
+      <AnchorPane prefHeight="94.0" prefWidth="825.0" style="-fx-background-color: #ffffff;"
+                  BorderPane.alignment="CENTER">
+        <JFXComboBox fx:id="materialBox" layoutX="14.0" layoutY="40.0" onAction="#selectMaterial" prefHeight="40.0"
+                     prefWidth="150.0" promptText="Choose Material"/>
+        <JFXTextField fx:id="priceText" layoutX="185.0" layoutY="40.0" prefHeight="40.0" prefWidth="180.0"
+                      promptText="Price">
           <font>
-            <Font name="System Bold" size="12.0" />
+            <Font size="16.0"/>
+          </font>
+        </JFXTextField>
+        <JFXTextField fx:id="weightText" layoutX="381.0" layoutY="40.0" prefHeight="40.0" promptText="Weight">
+          <font>
+            <Font size="16.0"/>
+          </font>
+        </JFXTextField>
+        <JFXButton layoutX="576.0" layoutY="47.0" mnemonicParsing="false" onAction="#addItem" prefHeight="37.0"
+                   prefWidth="153.0" style="-fx-background-color: #8BC34A;" text="Add Item" textFill="WHITE">
+          <font>
+            <Font name="System Bold" size="16.0"/>
           </font>
         </JFXButton>
-        <Hyperlink layoutX="14.0" layoutY="55.0" onAction="#viewDailySummaries" text="View Daily Summaries" />
+        <Hyperlink layoutX="575.0" layoutY="12.0" onAction="#viewDailySummaries" text="View Daily Summaries">
+          <font>
+            <Font size="15.0"/>
+          </font>
+        </Hyperlink>
+        <Label layoutX="14.0" layoutY="14.0" text="Material">
+          <font>
+            <Font name="System Bold" size="16.0"/>
+          </font>
+        </Label>
+        <Label layoutX="185.0" layoutY="14.0" text="Price">
+          <font>
+            <Font name="System Bold" size="16.0"/>
+          </font>
+        </Label>
+        <Label layoutX="385.0" layoutY="14.0" text="Weight">
+          <font>
+            <Font name="System Bold" size="16.0"/>
+          </font>
+        </Label>
       </AnchorPane>
     </top>
     <center>
       <TableView fx:id="junkTable" prefHeight="472.0" prefWidth="640.0" BorderPane.alignment="CENTER">
         <columnResizePolicy>
-          <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+          <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
         </columnResizePolicy>
         <BorderPane.margin>
-          <Insets bottom="10.0" left="10.0" right="10.0" />
+          <Insets bottom="10.0" left="10.0" right="10.0"/>
         </BorderPane.margin>
       </TableView>
     </center>

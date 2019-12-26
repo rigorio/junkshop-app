@@ -2,6 +2,7 @@ package rigor.io.junkshop.ui.junkSummary;
 
 import com.jfoenix.controls.JFXDatePicker;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
@@ -10,6 +11,7 @@ import rigor.io.junkshop.models.junk.Junk;
 import rigor.io.junkshop.models.junk.JunkCollector;
 import rigor.io.junkshop.models.junk.JunkFX;
 import rigor.io.junkshop.models.materials.MaterialsProvider;
+import rigor.io.junkshop.utils.TaskTool;
 
 import java.net.URL;
 import java.time.LocalDate;
@@ -17,13 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JunkSummaryPresenter implements Initializable {
 
   @FXML
   private JFXDatePicker datePicker;
   @FXML
-  private TableView summaryTable;
+  private TableView<JunkFX> summaryTable;
   private JunkCollector junkCollector;
   private MaterialsProvider materialsProvider;
 
@@ -53,10 +56,17 @@ public class JunkSummaryPresenter implements Initializable {
   }
 
   private void initTable() {
-    summaryTable.setItems(FXCollections.observableList(summarizeJunk()
-                                                           .stream()
-                                                           .map(JunkFX::new)
-                                                           .collect(Collectors.toList())));
+    TaskTool<List<Junk>> tool = new TaskTool<>();
+    Task<List<Junk>> task = tool.createTask(this::summarizeJunk);
+    task.setOnSucceeded(e -> {
+      Stream<Junk> junkStream = task.getValue()
+          .stream();
+      List<JunkFX> junk = junkStream
+          .map(JunkFX::new)
+          .collect(Collectors.toList());
+      summaryTable.setItems(FXCollections.observableList(junk));
+    });
+    tool.execute(task);
   }
 
   @FXML

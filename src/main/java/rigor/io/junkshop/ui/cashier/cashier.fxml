@@ -9,72 +9,6 @@
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.ui.cashier.CashierPresenter">
   <BorderPane prefHeight="550" prefWidth="640" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-    <top>
-      <AnchorPane prefHeight="87.0" prefWidth="825.0" style="-fx-background-color: #ffffff;"
-                  BorderPane.alignment="CENTER">
-        <JFXComboBox fx:id="materialBox" layoutX="14.0" layoutY="36.0" onAction="#selectMaterial" prefHeight="37.0"
-                     prefWidth="164.0" promptText="Select Material"/>
-        <JFXTextField fx:id="priceText" layoutX="403.0" layoutY="38.0" prefHeight="37.0" prefWidth="75.0"
-                      promptText="Price">
-          <font>
-            <Font size="16.0"/>
-          </font>
-        </JFXTextField>
-        <JFXTextField fx:id="weightText" layoutX="302.0" layoutY="36.0" prefHeight="37.0" prefWidth="75.0"
-                      promptText="Weight">
-          <font>
-            <Font size="16.0"/>
-          </font>
-        </JFXTextField>
-        <JFXButton layoutX="562.0" layoutY="11.0" mnemonicParsing="false" onAction="#addItem" prefHeight="25.0"
-                   prefWidth="70.0" style="-fx-background-color: #8BC34A;" text="Add Item" textFill="WHITE">
-          <font>
-            <Font name="System Bold" size="12.0"/>
-          </font>
-        </JFXButton>
-        <Hyperlink layoutX="653.0" layoutY="40.0" onAction="#viewPurchaseHistory" prefHeight="23.0" prefWidth="100.0"
-                   text="Purchase History"/>
-        <JFXButton fx:id="purchaseButton" layoutX="653.0" layoutY="11.0" mnemonicParsing="false"
-                   onAction="#purchaseItems" prefHeight="25.0" prefWidth="100.0" style="-fx-background-color: #8BC34A;"
-                   text="Purchase" textFill="WHITE">
-          <font>
-            <Font name="System Bold" size="12.0"/>
-          </font>
-        </JFXButton>
-        <JFXButton fx:id="deleteButton" layoutX="562.0" layoutY="39.0" mnemonicParsing="false" onAction="#deleteItem"
-                   prefHeight="25.0" prefWidth="70.0" style="-fx-background-color: #FF3D00;" text="Delete"
-                   textFill="WHITE">
-          <font>
-            <Font name="System Bold" size="12.0"/>
-          </font>
-        </JFXButton>
-        <Label layoutX="14.0" layoutY="11.0" text="Material" textFill="#404040">
-          <font>
-            <Font name="System Bold" size="16.0"/>
-          </font>
-        </Label>
-        <Label layoutX="402.0" layoutY="11.0" text="Price" textFill="#404040">
-          <font>
-            <Font name="System Bold" size="16.0"/>
-          </font>
-        </Label>
-        <Label layoutX="302.0" layoutY="11.0" text="Weight" textFill="#404040">
-          <font>
-            <Font name="System Bold" size="16.0"/>
-          </font>
-        </Label>
-        <Label layoutX="198.0" layoutY="11.0" text="Available:">
-          <font>
-            <Font name="System Bold" size="16.0"/>
-          </font>
-        </Label>
-        <Label fx:id="quantityLabel" layoutX="198.0" layoutY="39.0" text="0.0">
-          <font>
-            <Font size="24.0"/>
-          </font>
-        </Label>
-      </AnchorPane>
-    </top>
     <center>
       <TableView fx:id="purchaseTable" prefHeight="472.0" prefWidth="805.0" BorderPane.alignment="CENTER">
         <columnResizePolicy>
@@ -85,5 +19,88 @@
         </BorderPane.margin>
       </TableView>
     </center>
+    <top>
+      <BorderPane prefHeight="108.0" prefWidth="825.0" BorderPane.alignment="CENTER">
+        <left>
+          <AnchorPane prefHeight="110.0" prefWidth="611.0" BorderPane.alignment="CENTER">
+            <JFXComboBox fx:id="materialBox" layoutX="14.0" layoutY="39.0" onAction="#selectMaterial"
+                         prefHeight="37.0" prefWidth="164.0" promptText="Select Material"/>
+            <JFXTextField fx:id="priceText" layoutX="407.0" layoutY="39.0" prefHeight="37.0" prefWidth="75.0"
+                          promptText="Price">
+              <font>
+                <Font size="16.0"/>
+              </font>
+            </JFXTextField>
+            <JFXTextField fx:id="weightText" layoutX="298.0" layoutY="39.0" prefHeight="37.0" prefWidth="75.0"
+                          promptText="Weight">
+              <font>
+                <Font size="16.0"/>
+              </font>
+            </JFXTextField>
+            <JFXButton layoutX="507.0" layoutY="20.0" mnemonicParsing="false" onAction="#addItem" prefHeight="37.0"
+                       prefWidth="93.0" style="-fx-background-color: #8BC34A;" text="Add Item" textFill="WHITE">
+              <font>
+                <Font name="System Bold" size="16.0"/>
+              </font>
+            </JFXButton>
+            <JFXButton fx:id="deleteButton" layoutX="506.0" layoutY="61.0" mnemonicParsing="false"
+                       onAction="#deleteItem" prefHeight="37.0" prefWidth="94.0"
+                       style="-fx-background-color: #FF3D00;" text="Delete" textFill="WHITE">
+              <font>
+                <Font name="System Bold" size="16.0"/>
+              </font>
+            </JFXButton>
+            <Label layoutX="14.0" layoutY="14.0" text="Material" textFill="#404040">
+              <font>
+                <Font name="System Bold" size="16.0"/>
+              </font>
+            </Label>
+            <Label layoutX="407.0" layoutY="14.0" text="Price:" textFill="#404040">
+              <font>
+                <Font name="System Bold" size="16.0"/>
+              </font>
+            </Label>
+            <Label layoutX="298.0" layoutY="14.0" text="Weight:" textFill="#404040">
+              <font>
+                <Font name="System Bold" size="16.0"/>
+              </font>
+            </Label>
+            <Label layoutX="196.0" layoutY="14.0" text="Available:">
+              <font>
+                <Font name="System Bold" size="16.0"/>
+              </font>
+            </Label>
+            <Label fx:id="quantityLabel" layoutX="196.0" layoutY="41.0" text="0.0">
+              <font>
+                <Font size="24.0"/>
+              </font>
+            </Label>
+          </AnchorPane>
+        </left>
+        <right>
+          <VBox alignment="TOP_RIGHT" prefHeight="200.0" prefWidth="143.0" BorderPane.alignment="CENTER">
+            <padding>
+              <Insets right="5.0"/>
+            </padding>
+            <Label fx:id="loadingLabel" text="Loading info...">
+              <font>
+                <Font name="System Bold Italic" size="15.0"/>
+              </font>
+            </Label>
+            <JFXButton fx:id="purchaseButton" mnemonicParsing="false" onAction="#purchaseItems" prefHeight="37.0"
+                       prefWidth="143.0" style="-fx-background-color: #8BC34A;" text="Purchase" textFill="WHITE">
+              <font>
+                <Font name="System Bold" size="16.0"/>
+              </font>
+            </JFXButton>
+            <Hyperlink onAction="#viewPurchaseHistory" prefHeight="33.0" prefWidth="139.0" text="Purchase History">
+              <font>
+                <Font name="System Bold" size="16.0"/>
+              </font>
+            </Hyperlink>
+          </VBox>
+        </right>
+      </BorderPane>
+    </top>
   </BorderPane>
 </AnchorPane>
