@@ -133,6 +133,7 @@ public class CashSummaryPresenter implements Initializable {
   }
 
   private void setExpensesTable() {
+    loadingLabel.setVisible(true);
     setAmounts();
     TaskTool<List<Expense>> tool = new TaskTool<>();
     Task<List<Expense>> task = tool.createTask(this::getExpenses);

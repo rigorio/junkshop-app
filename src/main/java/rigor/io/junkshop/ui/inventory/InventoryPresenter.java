@@ -6,6 +6,8 @@ import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import rigor.io.junkshop.models.junk.Junk;
@@ -27,6 +29,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class InventoryPresenter implements Initializable {
+  @FXML
+  private Label loadingLabel;
   @FXML
   private JFXComboBox<String> materialBox;
   @FXML
@@ -66,6 +70,7 @@ public class InventoryPresenter implements Initializable {
 
 
   private void fillTableData() {
+    loadingLabel.setVisible(true);
     TaskTool<List<Junk>> tool = new TaskTool<>();
     Task<List<Junk>> task = tool.createTask(this::getJunk);
     task.setOnSucceeded(e -> {
@@ -78,6 +83,7 @@ public class InventoryPresenter implements Initializable {
           .map(JunkFX::new)
           .collect(Collectors.toList());
       junkTable.setItems(FXCollections.observableList(junk));
+      loadingLabel.setVisible(false);
     });
     tool.execute(task);
   }
@@ -105,7 +111,20 @@ public class InventoryPresenter implements Initializable {
 
   @FXML
   public void addItem() {
-    if (priceText.getText().length() < 1 || weightText.getText().length() < 1 || materialBox.getValue() == null) {
+    if (materialBox.getValue() == null) {
+      Alert alert = new Alert(Alert.AlertType.WARNING);
+      alert.setTitle("No material selected");
+      alert.setHeaderText("Please select a material from the list");
+      alert.setContentText(null);
+      alert.showAndWait();
+      return;
+    }
+    if (priceText.getText().length() < 1 || weightText.getText().length() < 1 ) {
+      Alert alert = new Alert(Alert.AlertType.WARNING);
+      alert.setTitle("Price/Weight not specified");
+      alert.setHeaderText("Please enter price/weight");
+      alert.setContentText(null);
+      alert.showAndWait();
       return;
     }
     String materialName = materialBox.getValue();
@@ -125,6 +144,7 @@ public class InventoryPresenter implements Initializable {
 
   @FXML
   public void selectMaterial() {
+    loadingLabel.setVisible(true);
     String materialName = materialBox.getValue();
     Optional<Material> any = getMaterials().stream()
         .filter(material -> material.getMaterial().equalsIgnoreCase(materialName))
@@ -133,6 +153,7 @@ public class InventoryPresenter implements Initializable {
       Material material = any.get();
       priceText.setText(material.getStandardPrice());
     }
+    loadingLabel.setVisible(false);
   }
 
   @FXML
