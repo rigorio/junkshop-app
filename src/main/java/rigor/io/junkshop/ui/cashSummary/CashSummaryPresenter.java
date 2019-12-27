@@ -10,6 +10,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import rigor.io.junkshop.models.customProperties.CustomProperty;
+import rigor.io.junkshop.models.customProperties.CustomPropertyHandler;
+import rigor.io.junkshop.models.customProperties.CustomPropertyKeys;
 import rigor.io.junkshop.models.expense.Expense;
 import rigor.io.junkshop.models.expense.ExpenseFX;
 import rigor.io.junkshop.models.expense.ExpenseHandler;
@@ -21,7 +24,9 @@ import rigor.io.junkshop.utils.TaskTool;
 import rigor.io.junkshop.utils.UITools;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -59,11 +64,17 @@ public class CashSummaryPresenter implements Initializable {
   private ExpenseHandler expenseHandler;
   private SalesMan salesMan;
   private JunkCollector junkCollector;
+  private CustomPropertyHandler customPropertyHandler;
+  private static final String EXPENSES_KEY = "expenses";
+  private static final String SALES_KEY = "sales";
+  private static final String PURCHASES_KEY = "purchases";
+  private CustomProperty capitalProperty;
 
   public CashSummaryPresenter() {
     expenseHandler = new ExpenseHandler();
     salesMan = new SalesMan();
     junkCollector = new JunkCollector();
+    customPropertyHandler = new CustomPropertyHandler();
   }
 
   @Override
@@ -89,12 +100,26 @@ public class CashSummaryPresenter implements Initializable {
                                    sales);
 
     setSalesTable();
+    setCapitalTextbox();
     setExpensesTable();
     UITools.numberOnlyTextField(capitalTextBox);
     UITools.numberOnlyTextField(expenseAmountTextBox);
     UITools.numberOnlyTextField(salesTextBox);
     UITools.numberOnlyTextField(purchasesTextBox);
     UITools.numberOnlyTextField(expensesTextBox);
+  }
+
+  private void setCapitalTextbox() {
+    TaskTool<CustomProperty> tool = new TaskTool<>();
+    Task<CustomProperty> task = tool.createTask(() -> customPropertyHandler.getProperty(CustomPropertyKeys.CAPITAL.name()));
+    task.setOnSucceeded(e -> {
+      capitalProperty = task.getValue();
+      if (capitalProperty.getProperty() != null) {
+        String capitalValue = task.getValue().getValue();
+        capitalTextBox.setText(capitalValue);
+      }
+    });
+    tool.execute(task);
   }
 
   private void setSalesTable() {
@@ -112,29 +137,53 @@ public class CashSummaryPresenter implements Initializable {
   }
 
   private void setAmounts() {
+    TaskTool<Map<String, Double>> tool = new TaskTool<>();
+    Task<Map<String, Double>> task = tool.createTask(() -> {
+      Map<String, Double> values = new HashMap<>();
 
-    TaskTool<Double> t1 = new TaskTool<>();
-    Task<Double> taskExpense = t1.createTask(this::getTotalExpenses);
-    taskExpense.setOnSucceeded(e -> expensesTextBox.setText("" + taskExpense.getValue()));
-    t1.execute(taskExpense);
-
-    TaskTool<Double> t2 = new TaskTool<>();
-    Task<Double> taskSales = t2.createTask(this::getTotalSales);
-    taskSales.setOnSucceeded(e -> salesTextBox.setText("" + taskSales.getValue()));
-    t2.execute(taskSales);
-
-    TaskTool<Double> t3 = new TaskTool<>();
-    Task<Double> taskPurchases = t3.createTask(this::getTotalPurchases);
-    taskPurchases.setOnSucceeded(e -> {
-      purchasesTextBox.setText("" + taskPurchases.getValue());
+      values.put(EXPENSES_KEY, getTotalExpenses());
+      values.put(SALES_KEY, getTotalSales());
+      values.put(PURCHASES_KEY, getTotalPurchases());
+      return values;
     });
-    t3.execute(taskPurchases);
+    task.setOnSucceeded(e -> {
+      Map<String, Double> map = task.getValue();
+      expensesTextBox.setText("" + map.get(EXPENSES_KEY));
+      salesTextBox.setText("" + map.get(SALES_KEY));
+      purchasesTextBox.setText("" + map.get(PURCHASES_KEY));
+      saveChanges();
+    });
+    tool.execute(task);
+  }
 
+  @FXML
+  public void saveChanges() {
+    if (capitalTextBox.getText().length() > 0) {
+      loadingLabel.setVisible(true);
+      Double capital = Double.valueOf(capitalTextBox.getText());
+      Double sales = Double.valueOf(salesTextBox.getText());
+      Double purchases = Double.valueOf(purchasesTextBox.getText());
+      double totalExpenses = Double.valueOf(expensesTextBox.getText());
+      double totalCash = (capital + sales) - (purchases + totalExpenses);
+      cashOnHandTextBox.setText("" + totalCash);
+      TaskTool<Object> tool = new TaskTool<>();
+      Task<Object> task = tool.createTask(() -> {
+        CustomProperty customProperty = capitalProperty;
+        if (customProperty == null) {
+          customProperty = new CustomProperty();
+          customProperty.setProperty(CustomPropertyKeys.CAPITAL.name());
+        }
+        customProperty.setValue("" + capital);
+        customPropertyHandler.sendProperty(customProperty);
+        loadingLabel.setVisible(false);
+        return null;
+      });
+      tool.execute(task);
+    }
   }
 
   private void setExpensesTable() {
     loadingLabel.setVisible(true);
-    setAmounts();
     TaskTool<List<Expense>> tool = new TaskTool<>();
     Task<List<Expense>> task = tool.createTask(this::getExpenses);
     task.setOnSucceeded(e -> {
@@ -145,6 +194,7 @@ public class CashSummaryPresenter implements Initializable {
           .collect(Collectors.toList());
       expensesTable.setItems(FXCollections.observableList(expenses));
       loadingLabel.setVisible(false);
+      setAmounts();
     });
     tool.execute(task);
   }
@@ -179,16 +229,6 @@ public class CashSummaryPresenter implements Initializable {
       });
       tool.execute(task);
     }
-  }
-
-  @FXML
-  public void saveChanges() {
-    Double capital = Double.valueOf(capitalTextBox.getText());
-    Double sales = Double.valueOf(salesTextBox.getText());
-    Double purchases = Double.valueOf(purchasesTextBox.getText());
-    double totalExpenses = Double.valueOf(expensesTextBox.getText());
-    double totalCash = (capital + sales) - (purchases + totalExpenses);
-    cashOnHandTextBox.setText("" + totalCash);
   }
 
   private double getTotalExpenses() {

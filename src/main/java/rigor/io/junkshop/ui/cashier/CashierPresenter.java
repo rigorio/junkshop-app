@@ -125,11 +125,26 @@ public class CashierPresenter implements Initializable {
       return;
     }
     String material = materialBox.getValue();
-    String weight = weightText.getText();
+    Optional<PurchaseItemFX> any = purchaseItemList.stream().filter(p -> p.getMaterial().get().equals(material)).findAny();
+    double initialWeight = 0.0;
+    if (any.isPresent() && Double.valueOf(any.get().getWeight().get()) + Double.valueOf(weightText.getText()) > Double.valueOf(quantityLabel.getText())) {
+      Alert alert = new Alert(Alert.AlertType.WARNING);
+      alert.setTitle("Not enough materials");
+      alert.setHeaderText("There are not enough materials");
+      alert.setContentText(null);
+      alert.showAndWait();
+      return;
+    }
+    if (any.isPresent()) {
+      PurchaseItemFX purchaseItemFX = any.get();
+      purchaseTable.getItems().removeAll(purchaseItemFX);
+      initialWeight = Double.parseDouble(purchaseItemFX.getWeight().get());
+    }
+    double weight = Double.valueOf(weightText.getText()) + initialWeight;
     String price = priceText.getText();
     PurchaseItem item = PurchaseItem.builder()
         .material(material)
-        .weight(weight)
+        .weight("" + weight)
         .price(price)
         .build();
     purchaseItemList.add(new PurchaseItemFX(item));
