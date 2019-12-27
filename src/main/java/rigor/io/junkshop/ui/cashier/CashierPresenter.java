@@ -46,8 +46,6 @@ public class CashierPresenter implements Initializable {
   @FXML
   private Label loadingLabel;
   @FXML
-  private Label jobStatus;
-  @FXML
   private Label quantityLabel;
   @FXML
   private JFXButton purchaseButton;
@@ -97,9 +95,6 @@ public class CashierPresenter implements Initializable {
 
   @FXML
   public void addItem() {
-    System.out.println(materialBox.getValue());
-    System.out.println(priceText.getText());
-    System.out.println(weightText.getText());
     if (weightText.getText() == null || priceText.getText() == null || weightText.getText().length() < 1 || priceText.getText().length() < 1) {
       Alert alert = new Alert(Alert.AlertType.WARNING);
       alert.setTitle("Enter weight/price");
@@ -182,7 +177,15 @@ public class CashierPresenter implements Initializable {
           .mapToDouble(item -> Double.parseDouble(item.getPrice()))
           .sum();
 
-//    print(purchaseTable); TODO print function when purchasing
+      TextArea textArea = new TextArea();
+      textArea.appendText("Receipt #: " + receiptNumber.getText() + "\n");
+      textArea.appendText("Date: " + date.getText() + "\n");
+      textArea.appendText("Items:" + "\n");
+      for (PurchaseItem purchaseItem : purchaseItems) {
+        textArea.appendText(purchaseItem.getWeight() + "kg " + purchaseItem.getMaterial() + " - ₱ " + purchaseItem.getPrice() + "\n");
+      }
+      textArea.appendText("TOTAL: ₱ " + totalPrice);
+      print(textArea);
 
       Purchase purchase = Purchase.builder()
           .purchaseItems(purchaseItems)
@@ -227,18 +230,19 @@ public class CashierPresenter implements Initializable {
 
   private void print(Node node) {
     // Define the Job Status Message
-    jobStatus.textProperty().unbind();
-    jobStatus.setText("Creating a printer job...");
+    System.out.println("Creating a printer job...");
 
     // Create a printer job for the default printer
     PrinterJob job = PrinterJob.createPrinterJob();
+    JobSettings jobSettings = job.getJobSettings();
+    PageLayout pageLayout = jobSettings.getPageLayout();
 
     if (job != null) {
       // Show the printer job status
-      jobStatus.textProperty().bind(job.jobStatusProperty().asString());
 
       // Print the node
-      PageLayout pageLayout = Printer.getDefaultPrinter().createPageLayout(Paper.A6, PageOrientation.PORTRAIT, Printer.MarginType.DEFAULT);
+      pageLayout = job.getPrinter().createPageLayout(Paper.A4, PageOrientation.PORTRAIT, Printer.MarginType.DEFAULT);
+      jobSettings.setPageLayout(pageLayout);
       boolean printed = job.printPage(pageLayout, node);
 
       if (printed) {
@@ -246,12 +250,11 @@ public class CashierPresenter implements Initializable {
         job.endJob();
       } else {
         // Write Error Message
-        jobStatus.textProperty().unbind();
-        jobStatus.setText("Printing failed.");
+        System.out.println("Printing failed.");
       }
     } else {
       // Write Error Message
-      jobStatus.setText("Could not create a printer job.");
+      System.out.println("Could not create a printer job.");
     }
   }
 
