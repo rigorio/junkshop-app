@@ -45,7 +45,7 @@ public class Configurations {
 
   public String getHost() {
     Map<String, Object> map = getData();
-    System.out.println(map);
+//    System.out.println(map);
     Object o = map.get(ConfigKeys.DB_HOST.toString());
     return o != null ? o.toString() : null;
   }
@@ -87,7 +87,7 @@ public class Configurations {
 
   private File getConfigFile() {
     String absoluteFileName = getFilePath() + S + DEFAULT_FILENAME;
-    System.out.println(absoluteFileName);
+//    System.out.println(absoluteFileName);
     return new File(absoluteFileName);
   }
 
