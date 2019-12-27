@@ -9,10 +9,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.print.*;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import rigor.io.junkshop.models.materials.Material;
 import rigor.io.junkshop.models.materials.MaterialsProvider;
 import rigor.io.junkshop.models.purchase.Purchase;
@@ -34,6 +32,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CashierPresenter implements Initializable {
+
+  @FXML
+  private JFXButton addButton;
+  @FXML
+  private BorderPane receiptBox;
+  @FXML
+  private JFXTextField receiptNumber;
+  @FXML
+  private Label totalTextbox;
+  @FXML
+  private Label date;
   @FXML
   private Label loadingLabel;
   @FXML
@@ -81,11 +90,40 @@ public class CashierPresenter implements Initializable {
     fillMaterialBox();
     UITools.numberOnlyTextField(weightText);
     UITools.numberOnlyTextField(priceText);
+    date.setText(LocalDate.now().toString());
+    totalTextbox.setText("₱ 0.0");
   }
 
 
   @FXML
   public void addItem() {
+    System.out.println(materialBox.getValue());
+    System.out.println(priceText.getText());
+    System.out.println(weightText.getText());
+    if (weightText.getText() == null || priceText.getText() == null || weightText.getText().length() < 1 || priceText.getText().length() < 1) {
+      Alert alert = new Alert(Alert.AlertType.WARNING);
+      alert.setTitle("Enter weight/price");
+      alert.setHeaderText("Weight/Price was not entered");
+      alert.setContentText(null);
+      alert.showAndWait();
+      return;
+    }
+    if (Double.valueOf(weightText.getText()) > Double.valueOf(quantityLabel.getText())) {
+      Alert alert = new Alert(Alert.AlertType.WARNING);
+      alert.setTitle("Not enough material");
+      alert.setHeaderText("You are trying to buy " + weightText.getText() + " kg. There is only " + quantityLabel.getText() + " kg left.");
+      alert.setContentText(null);
+      alert.showAndWait();
+      return;
+    }
+    if (materialBox.getValue() == null) {
+      Alert alert = new Alert(Alert.AlertType.WARNING);
+      alert.setTitle("No material selected");
+      alert.setHeaderText("Please select a material");
+      alert.setContentText(null);
+      alert.showAndWait();
+      return;
+    }
     String material = materialBox.getValue();
     String weight = weightText.getText();
     String price = priceText.getText();
@@ -96,6 +134,10 @@ public class CashierPresenter implements Initializable {
         .build();
     purchaseItemList.add(new PurchaseItemFX(item));
     purchaseTable.setItems(FXCollections.observableList(purchaseItemList));
+    double total = purchaseItemList.stream()
+        .mapToDouble(purchase -> Double.valueOf(purchase.getPrice().get()))
+        .sum();
+    totalTextbox.setText("₱ " + UITools.roundToTwo(total));
   }
 
   @FXML
@@ -106,6 +148,14 @@ public class CashierPresenter implements Initializable {
 
   @FXML
   public void purchaseItems() {
+    if (receiptNumber.getText() == null || receiptNumber.getText().length() < 1 || purchaseTable.getItems().isEmpty()) {
+      Alert alert = new Alert(Alert.AlertType.WARNING);
+      alert.setTitle("No receipt number found");
+      alert.setHeaderText("Please enter the receipt number");
+      alert.setContentText(null);
+      alert.showAndWait();
+      return;
+    }
     purchaseButton.setText("Purchasing...");
     TaskTool<Object> tool = new TaskTool<>();
     Task<Object> task = tool.createTask(() -> {
@@ -144,6 +194,7 @@ public class CashierPresenter implements Initializable {
           .findAny();
       if (any.isPresent()) {
         Material material = any.get();
+        addButton.setDisable(material.getWeight() == null);
         priceText.setText(material.getStandardPrice());
         quantityLabel.setText(material.getWeight());
         loadingLabel.setVisible(false);
