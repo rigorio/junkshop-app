@@ -5,8 +5,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.layout.AnchorPane;
 import rigor.io.junkshop.ui.cashSummary.CashSummaryView;
-import rigor.io.junkshop.ui.cashier.CashierView;
-import rigor.io.junkshop.ui.inventory.InventoryView;
+import rigor.io.junkshop.ui.sales.SalesView;
+import rigor.io.junkshop.ui.purchases.PurchasesView;
 import rigor.io.junkshop.ui.settings.SettingsView;
 
 import java.net.URL;
@@ -19,17 +19,17 @@ public class DashboardPresenter implements Initializable {
 
   @Override
   public void initialize(URL location, ResourceBundle resources) {
-    updateDynamicPaneContent(new InventoryView().getView());
+    updateDynamicPaneContent(new PurchasesView().getView());
   }
 
   @FXML
   public void viewInventory() {
-    updateDynamicPaneContent(new InventoryView().getView());
+    updateDynamicPaneContent(new PurchasesView().getView());
   }
 
   @FXML
   public void viewCashier() {
-    updateDynamicPaneContent(new CashierView().getView());
+    updateDynamicPaneContent(new SalesView().getView());
   }
 
   @FXML

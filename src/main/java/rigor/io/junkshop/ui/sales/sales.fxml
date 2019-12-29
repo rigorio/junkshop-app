@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <AnchorPane prefHeight="550" prefWidth="732.0" xmlns="http://javafx.com/javafx/8.0.999-ea"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.ui.cashier.CashierPresenter">
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.ui.sales.SalesPresenter">
   <BorderPane prefHeight="550" prefWidth="825" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
     <left>

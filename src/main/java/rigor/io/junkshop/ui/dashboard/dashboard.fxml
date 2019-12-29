@@ -31,14 +31,14 @@
           </font>
         </Label>
         <JFXButton mnemonicParsing="false" onAction="#viewInventory" prefHeight="60.0" prefWidth="193.0"
-                   style="-fx-background-color: #2E7D32;" text="Inventory" textFill="WHITE" GridPane.hgrow="NEVER"
+                   style="-fx-background-color: #2E7D32;" text="Purchases" textFill="WHITE" GridPane.hgrow="NEVER"
                    GridPane.rowIndex="1" GridPane.valignment="TOP" GridPane.vgrow="NEVER">
           <font>
             <Font name="System Bold" size="18.0"/>
           </font>
         </JFXButton>
         <JFXButton mnemonicParsing="false" onAction="#viewCashier" prefHeight="60.0" prefWidth="193.0"
-                   style="-fx-background-color: #2E7D32;" text="Cashier" textFill="WHITE" GridPane.hgrow="NEVER"
+                   style="-fx-background-color: #2E7D32;" text="Sales" textFill="WHITE" GridPane.hgrow="NEVER"
                    GridPane.rowIndex="2" GridPane.valignment="TOP" GridPane.vgrow="NEVER">
           <font>
             <Font name="System Bold" size="18.0"/>

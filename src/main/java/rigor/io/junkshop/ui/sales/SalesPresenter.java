@@ -1,4 +1,4 @@
-package rigor.io.junkshop.ui.cashier;
+package rigor.io.junkshop.ui.sales;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
@@ -31,7 +31,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class CashierPresenter implements Initializable {
+public class SalesPresenter implements Initializable {
 
   @FXML
   private JFXButton addButton;
@@ -65,7 +65,7 @@ public class CashierPresenter implements Initializable {
   private List<PurchaseItemFX> purchaseItemList = new ArrayList<>();
   private MaterialsProvider materialsProvider;
 
-  public CashierPresenter() {
+  public SalesPresenter() {
     purchaseHandler = new PurchaseHandler();
     materialsProvider = new MaterialsProvider();
   }

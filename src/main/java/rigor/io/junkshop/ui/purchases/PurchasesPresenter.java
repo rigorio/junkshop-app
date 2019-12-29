@@ -1,4 +1,4 @@
-package rigor.io.junkshop.ui.inventory;
+package rigor.io.junkshop.ui.purchases;
 
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
@@ -28,7 +28,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class InventoryPresenter implements Initializable {
+public class PurchasesPresenter implements Initializable {
   @FXML
   private Label loadingLabel;
   @FXML
@@ -42,7 +42,7 @@ public class InventoryPresenter implements Initializable {
   private MaterialsProvider materialsProvider;
   private JunkCollector junkCollector;
 
-  public InventoryPresenter() {
+  public PurchasesPresenter() {
     materialsProvider = new MaterialsProvider();
     junkCollector = new JunkCollector();
   }
