@@ -169,7 +169,7 @@ public class CashSummaryPresenter implements Initializable {
       TaskTool<Object> tool = new TaskTool<>();
       Task<Object> task = tool.createTask(() -> {
         CustomProperty customProperty = capitalProperty;
-        if (customProperty == null) {
+        if (customProperty.getProperty() == null) {
           customProperty = new CustomProperty();
           customProperty.setProperty(CustomPropertyKeys.CAPITAL.name());
         }

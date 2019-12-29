@@ -25,7 +25,6 @@ public class CustomPropertyHandler {
     try {
       ResponseBody body = call.execute().body();
       String string = body.string();
-      System.out.println(string);
       customProperty = new ObjectMapper().readValue(string, new TypeReference<CustomProperty>() {});
     } catch (IOException e) {
       e.printStackTrace();
