@@ -1,5 +1,6 @@
 package rigor.io.junkshop.ui.purchases;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
 import javafx.collections.FXCollections;
@@ -10,11 +11,13 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import org.jetbrains.annotations.NotNull;
 import rigor.io.junkshop.models.junk.Junk;
 import rigor.io.junkshop.models.junk.JunkCollector;
 import rigor.io.junkshop.models.junk.JunkFX;
 import rigor.io.junkshop.models.materials.Material;
 import rigor.io.junkshop.models.materials.MaterialsProvider;
+import rigor.io.junkshop.printing.PrintUtil;
 import rigor.io.junkshop.ui.junkSummary.JunkSummaryView;
 import rigor.io.junkshop.utils.GuiManager;
 import rigor.io.junkshop.utils.TaskTool;
@@ -22,6 +25,7 @@ import rigor.io.junkshop.utils.UITools;
 
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -29,6 +33,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PurchasesPresenter implements Initializable {
+  @FXML
+  private JFXButton printButton;
   @FXML
   private Label loadingLabel;
   @FXML
@@ -59,9 +65,13 @@ public class PurchasesPresenter implements Initializable {
     TableColumn<JunkFX, String> weight = new TableColumn<>("Weight");
     weight.setCellValueFactory(e -> e.getValue().getWeight());
 
+    TableColumn<JunkFX, String> totalPrice = new TableColumn<>("Total");
+    totalPrice.setCellValueFactory(e -> e.getValue().getTotalPrice());
+
     junkTable.getColumns().addAll(material,
+                                  weight,
                                   price,
-                                  weight);
+                                  totalPrice);
     fillTableData();
 
     UITools.numberOnlyTextField(priceText);
@@ -119,7 +129,7 @@ public class PurchasesPresenter implements Initializable {
       alert.showAndWait();
       return;
     }
-    if (priceText.getText().length() < 1 || weightText.getText().length() < 1 ) {
+    if (priceText.getText().length() < 1 || weightText.getText().length() < 1) {
       Alert alert = new Alert(Alert.AlertType.WARNING);
       alert.setTitle("Price/Weight not specified");
       alert.setHeaderText("Please enter price/weight");
@@ -130,9 +140,12 @@ public class PurchasesPresenter implements Initializable {
     String materialName = materialBox.getValue();
     String price = priceText.getText();
     String weight = weightText.getText();
-    Junk junk = new Junk(materialName,
-                         price,
-                         weight);
+    Junk junk = Junk.builder()
+        .material(materialName)
+        .price(price)
+        .weight(weight)
+        .totalPrice("" + (Double.valueOf(price) * Double.valueOf(weight)))
+        .build();
     TaskTool<Object> tool = new TaskTool<>();
     Task<Object> task = tool.createTask(() -> {
       junkCollector.sendJunk(junk);
@@ -159,5 +172,33 @@ public class PurchasesPresenter implements Initializable {
   @FXML
   public void viewDailySummaries() {
     GuiManager.getInstance().displayView(new JunkSummaryView());
+  }
+
+  @FXML
+  public void printSelectedItems() {
+    List<Junk> junkList = getSelectedJunk();
+    List<String> lines = new ArrayList<>();
+    lines.add("Steelman Junkshop");
+    lines.add("Purchases");
+    lines.add("Date: " + LocalDate.now().toString() + "\n");
+    lines.add("Items:" + "\n");
+    for (Junk junk : junkList) {
+      lines.add(junk.getMaterial());
+      lines.add(junk.getWeight() + "kg * ₱" + junk.getPrice() + " = ₱" + junk.getTotalPrice());
+    }
+    double grandTotal = junkList.stream()
+        .mapToDouble(junk -> Double.valueOf(junk.getTotalPrice()))
+        .sum();
+    lines.add("GRAND TOTAL: ₱" + grandTotal);
+    PrintUtil.print(lines);
+  }
+
+  @NotNull
+  private List<Junk> getSelectedJunk() {
+    return junkTable.getSelectionModel()
+        .getSelectedItems()
+        .stream()
+        .map(Junk::new)
+        .collect(Collectors.toList());
   }
 }

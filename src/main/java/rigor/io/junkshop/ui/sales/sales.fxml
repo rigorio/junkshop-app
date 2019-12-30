@@ -150,7 +150,7 @@
                     <padding>
                       <Insets right="10.0"/>
                     </padding>
-                    <Label text="TOTAL: ">
+                    <Label text="GRAND TOTAL: ">
                       <font>
                         <Font name="System Bold" size="20.0"/>
                       </font>

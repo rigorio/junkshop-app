@@ -15,6 +15,7 @@ public class PurchaseItem {
   private String material;
   private String price;
   private String weight;
+  private String totalPrice;
 
   public PurchaseItem(PurchaseItemFX purchaseItem) {
     StringProperty id = purchaseItem.getId();

@@ -1,17 +1,18 @@
 package rigor.io.junkshop.printing;
 
-import javafx.collections.ObservableSet;
-import javafx.print.Printer;
+import javafx.print.PrinterJob;
+import javafx.scene.control.TextArea;
 
-public class PrintingService {
-  public Printer defaultPrinter() {
-    return Printer.getDefaultPrinter();
+import java.util.List;
+
+public class PrintUtil {
+  public static void print(List<String> lines) {
+    TextArea textArea = new TextArea();
+    lines.forEach(textArea::appendText);
+    PrinterJob job = PrinterJob.createPrinterJob();
+    boolean printed = job.printPage(textArea);
+    if (printed)
+      job.endJob();
   }
-
-  public ObservableSet<Printer> allPrinters() {
-    return Printer.getAllPrinters();
-  }
-
-
 
 }

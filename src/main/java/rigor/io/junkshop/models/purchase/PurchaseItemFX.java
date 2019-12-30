@@ -15,6 +15,7 @@ public class PurchaseItemFX {
   private StringProperty material;
   private StringProperty price;
   private StringProperty weight;
+  private StringProperty totalPrice;
 
   public PurchaseItemFX(PurchaseItem purchaseItem) {
     String id = purchaseItem.getId();
@@ -28,5 +29,8 @@ public class PurchaseItemFX {
 
     String weight = purchaseItem.getWeight();
     this.weight = weight != null ? new SimpleStringProperty(weight) : null;
+
+    String totalPrice = purchaseItem.getTotalPrice();
+    this.totalPrice = totalPrice != null ? new SimpleStringProperty(totalPrice) : null;
   }
 }

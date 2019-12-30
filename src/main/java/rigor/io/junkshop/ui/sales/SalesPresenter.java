@@ -17,6 +17,7 @@ import rigor.io.junkshop.models.purchase.Purchase;
 import rigor.io.junkshop.models.purchase.PurchaseHandler;
 import rigor.io.junkshop.models.purchase.PurchaseItem;
 import rigor.io.junkshop.models.purchase.PurchaseItemFX;
+import rigor.io.junkshop.printing.PrintUtil;
 import rigor.io.junkshop.ui.purchaseHistory.PurchaseHistoryView;
 import rigor.io.junkshop.utils.GuiManager;
 import rigor.io.junkshop.utils.TaskTool;
@@ -81,9 +82,13 @@ public class SalesPresenter implements Initializable {
     TableColumn<PurchaseItemFX, String> weight = new TableColumn<>("Weight");
     weight.setCellValueFactory(e -> e.getValue().getWeight());
 
+    TableColumn<PurchaseItemFX, String> totalPrice = new TableColumn<>("Total");
+    totalPrice.setCellValueFactory(e -> e.getValue().getTotalPrice());
+
     purchaseTable.getColumns().addAll(material,
                                       weight,
-                                      price);
+                                      price,
+                                      totalPrice);
     purchaseTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     fillMaterialBox();
     UITools.numberOnlyTextField(weightText);
@@ -141,11 +146,12 @@ public class SalesPresenter implements Initializable {
         .material(material)
         .weight("" + weight)
         .price(price)
+        .totalPrice("" + (weight * Double.valueOf(price)))
         .build();
     purchaseItemList.add(new PurchaseItemFX(item));
     purchaseTable.setItems(FXCollections.observableList(purchaseItemList));
     double total = purchaseItemList.stream()
-        .mapToDouble(purchase -> Double.valueOf(purchase.getPrice().get()))
+        .mapToDouble(purchase -> Double.valueOf(purchase.getTotalPrice().get()))
         .sum();
     totalTextbox.setText("₱ " + UITools.roundToTwo(total));
   }
@@ -177,15 +183,20 @@ public class SalesPresenter implements Initializable {
           .mapToDouble(item -> Double.parseDouble(item.getPrice()))
           .sum();
 
-      TextArea textArea = new TextArea();
-      textArea.appendText("Receipt #: " + receiptNumber.getText() + "\n");
-      textArea.appendText("Date: " + date.getText() + "\n");
-      textArea.appendText("Items:" + "\n");
+      List<String> lines = new ArrayList<>();
+      lines.add("Steelman Junkshop");
+      lines.add("Sales");
+      lines.add("Receipt #: " + receiptNumber.getText() + "\n");
+      lines.add("Date: " + date.getText() + "\n");
+      lines.add("Items:" + "\n");
+
+
       for (PurchaseItem purchaseItem : purchaseItems) {
-        textArea.appendText(purchaseItem.getWeight() + "kg " + purchaseItem.getMaterial() + " - ₱ " + purchaseItem.getPrice() + "\n");
+        lines.add(purchaseItem.getMaterial());
+        lines.add(purchaseItem.getWeight() + "kg * ₱" + purchaseItem.getPrice() + " = ₱" + purchaseItem.getTotalPrice());
       }
-      textArea.appendText("TOTAL: ₱ " + totalPrice);
-      print(textArea);
+      lines.add("GRAND TOTAL: ₱ " + totalPrice);
+      PrintUtil.print(lines);
 
       Purchase purchase = Purchase.builder()
           .purchaseItems(purchaseItems)
