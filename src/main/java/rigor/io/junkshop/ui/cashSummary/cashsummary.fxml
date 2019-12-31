@@ -5,93 +5,72 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<AnchorPane prefHeight="550" prefWidth="825.0" xmlns="http://javafx.com/javafx/8.0.999-ea"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.ui.cashSummary.CashSummaryPresenter">
+<AnchorPane prefHeight="550" prefWidth="825.0" style="-fx-background-color: #ffffff;"
+            xmlns="http://javafx.com/javafx/8.0.999-ea" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="rigor.io.junkshop.ui.cashSummary.CashSummaryPresenter">
   <BorderPane prefHeight="550" prefWidth="730.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-
-    <right>
-      <BorderPane pickOnBounds="false" prefHeight="550.0" prefWidth="281.0" BorderPane.alignment="CENTER">
+    <top>
+      <BorderPane prefHeight="117.0" prefWidth="825.0" BorderPane.alignment="CENTER">
         <center>
-          <TableView fx:id="salesTable" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-            <columnResizePolicy>
-              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-            </columnResizePolicy>
-            <BorderPane.margin>
-              <Insets bottom="10.0" left="10.0" right="10.0"/>
-            </BorderPane.margin>
-          </TableView>
-        </center>
-        <top>
-          <AnchorPane prefHeight="44.0" prefWidth="281.0" BorderPane.alignment="CENTER">
-            <children>
-              <Label layoutX="14.0" layoutY="14.0" text="Sales">
-                <font>
-                  <Font name="System Bold Italic" size="20.0"/>
-                </font>
-              </Label>
-            </children>
-          </AnchorPane>
-        </top>
-      </BorderPane>
-
-    </right>
-    <left>
-      <BorderPane prefHeight="550.0" prefWidth="227.0" BorderPane.alignment="CENTER">
-        <center>
-          <AnchorPane prefHeight="550.0" prefWidth="225.0" BorderPane.alignment="CENTER">
+          <AnchorPane prefHeight="550.0" prefWidth="825.0" BorderPane.alignment="CENTER">
             <Label layoutX="14.0" layoutY="41.0" text="Capital:">
               <font>
                 <Font name="System Bold" size="16.0"/>
               </font>
             </Label>
-            <Label layoutX="14.0" layoutY="113.0" text="Sales:">
+            <Label layoutX="144.0" layoutY="41.0" text="Sales:">
               <font>
                 <Font name="System Bold" size="16.0"/>
               </font>
             </Label>
-            <Label layoutX="14.0" layoutY="177.0" text="Purchases:">
+            <Label layoutX="275.0" layoutY="41.0" text="Purchases:">
               <font>
                 <Font name="System Bold" size="16.0"/>
               </font>
             </Label>
-            <Label layoutX="15.0" layoutY="239.0" text="Expenses:">
+            <Label layoutX="405.0" layoutY="41.0" text="Expenses:">
               <font>
                 <Font name="System Bold" size="16.0"/>
               </font>
             </Label>
-            <JFXButton fx:id="saveButton" layoutX="133.0" layoutY="35.0" mnemonicParsing="false" onAction="#saveChanges"
-                       style="-fx-background-color: #8BC34A;" text="Update" textFill="WHITE">
+            <JFXButton fx:id="saveButton" layoutX="73.0" layoutY="39.0" mnemonicParsing="false" onAction="#saveChanges"
+                       prefHeight="26.0" prefWidth="63.0" style="-fx-background-color: #8BC34A;" text="Update"
+                       textFill="WHITE">
               <font>
-                <Font name="System Bold" size="16.0"/>
+                <Font name="System Bold" size="13.0"/>
               </font>
             </JFXButton>
-            <JFXTextField fx:id="capitalTextBox" layoutX="14.0" layoutY="66.0">
+            <JFXTextField fx:id="capitalTextBox" layoutX="14.0" layoutY="66.0" prefHeight="37.0" prefWidth="120.0">
               <font>
                 <Font size="16.0"/>
               </font>
             </JFXTextField>
-            <JFXTextField fx:id="salesTextBox" editable="false" layoutX="14.0" layoutY="138.0">
+            <JFXTextField fx:id="salesTextBox" editable="false" layoutX="144.0" layoutY="66.0" prefHeight="37.0"
+                          prefWidth="120.0">
               <font>
                 <Font size="16.0"/>
               </font>
             </JFXTextField>
-            <JFXTextField fx:id="purchasesTextBox" editable="false" layoutX="14.0" layoutY="202.0">
+            <JFXTextField fx:id="purchasesTextBox" editable="false" layoutX="275.0" layoutY="66.0" prefHeight="37.0"
+                          prefWidth="120.0">
               <font>
                 <Font size="16.0"/>
               </font>
             </JFXTextField>
-            <JFXTextField fx:id="expensesTextBox" editable="false" layoutX="14.0" layoutY="264.0">
+            <JFXTextField fx:id="expensesTextBox" editable="false" layoutX="404.0" layoutY="66.0" prefHeight="37.0"
+                          prefWidth="120.0">
               <font>
                 <Font size="16.0"/>
               </font>
             </JFXTextField>
-            <Label layoutX="15.0" layoutY="301.0" text="Total Cash On-Hand:">
+            <Label layoutX="535.0" layoutY="41.0" text="Cash On-Hand:">
               <font>
                 <Font name="System Bold" size="16.0"/>
               </font>
             </Label>
-            <JFXTextField fx:id="cashOnHandTextBox" editable="false" layoutX="14.0" layoutY="326.0">
+            <JFXTextField fx:id="cashOnHandTextBox" editable="false" layoutX="534.0" layoutY="66.0" prefHeight="37.0"
+                          prefWidth="119.0">
               <font>
                 <Font size="16.0"/>
               </font>
@@ -104,12 +83,9 @@
           </AnchorPane>
         </center>
       </BorderPane>
-
-    </left>
-
-    <center>
-      <BorderPane prefHeight="550.0" prefWidth="318.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER">
+    </top>
+    <left>
+      <BorderPane prefHeight="433.0" prefWidth="377.0" BorderPane.alignment="CENTER">
         <center>
           <TableView fx:id="expensesTable" prefHeight="382.0" prefWidth="297.0" BorderPane.alignment="CENTER">
             <columnResizePolicy>
@@ -124,13 +100,13 @@
           <AnchorPane prefHeight="178.0" prefWidth="317.0" style="-fx-background-color: #ffffff;"
                       BorderPane.alignment="CENTER">
             <JFXTextField fx:id="expenseNameTextBox" layoutX="14.0" layoutY="68.0" prefHeight="37.0" prefWidth="100.0"
-                          promptText="name">
+                          promptText="name...">
               <font>
                 <Font size="16.0"/>
               </font>
             </JFXTextField>
             <JFXTextField fx:id="expenseAmountTextBox" layoutX="14.0" layoutY="124.0" prefHeight="37.0"
-                          prefWidth="100.0" promptText="amount">
+                          prefWidth="100.0" promptText="amount...">
               <font>
                 <Font size="16.0"/>
               </font>
@@ -145,18 +121,18 @@
                 <Font size="16.0"/>
               </font>
             </Label>
-            <JFXButton fx:id="addExpenseButton" layoutX="121.0" layoutY="71.0" mnemonicParsing="false"
-                       onAction="#addExpense" prefHeight="37.0" prefWidth="137.0" style="-fx-background-color: #8BC34A;"
-                       text="Add Expense" textFill="WHITE">
+            <JFXButton fx:id="addExpenseButton" layoutX="298.0" layoutY="73.0" mnemonicParsing="false"
+                       onAction="#addExpense" prefHeight="37.0" prefWidth="65.0" style="-fx-background-color: #8BC34A;"
+                       text="Add" textFill="WHITE">
               <font>
-                <Font name="System Bold" size="16.0"/>
+                <Font name="System Bold" size="14.0"/>
               </font>
             </JFXButton>
-            <JFXButton fx:id="deleteExpenseButton" layoutX="121.0" layoutY="127.0" mnemonicParsing="false"
-                       onAction="#deleteExpense" prefHeight="37.0" prefWidth="137.0"
-                       style="-fx-background-color: #FF3D00;" text="Delete Expense" textFill="WHITE">
+            <JFXButton fx:id="deleteExpenseButton" layoutX="298.0" layoutY="126.0" mnemonicParsing="false"
+                       onAction="#deleteExpense" prefHeight="37.0" prefWidth="65.0"
+                       style="-fx-background-color: #FF3D00;" text="Delete" textFill="WHITE">
               <font>
-                <Font name="System Bold" size="16.0"/>
+                <Font name="System Bold" size="14.0"/>
               </font>
             </JFXButton>
             <Label layoutX="14.0" layoutY="14.0" text="Expenses">
@@ -164,10 +140,39 @@
                 <Font name="System Bold Italic" size="20.0"/>
               </font>
             </Label>
+            <JFXTextField fx:id="noteTextbox" layoutX="123.0" layoutY="68.0" prefHeight="37.0" prefWidth="166.0"
+                          promptText="note...">
+              <font>
+                <Font size="16.0"/>
+              </font>
+            </JFXTextField>
+            <Label layoutX="123.0" layoutY="49.0" text="Note:">
+              <font>
+                <Font size="16.0"/>
+              </font>
+            </Label>
           </AnchorPane>
         </top>
       </BorderPane>
-
+    </left>
+    <center>
+      <BorderPane pickOnBounds="false" prefHeight="550.0" prefWidth="281.0" BorderPane.alignment="CENTER">
+        <center>
+          <TableView fx:id="dataTable" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <columnResizePolicy>
+              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+            <BorderPane.margin>
+              <Insets bottom="10.0" left="10.0" right="10.0"/>
+            </BorderPane.margin>
+          </TableView>
+        </center>
+        <top>
+          <AnchorPane prefHeight="44.0" prefWidth="281.0" BorderPane.alignment="CENTER">
+            <JFXComboBox fx:id="dataSelector" layoutX="14.0" layoutY="10.0" onAction="#changeData" prefWidth="150.0"/>
+          </AnchorPane>
+        </top>
+      </BorderPane>
     </center>
   </BorderPane>
 </AnchorPane>

@@ -1,6 +1,7 @@
 package rigor.io.junkshop.ui.cashSummary;
 
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextField;
 import javafx.collections.FXCollections;
@@ -10,13 +11,18 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import rigor.io.junkshop.models.cash.Cash;
+import rigor.io.junkshop.models.cash.CashFX;
+import rigor.io.junkshop.models.cash.CashHandler;
 import rigor.io.junkshop.models.customProperties.CustomProperty;
 import rigor.io.junkshop.models.customProperties.CustomPropertyHandler;
 import rigor.io.junkshop.models.customProperties.CustomPropertyKeys;
 import rigor.io.junkshop.models.expense.Expense;
 import rigor.io.junkshop.models.expense.ExpenseFX;
 import rigor.io.junkshop.models.expense.ExpenseHandler;
+import rigor.io.junkshop.models.junk.Junk;
 import rigor.io.junkshop.models.junk.JunkCollector;
+import rigor.io.junkshop.models.junk.JunkFX;
 import rigor.io.junkshop.models.sales.SalesEntity;
 import rigor.io.junkshop.models.sales.SalesFX;
 import rigor.io.junkshop.models.sales.SalesMan;
@@ -24,17 +30,18 @@ import rigor.io.junkshop.utils.TaskTool;
 import rigor.io.junkshop.utils.UITools;
 
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CashSummaryPresenter implements Initializable {
 
   @FXML
-  private TableView<SalesFX> salesTable;
+  private JFXComboBox<String> dataSelector;
+  @FXML
+  private JFXTextField noteTextbox;
+  @FXML
+  private TableView dataTable;
   @FXML
   private Label loadingLabel;
   @FXML
@@ -65,20 +72,27 @@ public class CashSummaryPresenter implements Initializable {
   private SalesMan salesMan;
   private JunkCollector junkCollector;
   private CustomPropertyHandler customPropertyHandler;
+  private CustomProperty capitalProperty;
+  private CashHandler cashHandler;
   private static final String EXPENSES_KEY = "expenses";
   private static final String SALES_KEY = "sales";
   private static final String PURCHASES_KEY = "purchases";
-  private CustomProperty capitalProperty;
+  private static final String SELECT_SALES = "Sales";
+  private static final String SELECT_PURCHASES = "Purchases";
+  private static final String SELECT_OVERALL = "Overall";
 
   public CashSummaryPresenter() {
     expenseHandler = new ExpenseHandler();
     salesMan = new SalesMan();
     junkCollector = new JunkCollector();
     customPropertyHandler = new CustomPropertyHandler();
+    cashHandler = new CashHandler();
   }
 
   @Override
   public void initialize(URL location, ResourceBundle resources) {
+    fillDataSelector();
+
     TableColumn<ExpenseFX, String> expense = new TableColumn<>("Expense");
     expense.setCellValueFactory(e -> e.getValue().getName());
 
@@ -89,17 +103,7 @@ public class CashSummaryPresenter implements Initializable {
     expensesTable.getColumns().addAll(expense,
                                       amount);
 
-    TableColumn<SalesFX, String> span = new TableColumn<>("Span");
-    span.setCellValueFactory(e -> e.getValue().getSpan());
-
-    TableColumn<SalesFX, String> sales = new TableColumn<>("Sales");
-    sales.setCellValueFactory(e -> e.getValue().getSales());
-
-
-    salesTable.getColumns().addAll(span,
-                                   sales);
-
-    setSalesTable();
+    initOverallTable();
     setCapitalTextbox();
     setExpensesTable();
     UITools.numberOnlyTextField(capitalTextBox);
@@ -107,6 +111,95 @@ public class CashSummaryPresenter implements Initializable {
     UITools.numberOnlyTextField(salesTextBox);
     UITools.numberOnlyTextField(purchasesTextBox);
     UITools.numberOnlyTextField(expensesTextBox);
+  }
+
+  private void initSalesTable() {
+
+    dataTable.setItems(null);
+    dataTable.getColumns().clear();
+    TableColumn<SalesFX, String> span = new TableColumn<>("Span");
+    span.setCellValueFactory(e -> e.getValue().getSpan());
+
+    TableColumn<SalesFX, String> sales = new TableColumn<>("Sales");
+    sales.setCellValueFactory(e -> e.getValue().getSales());
+
+
+    dataTable.getColumns().addAll(span,
+                                  sales);
+    TaskTool<List<SalesEntity>> tool = new TaskTool<>();
+    Task<List<SalesEntity>> task = tool.createTask(() -> salesMan.getSales());
+    task.setOnSucceeded(e -> {
+      Stream<SalesEntity> salesEntityStream = task.getValue()
+          .stream();
+      List<SalesFX> sales1 = salesEntityStream
+          .map(SalesFX::new)
+          .collect(Collectors.toList());
+      dataTable.setItems(FXCollections.observableList(sales1));
+    });
+    tool.execute(task);
+  }
+
+  private void initPurchasesTable() {
+    dataTable.setItems(null);
+    dataTable.getColumns().clear();
+    TableColumn<JunkFX, String> totalPrice = new TableColumn<>("Total Price");
+    totalPrice.setCellValueFactory(e -> e.getValue().getTotalPrice());
+
+    TableColumn<JunkFX, String> material = new TableColumn<>("Material");
+    material.setCellValueFactory(e -> e.getValue().getMaterial());
+
+    TableColumn<JunkFX, String> date = new TableColumn<>("Date");
+    date.setCellValueFactory(e -> e.getValue().getDate());
+
+
+    dataTable.getColumns().addAll(date,
+                                  material,
+                                  totalPrice);
+    TaskTool<List<Junk>> tool = new TaskTool<>();
+    Task<List<Junk>> task = tool.createTask(() -> junkCollector.getJunk());
+    task.setOnSucceeded(e -> {
+      Stream<Junk> junkStream = task.getValue()
+          .stream();
+      List<JunkFX> junkFXList = junkStream
+          .map(JunkFX::new)
+          .collect(Collectors.toList());
+      dataTable.setItems(FXCollections.observableList(junkFXList));
+    });
+    tool.execute(task);
+  }
+
+  private void initOverallTable() {
+    dataTable.setItems(null);
+    dataTable.getColumns().clear();
+    TableColumn<CashFX, String> date = new TableColumn<>("Date");
+    date.setCellValueFactory(e -> e.getValue().getDate());
+
+    TableColumn<CashFX, String> capital = new TableColumn<>("Capital");
+    capital.setCellValueFactory(e -> e.getValue().getCapital());
+    TableColumn<CashFX, String> cashOnHand = new TableColumn<>("Cash");
+    cashOnHand.setCellValueFactory(e -> e.getValue().getCashOnHand());
+
+
+    dataTable.getColumns().addAll(date,
+                                  capital,
+                                  cashOnHand);
+    TaskTool<List<Cash>> tool = new TaskTool<>();
+    Task<List<Cash>> task = tool.createTask(() -> cashHandler.getCash());
+    task.setOnSucceeded(e -> {
+      Stream<Cash> cashStream = task.getValue().stream();
+      List<CashFX> cash = cashStream.map(CashFX::new).collect(Collectors.toList());
+      dataTable.setItems(FXCollections.observableList(cash));
+    });
+    tool.execute(task);
+
+  }
+
+  private void fillDataSelector() {
+    List<String> options = new ArrayList<>();
+    options.add(SELECT_SALES);
+    options.add(SELECT_PURCHASES);
+    options.add(SELECT_OVERALL);
+    dataSelector.setItems(FXCollections.observableList(options));
   }
 
   private void setCapitalTextbox() {
@@ -118,20 +211,6 @@ public class CashSummaryPresenter implements Initializable {
         String capitalValue = task.getValue().getValue();
         capitalTextBox.setText(capitalValue);
       }
-    });
-    tool.execute(task);
-  }
-
-  private void setSalesTable() {
-    TaskTool<List<SalesEntity>> tool = new TaskTool<>();
-    Task<List<SalesEntity>> task = tool.createTask(() -> salesMan.getSales());
-    task.setOnSucceeded(e -> {
-      Stream<SalesEntity> salesEntityStream = task.getValue()
-          .stream();
-      List<SalesFX> sales = salesEntityStream
-          .map(SalesFX::new)
-          .collect(Collectors.toList());
-      salesTable.setItems(FXCollections.observableList(sales));
     });
     tool.execute(task);
   }
@@ -228,6 +307,22 @@ public class CashSummaryPresenter implements Initializable {
         return null;
       });
       tool.execute(task);
+    }
+  }
+
+  @FXML
+  public void changeData() {
+    String option = dataSelector.getValue();
+    switch (option) {
+      case SELECT_PURCHASES:
+        initPurchasesTable();
+        break;
+      case SELECT_OVERALL:
+        initOverallTable();
+        break;
+      case SELECT_SALES:
+        initSalesTable();
+        break;
     }
   }
 
