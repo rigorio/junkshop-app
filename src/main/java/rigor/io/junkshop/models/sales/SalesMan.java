@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SalesMan {
-  private String URL = Configurations.getInstance().getHost() + "/sales";
+  private String URL = Configurations.getInstance().getHost() + "/salessummary";
 
   public List<SalesEntity> getSales() {
     OkHttpClient client = new OkHttpClient();
