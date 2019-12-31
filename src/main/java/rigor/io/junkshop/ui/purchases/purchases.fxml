@@ -24,16 +24,16 @@
         <left>
           <AnchorPane prefHeight="159.0" prefWidth="738.0" style="-fx-background-color: #ffffff;"
                       BorderPane.alignment="CENTER">
-            <JFXComboBox fx:id="materialBox" layoutX="14.0" layoutY="98.0" onAction="#selectMaterial" prefHeight="40.0"
+            <JFXComboBox fx:id="materialBox" layoutX="14.0" layoutY="57.0" onAction="#selectMaterial" prefHeight="40.0"
                          prefWidth="150.0" promptText="Choose Material"/>
-            <JFXTextField fx:id="priceText" layoutX="185.0" layoutY="98.0" prefHeight="40.0" prefWidth="80.0"
-                          promptText="Price">
+            <JFXTextField fx:id="priceText" layoutX="185.0" layoutY="57.0" prefHeight="40.0" prefWidth="80.0"
+                          promptText="Price...">
               <font>
                 <Font size="16.0"/>
               </font>
             </JFXTextField>
-            <JFXTextField fx:id="weightText" layoutX="283.0" layoutY="98.0" prefHeight="40.0" prefWidth="80.0"
-                          promptText="Weight">
+            <JFXTextField fx:id="weightText" layoutX="283.0" layoutY="57.0" prefHeight="40.0" prefWidth="80.0"
+                          promptText="Weight...">
               <font>
                 <Font size="16.0"/>
               </font>
@@ -74,12 +74,18 @@
                 <Font name="System Bold" size="16.0"/>
               </font>
             </Label>
-            <JFXTextArea fx:id="noteTextBox" layoutX="378.0" layoutY="63.0" prefHeight="75.0" prefWidth="192.0"
-                         promptText="Note">
+            <JFXTextArea fx:id="noteTextBox" layoutX="378.0" layoutY="58.0" prefHeight="80.0" prefWidth="192.0"
+                         promptText="Note...">
               <font>
                 <Font size="16.0"/>
               </font>
             </JFXTextArea>
+            <JFXTextField fx:id="otherTextBox" layoutX="14.0" layoutY="102.0" prefHeight="37.0" prefWidth="152.0"
+                          promptText="Other...">
+              <font>
+                <Font size="16.0"/>
+              </font>
+            </JFXTextField>
           </AnchorPane>
         </left>
         <right>

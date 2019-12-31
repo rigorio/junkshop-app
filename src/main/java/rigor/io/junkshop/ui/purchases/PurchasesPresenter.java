@@ -35,6 +35,8 @@ import java.util.stream.Stream;
 
 public class PurchasesPresenter implements Initializable {
   @FXML
+  private JFXTextField otherTextBox;
+  @FXML
   private JFXTextArea noteTextBox;
   @FXML
   private JFXButton printButton;
@@ -144,7 +146,9 @@ public class PurchasesPresenter implements Initializable {
       alert.showAndWait();
       return;
     }
-    String materialName = materialBox.getValue();
+    String materialName = otherTextBox.getText() != null && otherTextBox.getText().length() > 0
+        ? otherTextBox.getText()
+        : materialBox.getValue();
     String price = priceText.getText();
     String weight = weightText.getText();
     String note = noteTextBox.getText();

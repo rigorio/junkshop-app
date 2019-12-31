@@ -34,6 +34,8 @@ import java.util.stream.Stream;
 public class SalesPresenter implements Initializable {
 
   @FXML
+  private JFXTextField otherText;
+  @FXML
   private JFXTextArea noteText;
   @FXML
   private JFXButton addButton;
@@ -113,7 +115,7 @@ public class SalesPresenter implements Initializable {
       alert.showAndWait();
       return;
     }
-    if (Double.valueOf(weightText.getText()) > Double.valueOf(quantityLabel.getText())) {
+    if ((otherText.getText() == null) && (Double.valueOf(weightText.getText()) > Double.valueOf(quantityLabel.getText()))) {
       Alert alert = new Alert(Alert.AlertType.WARNING);
       alert.setTitle("Not enough material");
       alert.setHeaderText("You are trying to buy " + weightText.getText() + " kg. There is only " + quantityLabel.getText() + " kg left.");
@@ -121,7 +123,7 @@ public class SalesPresenter implements Initializable {
       alert.showAndWait();
       return;
     }
-    if (materialBox.getValue() == null) {
+    if ((otherText.getText() == null) && materialBox.getValue() == null) {
       Alert alert = new Alert(Alert.AlertType.WARNING);
       alert.setTitle("No material selected");
       alert.setHeaderText("Please select a material");
@@ -129,7 +131,9 @@ public class SalesPresenter implements Initializable {
       alert.showAndWait();
       return;
     }
-    String material = materialBox.getValue();
+    String material = otherText.getText() != null && otherText.getText().length() > 0
+        ? otherText.getText()
+        : materialBox.getValue();
     Optional<SaleItemFX> any = purchaseItemList.stream().filter(p -> p.getMaterial().get().equals(material)).findAny();
     double initialWeight = 0.0;
     if (any.isPresent() && Double.valueOf(any.get().getWeight().get()) + Double.valueOf(weightText.getText()) > Double.valueOf(quantityLabel.getText())) {
@@ -186,7 +190,7 @@ public class SalesPresenter implements Initializable {
           .map(SaleItem::new)
           .collect(Collectors.toList());
       double totalPrice = saleItems.stream()
-          .mapToDouble(item -> Double.parseDouble(item.getPrice()))
+          .mapToDouble(item -> Double.parseDouble(item.getTotalPrice()))
           .sum();
 
       List<String> lines = new ArrayList<>();
@@ -229,7 +233,7 @@ public class SalesPresenter implements Initializable {
           .findAny();
       if (any.isPresent()) {
         Material material = any.get();
-        addButton.setDisable(material.getWeight() == null);
+//        addButton.setDisable(material.getWeight() == null);
         priceText.setText(material.getStandardPrice());
         quantityLabel.setText(material.getWeight());
         loadingLabel.setVisible(false);
