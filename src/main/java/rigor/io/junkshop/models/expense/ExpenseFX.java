@@ -13,6 +13,7 @@ public class ExpenseFX {
   private StringProperty id;
   private StringProperty name;
   private StringProperty amount;
+  private StringProperty note;
   private StringProperty date;
 
   public ExpenseFX(Expense expense) {
@@ -23,9 +24,12 @@ public class ExpenseFX {
     this.name = name != null ? new SimpleStringProperty(name) : null;
 
     String amount = expense.getAmount();
-    this.amount = amount != null ? new SimpleStringProperty(amount): null;
+    this.amount = amount != null ? new SimpleStringProperty(amount) : null;
 
     String date = expense.getDate();
     this.date = date != null ? new SimpleStringProperty(date) : null;
+
+    String note = expense.getNote();
+    this.note = note != null ? new SimpleStringProperty(note) : null;
   }
 }

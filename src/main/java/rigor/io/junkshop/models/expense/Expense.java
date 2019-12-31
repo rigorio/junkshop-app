@@ -12,6 +12,7 @@ public class Expense {
   private String id;
   private String name;
   private String amount;
+  private String note;
   private String date;
 
   public Expense(ExpenseFX expenseFX) {
