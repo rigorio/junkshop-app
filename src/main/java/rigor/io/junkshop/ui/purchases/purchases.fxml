@@ -20,19 +20,20 @@
       </TableView>
     </center>
     <top>
-      <BorderPane prefHeight="111.0" prefWidth="825.0" BorderPane.alignment="CENTER">
+      <BorderPane prefHeight="154.0" prefWidth="825.0" BorderPane.alignment="CENTER">
         <left>
           <AnchorPane prefHeight="159.0" prefWidth="738.0" style="-fx-background-color: #ffffff;"
                       BorderPane.alignment="CENTER">
-            <JFXComboBox fx:id="materialBox" layoutX="14.0" layoutY="58.0" onAction="#selectMaterial" prefHeight="40.0"
+            <JFXComboBox fx:id="materialBox" layoutX="14.0" layoutY="98.0" onAction="#selectMaterial" prefHeight="40.0"
                          prefWidth="150.0" promptText="Choose Material"/>
-            <JFXTextField fx:id="priceText" layoutX="185.0" layoutY="58.0" prefHeight="40.0" prefWidth="180.0"
+            <JFXTextField fx:id="priceText" layoutX="185.0" layoutY="98.0" prefHeight="40.0" prefWidth="80.0"
                           promptText="Price">
               <font>
                 <Font size="16.0"/>
               </font>
             </JFXTextField>
-            <JFXTextField fx:id="weightText" layoutX="381.0" layoutY="58.0" prefHeight="40.0" promptText="Weight">
+            <JFXTextField fx:id="weightText" layoutX="283.0" layoutY="98.0" prefHeight="40.0" prefWidth="80.0"
+                          promptText="Weight">
               <font>
                 <Font size="16.0"/>
               </font>
@@ -58,7 +59,7 @@
                 <Font name="System Bold" size="16.0"/>
               </font>
             </Label>
-            <Label layoutX="381.0" layoutY="32.0" text="Weight">
+            <Label layoutX="283.0" layoutY="32.0" text="Weight">
               <font>
                 <Font name="System Bold" size="16.0"/>
               </font>
@@ -68,12 +69,23 @@
                 <Font name="System Italic" size="17.0"/>
               </font>
             </Label>
+            <Label layoutX="378.0" layoutY="32.0" text="Note">
+              <font>
+                <Font name="System Bold" size="16.0"/>
+              </font>
+            </Label>
+            <JFXTextArea fx:id="noteTextBox" layoutX="378.0" layoutY="63.0" prefHeight="75.0" prefWidth="192.0"
+                         promptText="Note">
+              <font>
+                <Font size="16.0"/>
+              </font>
+            </JFXTextArea>
           </AnchorPane>
         </left>
         <right>
-          <JFXButton fx:id="printButton" onAction="#printSelectedItems" mnemonicParsing="false"
-                     style="-fx-background-color: #8BC34A;"
-                     text="Print" textFill="WHITE" BorderPane.alignment="TOP_RIGHT">
+          <JFXButton fx:id="printButton" mnemonicParsing="false" onAction="#printSelectedItems"
+                     style="-fx-background-color: #8BC34A;" text="Print" textFill="WHITE"
+                     BorderPane.alignment="TOP_RIGHT">
             <font>
               <Font name="System Bold" size="16.0"/>
             </font>

@@ -16,6 +16,8 @@ public class JunkFX {
   private StringProperty price;
   private StringProperty totalPrice;
   private StringProperty weight;
+  private StringProperty date;
+  private StringProperty note;
 
   public JunkFX(Junk junk) {
     String id = junk.getId();
@@ -32,5 +34,11 @@ public class JunkFX {
 
     String totalPrice = junk.getTotalPrice();
     this.totalPrice = totalPrice != null ? new SimpleStringProperty(totalPrice) : null;
+
+    String date = junk.getDate();
+    this.date = date != null ? new SimpleStringProperty(date) : null;
+
+    String note = junk.getNote();
+    this.note = note != null ? new SimpleStringProperty(note) : null;
   }
 }

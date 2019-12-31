@@ -6,6 +6,8 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
 public class UITools {
+  public static final String PESO = "₱";
+
   public static void numberOnlyTextField(JFXTextField priceText) {
     priceText.textProperty().addListener((observable, oldValue, newValue) -> {
       if (!newValue.matches("\\d*(\\.\\d*)?")) {
@@ -13,6 +15,7 @@ public class UITools {
       }
     });
   }
+
   public static String roundToTwo(Double dd) {
     DecimalFormat format = new DecimalFormat("#.##");
     format.setRoundingMode(RoundingMode.CEILING);

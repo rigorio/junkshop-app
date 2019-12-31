@@ -2,6 +2,7 @@ package rigor.io.junkshop.ui.purchases;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
+import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -34,6 +35,8 @@ import java.util.stream.Stream;
 
 public class PurchasesPresenter implements Initializable {
   @FXML
+  private JFXTextArea noteTextBox;
+  @FXML
   private JFXButton printButton;
   @FXML
   private Label loadingLabel;
@@ -59,6 +62,9 @@ public class PurchasesPresenter implements Initializable {
     TableColumn<JunkFX, String> material = new TableColumn<>("Material");
     material.setCellValueFactory(e -> e.getValue().getMaterial());
 
+    TableColumn<JunkFX, String> note = new TableColumn<>("Note");
+    note.setCellValueFactory(e -> e.getValue().getNote());
+
     TableColumn<JunkFX, String> price = new TableColumn<>("Price");
     price.setCellValueFactory(e -> e.getValue().getPrice());
 
@@ -69,6 +75,7 @@ public class PurchasesPresenter implements Initializable {
     totalPrice.setCellValueFactory(e -> e.getValue().getTotalPrice());
 
     junkTable.getColumns().addAll(material,
+                                  note,
                                   weight,
                                   price,
                                   totalPrice);
@@ -140,10 +147,12 @@ public class PurchasesPresenter implements Initializable {
     String materialName = materialBox.getValue();
     String price = priceText.getText();
     String weight = weightText.getText();
+    String note = noteTextBox.getText();
     Junk junk = Junk.builder()
         .material(materialName)
         .price(price)
         .weight(weight)
+        .note(note)
         .totalPrice("" + (Double.valueOf(price) * Double.valueOf(weight)))
         .build();
     TaskTool<Object> tool = new TaskTool<>();

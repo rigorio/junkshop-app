@@ -1,6 +1,5 @@
-package rigor.io.junkshop.models.purchase;
+package rigor.io.junkshop.models.sale;
 
-import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import lombok.AllArgsConstructor;
@@ -13,25 +12,25 @@ import java.util.stream.Collectors;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PurchaseFX {
+public class SaleFX {
   private StringProperty id;
   private StringProperty totalPrice;
-  private List<PurchaseItemFX> purchaseItems;
+  private List<SaleItemFX> purchaseItems;
   private StringProperty date;
 
-  public PurchaseFX(Purchase purchase) {
-    String id = purchase.getId();
+  public SaleFX(Sale sale) {
+    String id = sale.getId();
     this.id = id != null ? new SimpleStringProperty(id) : null;
 
-    String totalPrice = purchase.getTotalPrice();
+    String totalPrice = sale.getTotalPrice();
     this.totalPrice = totalPrice != null ? new SimpleStringProperty(totalPrice) : null;
 
-    String date = purchase.getDate();
+    String date = sale.getDate();
     this.date = date != null ? new SimpleStringProperty(date) : null;
 
-    List<PurchaseItem> purchaseItems = purchase.getPurchaseItems();
-    this.purchaseItems = purchaseItems.stream()
-        .map(PurchaseItemFX::new)
+    List<SaleItem> saleItems = sale.getSaleItems();
+    this.purchaseItems = saleItems.stream()
+        .map(SaleItemFX::new)
         .collect(Collectors.toList());
   }
 }

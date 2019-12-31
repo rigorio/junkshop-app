@@ -2,21 +2,20 @@ package rigor.io.junkshop.ui.sales;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
+import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.print.*;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import rigor.io.junkshop.models.materials.Material;
 import rigor.io.junkshop.models.materials.MaterialsProvider;
-import rigor.io.junkshop.models.purchase.Purchase;
-import rigor.io.junkshop.models.purchase.PurchaseHandler;
-import rigor.io.junkshop.models.purchase.PurchaseItem;
-import rigor.io.junkshop.models.purchase.PurchaseItemFX;
+import rigor.io.junkshop.models.sale.Sale;
+import rigor.io.junkshop.models.sale.SaleHandler;
+import rigor.io.junkshop.models.sale.SaleItem;
+import rigor.io.junkshop.models.sale.SaleItemFX;
 import rigor.io.junkshop.printing.PrintUtil;
 import rigor.io.junkshop.ui.purchaseHistory.PurchaseHistoryView;
 import rigor.io.junkshop.utils.GuiManager;
@@ -35,6 +34,8 @@ import java.util.stream.Stream;
 public class SalesPresenter implements Initializable {
 
   @FXML
+  private JFXTextArea noteText;
+  @FXML
   private JFXButton addButton;
   @FXML
   private BorderPane receiptBox;
@@ -51,7 +52,7 @@ public class SalesPresenter implements Initializable {
   @FXML
   private JFXButton purchaseButton;
   @FXML
-  private TableView<PurchaseItemFX> purchaseTable;
+  private TableView<SaleItemFX> purchaseTable;
   @FXML
   private JFXComboBox<String> materialBox;
   @FXML
@@ -61,31 +62,35 @@ public class SalesPresenter implements Initializable {
   @FXML
   private JFXButton deleteButton;
 
-  private PurchaseHandler purchaseHandler;
+  private SaleHandler saleHandler;
 
-  private List<PurchaseItemFX> purchaseItemList = new ArrayList<>();
+  private List<SaleItemFX> purchaseItemList = new ArrayList<>();
   private MaterialsProvider materialsProvider;
 
   public SalesPresenter() {
-    purchaseHandler = new PurchaseHandler();
+    saleHandler = new SaleHandler();
     materialsProvider = new MaterialsProvider();
   }
 
   @Override
   public void initialize(URL location, ResourceBundle resources) {
-    TableColumn<PurchaseItemFX, String> material = new TableColumn<>("Material");
+    TableColumn<SaleItemFX, String> material = new TableColumn<>("Material");
     material.setCellValueFactory(e -> e.getValue().getMaterial());
 
-    TableColumn<PurchaseItemFX, String> price = new TableColumn<>("Price");
+    TableColumn<SaleItemFX, String> note = new TableColumn<>("Note");
+    note.setCellValueFactory(e -> e.getValue().getNote());
+
+    TableColumn<SaleItemFX, String> price = new TableColumn<>("Price");
     price.setCellValueFactory(e -> e.getValue().getPrice());
 
-    TableColumn<PurchaseItemFX, String> weight = new TableColumn<>("Weight");
+    TableColumn<SaleItemFX, String> weight = new TableColumn<>("Weight");
     weight.setCellValueFactory(e -> e.getValue().getWeight());
 
-    TableColumn<PurchaseItemFX, String> totalPrice = new TableColumn<>("Total");
+    TableColumn<SaleItemFX, String> totalPrice = new TableColumn<>("Total");
     totalPrice.setCellValueFactory(e -> e.getValue().getTotalPrice());
 
     purchaseTable.getColumns().addAll(material,
+                                      note,
                                       weight,
                                       price,
                                       totalPrice);
@@ -125,7 +130,7 @@ public class SalesPresenter implements Initializable {
       return;
     }
     String material = materialBox.getValue();
-    Optional<PurchaseItemFX> any = purchaseItemList.stream().filter(p -> p.getMaterial().get().equals(material)).findAny();
+    Optional<SaleItemFX> any = purchaseItemList.stream().filter(p -> p.getMaterial().get().equals(material)).findAny();
     double initialWeight = 0.0;
     if (any.isPresent() && Double.valueOf(any.get().getWeight().get()) + Double.valueOf(weightText.getText()) > Double.valueOf(quantityLabel.getText())) {
       Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -136,19 +141,20 @@ public class SalesPresenter implements Initializable {
       return;
     }
     if (any.isPresent()) {
-      PurchaseItemFX purchaseItemFX = any.get();
-      purchaseTable.getItems().removeAll(purchaseItemFX);
-      initialWeight = Double.parseDouble(purchaseItemFX.getWeight().get());
+      SaleItemFX saleItemFX = any.get();
+      purchaseTable.getItems().removeAll(saleItemFX);
+      initialWeight = Double.parseDouble(saleItemFX.getWeight().get());
     }
     double weight = Double.valueOf(weightText.getText()) + initialWeight;
     String price = priceText.getText();
-    PurchaseItem item = PurchaseItem.builder()
+    SaleItem item = SaleItem.builder()
         .material(material)
+        .note(noteText.getText())
         .weight("" + weight)
         .price(price)
         .totalPrice("" + (weight * Double.valueOf(price)))
         .build();
-    purchaseItemList.add(new PurchaseItemFX(item));
+    purchaseItemList.add(new SaleItemFX(item));
     purchaseTable.setItems(FXCollections.observableList(purchaseItemList));
     double total = purchaseItemList.stream()
         .mapToDouble(purchase -> Double.valueOf(purchase.getTotalPrice().get()))
@@ -175,11 +181,11 @@ public class SalesPresenter implements Initializable {
     purchaseButton.setText("Purchasing...");
     TaskTool<Object> tool = new TaskTool<>();
     Task<Object> task = tool.createTask(() -> {
-      List<PurchaseItem> purchaseItems = purchaseTable.getItems()
+      List<SaleItem> saleItems = purchaseTable.getItems()
           .stream()
-          .map(PurchaseItem::new)
+          .map(SaleItem::new)
           .collect(Collectors.toList());
-      double totalPrice = purchaseItems.stream()
+      double totalPrice = saleItems.stream()
           .mapToDouble(item -> Double.parseDouble(item.getPrice()))
           .sum();
 
@@ -191,19 +197,19 @@ public class SalesPresenter implements Initializable {
       lines.add("Items:" + "\n");
 
 
-      for (PurchaseItem purchaseItem : purchaseItems) {
+      for (SaleItem purchaseItem : saleItems) {
         lines.add(purchaseItem.getMaterial());
         lines.add(purchaseItem.getWeight() + "kg * ₱" + purchaseItem.getPrice() + " = ₱" + purchaseItem.getTotalPrice());
       }
       lines.add("GRAND TOTAL: ₱ " + totalPrice);
       PrintUtil.print(lines);
 
-      Purchase purchase = Purchase.builder()
-          .purchaseItems(purchaseItems)
+      Sale sale = Sale.builder()
+          .saleItems(saleItems)
           .date(LocalDate.now().toString())
           .totalPrice("" + totalPrice)
           .build();
-      purchaseHandler.sendPurchase(purchase);
+      saleHandler.sendPurchase(sale);
       return null;
     });
     task.setOnSucceeded(e -> purchaseButton.setText("Purchase"));
@@ -237,36 +243,6 @@ public class SalesPresenter implements Initializable {
   @FXML
   public void viewPurchaseHistory() {
     GuiManager.getInstance().displayView(new PurchaseHistoryView());
-  }
-
-  private void print(Node node) {
-    // Define the Job Status Message
-    System.out.println("Creating a printer job...");
-
-    // Create a printer job for the default printer
-    PrinterJob job = PrinterJob.createPrinterJob();
-    JobSettings jobSettings = job.getJobSettings();
-    PageLayout pageLayout = jobSettings.getPageLayout();
-
-    if (job != null) {
-      // Show the printer job status
-
-      // Print the node
-      pageLayout = job.getPrinter().createPageLayout(Paper.A4, PageOrientation.PORTRAIT, Printer.MarginType.DEFAULT);
-      jobSettings.setPageLayout(pageLayout);
-      boolean printed = job.printPage(pageLayout, node);
-
-      if (printed) {
-        // End the printer job
-        job.endJob();
-      } else {
-        // Write Error Message
-        System.out.println("Printing failed.");
-      }
-    } else {
-      // Write Error Message
-      System.out.println("Could not create a printer job.");
-    }
   }
 
   private void fillMaterialBox() {

@@ -8,9 +8,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import rigor.io.junkshop.models.purchase.Purchase;
-import rigor.io.junkshop.models.purchase.PurchaseFX;
-import rigor.io.junkshop.models.purchase.PurchaseHandler;
+import rigor.io.junkshop.models.sale.Sale;
+import rigor.io.junkshop.models.sale.SaleFX;
+import rigor.io.junkshop.models.sale.SaleHandler;
 import rigor.io.junkshop.utils.TaskTool;
 
 import java.net.URL;
@@ -21,28 +21,28 @@ import java.util.stream.Stream;
 
 public class PurchaseHistoryPresenter implements Initializable {
   @FXML
-  private TableView<PurchaseFX> historyTable;
+  private TableView<SaleFX> historyTable;
   @FXML
   private JFXDatePicker datePicker;
 
-  private PurchaseHandler purchaseHandler;
+  private SaleHandler saleHandler;
 
   public PurchaseHistoryPresenter() {
-    purchaseHandler = new PurchaseHandler();
+    saleHandler = new SaleHandler();
   }
 
   @Override
   public void initialize(URL location, ResourceBundle resources) {
-    TableColumn<PurchaseFX, String> receiptNumber = new TableColumn<>("Receipt #");
+    TableColumn<SaleFX, String> receiptNumber = new TableColumn<>("Receipt #");
     receiptNumber.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue().getId().get()));
 
-    TableColumn<PurchaseFX, String> price = new TableColumn<>("Total Price");
+    TableColumn<SaleFX, String> price = new TableColumn<>("Total Price");
     price.setCellValueFactory(e -> e.getValue().getTotalPrice());
 
-    TableColumn<PurchaseFX, String> date = new TableColumn<>("Date");
+    TableColumn<SaleFX, String> date = new TableColumn<>("Date");
     date.setCellValueFactory(e -> e.getValue().getDate());
 
-    TableColumn<PurchaseFX, String> items = new TableColumn<>("No. Items");
+    TableColumn<SaleFX, String> items = new TableColumn<>("No. Items");
     items.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue().getPurchaseItems().size()));
 
 
@@ -57,21 +57,21 @@ public class PurchaseHistoryPresenter implements Initializable {
   }
 
   private void initTable() {
-    TaskTool<List<Purchase>> tool = new TaskTool<>();
-    Task<List<Purchase>> task = tool.createTask(this::purchaseHistory);
+    TaskTool<List<Sale>> tool = new TaskTool<>();
+    Task<List<Sale>> task = tool.createTask(this::purchaseHistory);
     task.setOnSucceeded(e -> {
-      Stream<Purchase> purchaseStream = task.getValue()
+      Stream<Sale> purchaseStream = task.getValue()
           .stream();
-      List<PurchaseFX> purchases = purchaseStream
-          .map(PurchaseFX::new)
+      List<SaleFX> purchases = purchaseStream
+          .map(SaleFX::new)
           .collect(Collectors.toList());
       historyTable.setItems(FXCollections.observableList(purchases));
     });
     tool.execute(task);
   }
 
-  private List<Purchase> purchaseHistory() {
-    return purchaseHandler.getPurchases();
+  private List<Sale> purchaseHistory() {
+    return saleHandler.getPurchases();
   }
 
   @FXML

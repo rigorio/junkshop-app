@@ -16,20 +16,11 @@ public class Junk {
   private String id;
   private String material;
   private String price;
+  private String note;
   private String weight;
   private String totalPrice;
   private String date;
 
-  public Junk(String material, String price, String weight) {
-    this.material = material;
-    this.price = price;
-    this.weight = weight;
-  }
-
-  /**
-   * date is not included
-   * @param junk
-   */
   public Junk(JunkFX junk) {
     StringProperty id = junk.getId();
     this.id = id != null ? id.get() : null;
@@ -45,5 +36,11 @@ public class Junk {
 
     StringProperty totalPrice = junk.getTotalPrice();
     this.totalPrice = totalPrice != null ? totalPrice.get() : null;
+
+    StringProperty date = junk.getDate();
+    this.date = date != null ? date.get() : null;
+
+    StringProperty note = junk.getNote();
+    this.note = note != null ? note.get() : null;
   }
 }

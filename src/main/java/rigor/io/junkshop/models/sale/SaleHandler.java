@@ -1,4 +1,4 @@
-package rigor.io.junkshop.models.purchase;
+package rigor.io.junkshop.models.sale;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,33 +10,33 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PurchaseHandler {
+public class SaleHandler {
   private static final MediaType JSON
       = MediaType.parse("application/json; charset=utf-8");
-  private String URL = Configurations.getInstance().getHost() + "/purchase";
+  private String URL = Configurations.getInstance().getHost() + "/sale";
 
-  public List<Purchase> getPurchases() {
+  public List<Sale> getPurchases() {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
         .url(URL)
         .build();
     Call call = client.newCall(request);
-    List<Purchase> purchases = new ArrayList<>();
+    List<Sale> sales = new ArrayList<>();
     try {
       ResponseBody body = call.execute().body();
       String string = body.string();
-      purchases = new ObjectMapper().readValue(string, new TypeReference<List<Purchase>>() {});
+      sales = new ObjectMapper().readValue(string, new TypeReference<List<Sale>>() {});
     } catch (IOException e) {
       e.printStackTrace();
     }
-    return purchases;
+    return sales;
   }
 
-  public void sendPurchase(Purchase purchase) {
+  public void sendPurchase(Sale sale) {
     OkHttpClient client = new OkHttpClient();
     try {
-      purchase.setDate(LocalDate.now().toString());
-      String jsonString = new ObjectMapper().writeValueAsString(purchase);
+      sale.setDate(LocalDate.now().toString());
+      String jsonString = new ObjectMapper().writeValueAsString(sale);
       RequestBody reqbody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
           .url(URL)

@@ -27,14 +27,14 @@
                 <Font size="16.0"/>
               </font>
             </JFXTextField>
-            <JFXButton fx:id="addButton" layoutX="14.0" layoutY="302.0" mnemonicParsing="false" onAction="#addItem"
+            <JFXButton fx:id="addButton" layoutX="14.0" layoutY="428.0" mnemonicParsing="false" onAction="#addItem"
                        prefHeight="37.0" prefWidth="93.0" style="-fx-background-color: #8BC34A;" text="Add Item"
                        textFill="WHITE">
               <font>
                 <Font name="System Bold" size="16.0"/>
               </font>
             </JFXButton>
-            <JFXButton fx:id="deleteButton" layoutX="14.0" layoutY="347.0" mnemonicParsing="false"
+            <JFXButton fx:id="deleteButton" layoutX="14.0" layoutY="473.0" mnemonicParsing="false"
                        onAction="#deleteItem" prefHeight="37.0" prefWidth="94.0" style="-fx-background-color: #FF3D00;"
                        text="Delete" textFill="WHITE">
               <font>
@@ -66,6 +66,12 @@
                 <Font size="24.0"/>
               </font>
             </Label>
+            <Label layoutX="14.0" layoutY="305.0" text="Note" textFill="#404040">
+              <font>
+                <Font name="System Bold" size="16.0"/>
+              </font>
+            </Label>
+            <JFXTextArea fx:id="noteText" layoutX="14.0" layoutY="330.0" prefHeight="80.0" prefWidth="164.0"/>
           </AnchorPane>
         </center>
       </BorderPane>
