@@ -32,6 +32,23 @@ public class CashHandler {
     return cash;
   }
 
+  public Cash today() {
+    OkHttpClient client = new OkHttpClient();
+    Request request = new Request.Builder()
+        .url(URL+"/today")
+        .build();
+    Call call = client.newCall(request);
+    Cash cash = new Cash();
+    try {
+      ResponseBody body = call.execute().body();
+      String string = body.string();
+      cash = new ObjectMapper().readValue(string, new TypeReference<Cash>() {});
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return cash;
+  }
+
   public void sendCash(Cash cash) {
     OkHttpClient client = new OkHttpClient();
     try {

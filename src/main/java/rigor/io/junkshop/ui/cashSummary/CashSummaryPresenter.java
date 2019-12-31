@@ -16,7 +16,6 @@ import rigor.io.junkshop.models.cash.CashFX;
 import rigor.io.junkshop.models.cash.CashHandler;
 import rigor.io.junkshop.models.customProperties.CustomProperty;
 import rigor.io.junkshop.models.customProperties.CustomPropertyHandler;
-import rigor.io.junkshop.models.customProperties.CustomPropertyKeys;
 import rigor.io.junkshop.models.expense.Expense;
 import rigor.io.junkshop.models.expense.ExpenseFX;
 import rigor.io.junkshop.models.expense.ExpenseHandler;
@@ -30,7 +29,9 @@ import rigor.io.junkshop.utils.TaskTool;
 import rigor.io.junkshop.utils.UITools;
 
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -104,7 +105,7 @@ public class CashSummaryPresenter implements Initializable {
                                       amount);
 
     initOverallTable();
-    setCapitalTextbox();
+    setDailies();
     setExpensesTable();
     UITools.numberOnlyTextField(capitalTextBox);
     UITools.numberOnlyTextField(expenseAmountTextBox);
@@ -202,6 +203,7 @@ public class CashSummaryPresenter implements Initializable {
     dataSelector.setItems(FXCollections.observableList(options));
   }
 
+/*
   private void setCapitalTextbox() {
     TaskTool<CustomProperty> tool = new TaskTool<>();
     Task<CustomProperty> task = tool.createTask(() -> customPropertyHandler.getProperty(CustomPropertyKeys.CAPITAL.name()));
@@ -214,8 +216,23 @@ public class CashSummaryPresenter implements Initializable {
     });
     tool.execute(task);
   }
+*/
 
-  private void setAmounts() {
+  private void setDailies() {
+    TaskTool<Cash> tool = new TaskTool<>();
+    Task<Cash> task = tool.createTask(() -> cashHandler.today());
+    task.setOnSucceeded(e -> {
+      Cash cash = task.getValue();
+      capitalTextBox.setText(cash.getCapital());
+      salesTextBox.setText(cash.getSales());
+      purchasesTextBox.setText(cash.getPurchases());
+      expensesTextBox.setText(cash.getExpenses());
+      cashOnHandTextBox.setText(cash.getCashOnHand());
+    });
+    tool.execute(task);
+  }
+
+/*  private void setAmounts() {
     TaskTool<Map<String, Double>> tool = new TaskTool<>();
     Task<Map<String, Double>> task = tool.createTask(() -> {
       Map<String, Double> values = new HashMap<>();
@@ -233,32 +250,20 @@ public class CashSummaryPresenter implements Initializable {
       saveChanges();
     });
     tool.execute(task);
-  }
+  }*/
 
   @FXML
   public void saveChanges() {
-    if (capitalTextBox.getText().length() > 0) {
-      loadingLabel.setVisible(true);
-      Double capital = Double.valueOf(capitalTextBox.getText());
-      Double sales = Double.valueOf(salesTextBox.getText());
-      Double purchases = Double.valueOf(purchasesTextBox.getText());
-      double totalExpenses = Double.valueOf(expensesTextBox.getText());
-      double totalCash = (capital + sales) - (purchases + totalExpenses);
-      cashOnHandTextBox.setText("" + totalCash);
-      TaskTool<Object> tool = new TaskTool<>();
-      Task<Object> task = tool.createTask(() -> {
-        CustomProperty customProperty = capitalProperty;
-        if (customProperty.getProperty() == null) {
-          customProperty = new CustomProperty();
-          customProperty.setProperty(CustomPropertyKeys.CAPITAL.name());
-        }
-        customProperty.setValue("" + capital);
-        customPropertyHandler.sendProperty(customProperty);
-        loadingLabel.setVisible(false);
-        return null;
-      });
-      tool.execute(task);
-    }
+    String capital = capitalTextBox.getText();
+    Cash cash = cashHandler.today();
+    cash.setCapital(capital);
+    TaskTool<Cash> tool = new TaskTool<>();
+    Task<Cash> task = tool.createTask(() -> {
+      cashHandler.sendCash(cash);
+      setDailies();
+      return null;
+    });
+    tool.execute(task);
   }
 
   private void setExpensesTable() {
@@ -273,7 +278,7 @@ public class CashSummaryPresenter implements Initializable {
           .collect(Collectors.toList());
       expensesTable.setItems(FXCollections.observableList(expenses));
       loadingLabel.setVisible(false);
-      setAmounts();
+//      setAmounts();
     });
     tool.execute(task);
   }
