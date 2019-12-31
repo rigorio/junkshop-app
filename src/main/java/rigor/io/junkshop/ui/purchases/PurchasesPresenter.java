@@ -197,6 +197,7 @@ public class PurchasesPresenter implements Initializable {
     lines.add("Items:" + "\n");
     for (Junk junk : junkList) {
       lines.add(junk.getMaterial());
+      lines.add(junk.getNote());
       lines.add(junk.getWeight() + "kg * ₱" + junk.getPrice() + " = ₱" + junk.getTotalPrice());
     }
     double grandTotal = junkList.stream()

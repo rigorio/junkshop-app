@@ -203,6 +203,7 @@ public class SalesPresenter implements Initializable {
 
       for (SaleItem purchaseItem : saleItems) {
         lines.add(purchaseItem.getMaterial());
+        lines.add(purchaseItem.getNote());
         lines.add(purchaseItem.getWeight() + "kg * ₱" + purchaseItem.getPrice() + " = ₱" + purchaseItem.getTotalPrice());
       }
       lines.add("GRAND TOTAL: ₱ " + totalPrice);
