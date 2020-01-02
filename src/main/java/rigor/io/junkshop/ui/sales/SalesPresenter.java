@@ -174,6 +174,14 @@ public class SalesPresenter implements Initializable {
 
   @FXML
   public void purchaseItems() {
+    if ( purchaseTable.getItems().isEmpty()) {
+      Alert alert = new Alert(Alert.AlertType.WARNING);
+      alert.setTitle("No items found");
+      alert.setHeaderText("Add items to the table/list");
+      alert.setContentText(null);
+      alert.showAndWait();
+      return;
+    }
     if (receiptNumber.getText() == null || receiptNumber.getText().length() < 1 || purchaseTable.getItems().isEmpty()) {
       Alert alert = new Alert(Alert.AlertType.WARNING);
       alert.setTitle("No receipt number found");
