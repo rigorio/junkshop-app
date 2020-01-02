@@ -20,8 +20,9 @@ import rigor.io.junkshop.models.expense.Expense;
 import rigor.io.junkshop.models.expense.ExpenseFX;
 import rigor.io.junkshop.models.expense.ExpenseHandler;
 import rigor.io.junkshop.models.junk.Junk;
-import rigor.io.junkshop.models.junk.JunkCollector;
+import rigor.io.junkshop.models.junk.PurchaseHandler;
 import rigor.io.junkshop.models.junk.JunkFX;
+import rigor.io.junkshop.models.junk.PurchaseSummaryFX;
 import rigor.io.junkshop.models.sales.SalesEntity;
 import rigor.io.junkshop.models.sales.SalesFX;
 import rigor.io.junkshop.models.sales.SalesMan;
@@ -37,6 +38,8 @@ import java.util.stream.Stream;
 
 public class CashSummaryPresenter implements Initializable {
 
+  @FXML
+  private JFXComboBox<String> spanSelector;
   @FXML
   private JFXComboBox<String> dataSelector;
   @FXML
@@ -71,7 +74,7 @@ public class CashSummaryPresenter implements Initializable {
   private JFXTextField cashOnHandTextBox;
   private ExpenseHandler expenseHandler;
   private SalesMan salesMan;
-  private JunkCollector junkCollector;
+  private PurchaseHandler purchaseHandler;
   private CustomPropertyHandler customPropertyHandler;
   private CustomProperty capitalProperty;
   private CashHandler cashHandler;
@@ -81,11 +84,13 @@ public class CashSummaryPresenter implements Initializable {
   private static final String SELECT_SALES = "Sales";
   private static final String SELECT_PURCHASES = "Purchases";
   private static final String SELECT_OVERALL = "Overall";
+  private static final String DAILY = "Daily";
+  private static final String MONTHLY = "Monthly";
 
   public CashSummaryPresenter() {
     expenseHandler = new ExpenseHandler();
     salesMan = new SalesMan();
-    junkCollector = new JunkCollector();
+    purchaseHandler = new PurchaseHandler();
     customPropertyHandler = new CustomPropertyHandler();
     cashHandler = new CashHandler();
   }
@@ -93,6 +98,7 @@ public class CashSummaryPresenter implements Initializable {
   @Override
   public void initialize(URL location, ResourceBundle resources) {
     fillDataSelector();
+    fillSpanSelector();
 
     TableColumn<ExpenseFX, String> expense = new TableColumn<>("Expense");
     expense.setCellValueFactory(e -> e.getValue().getName());
@@ -143,21 +149,23 @@ public class CashSummaryPresenter implements Initializable {
   private void initPurchasesTable() {
     dataTable.setItems(null);
     dataTable.getColumns().clear();
-    TableColumn<JunkFX, String> totalPrice = new TableColumn<>("Total Price");
-    totalPrice.setCellValueFactory(e -> e.getValue().getTotalPrice());
+    String span = spanSelector.getValue();
+    if (span.equals(DAILY)) {
+      TableColumn<JunkFX, String> totalPrice = new TableColumn<>("Total Price");
+      totalPrice.setCellValueFactory(e -> e.getValue().getTotalPrice());
 
-    TableColumn<JunkFX, String> material = new TableColumn<>("Material");
-    material.setCellValueFactory(e -> e.getValue().getMaterial());
+      TableColumn<JunkFX, String> material = new TableColumn<>("Material");
+      material.setCellValueFactory(e -> e.getValue().getMaterial());
 
-    TableColumn<JunkFX, String> date = new TableColumn<>("Date");
-    date.setCellValueFactory(e -> e.getValue().getDate());
+      TableColumn<JunkFX, String> date = new TableColumn<>("Date");
+      date.setCellValueFactory(e -> e.getValue().getDate());
 
 
-    dataTable.getColumns().addAll(date,
-                                  material,
-                                  totalPrice);
+      dataTable.getColumns().addAll(date,
+                                    material,
+                                    totalPrice);
     TaskTool<List<Junk>> tool = new TaskTool<>();
-    Task<List<Junk>> task = tool.createTask(() -> junkCollector.getJunk());
+    Task<List<Junk>> task = tool.createTask(() -> purchaseHandler.getJunk());
     task.setOnSucceeded(e -> {
       Stream<Junk> junkStream = task.getValue()
           .stream();
@@ -167,6 +175,22 @@ public class CashSummaryPresenter implements Initializable {
       dataTable.setItems(FXCollections.observableList(junkFXList));
     });
     tool.execute(task);
+    } else if (span.equals(MONTHLY)) {
+      TableColumn<PurchaseSummaryFX, String> s = new TableColumn<>("Span");
+      s.setCellValueFactory(e -> e.getValue().getSpan());
+
+      TableColumn<PurchaseSummaryFX, String> t = new TableColumn<>("Total");
+      t.setCellValueFactory(e -> e.getValue().getAmount());
+
+
+      dataTable.getColumns().addAll(s,
+                                    t);
+      TaskTool<List<PurchaseSummaryFX>> tool = new TaskTool<>();
+      Task<List<PurchaseSummaryFX>> task = tool.createTask(() -> purchaseHandler.getMonthlyPurchaseSummary());
+      task.setOnSucceeded(e -> dataTable.setItems(FXCollections.observableList(task.getValue())));
+      tool.execute(task);
+    }
+
   }
 
   private void initOverallTable() {
@@ -203,6 +227,7 @@ public class CashSummaryPresenter implements Initializable {
     dataSelector.setItems(FXCollections.observableList(options));
   }
 
+
 /*
   private void setCapitalTextbox() {
     TaskTool<CustomProperty> tool = new TaskTool<>();
@@ -217,7 +242,6 @@ public class CashSummaryPresenter implements Initializable {
     tool.execute(task);
   }
 */
-
   private void setDailies() {
     TaskTool<Cash> tool = new TaskTool<>();
     Task<Cash> task = tool.createTask(() -> cashHandler.today());
@@ -231,6 +255,7 @@ public class CashSummaryPresenter implements Initializable {
     });
     tool.execute(task);
   }
+
 
 /*  private void setAmounts() {
     TaskTool<Map<String, Double>> tool = new TaskTool<>();
@@ -251,7 +276,6 @@ public class CashSummaryPresenter implements Initializable {
     });
     tool.execute(task);
   }*/
-
   @FXML
   public void saveChanges() {
     String capital = capitalTextBox.getText();
@@ -284,10 +308,6 @@ public class CashSummaryPresenter implements Initializable {
   }
 
   @FXML
-  public void changeDate() {
-  }
-
-  @FXML
   public void addExpense() {
     String name = expenseNameTextBox.getText();
     String amount = expenseAmountTextBox.getText();
@@ -299,6 +319,13 @@ public class CashSummaryPresenter implements Initializable {
       return null;
     });
     tool.execute(task);
+  }
+
+  private void fillSpanSelector() {
+    List<String> options = new ArrayList<>();
+    options.add(DAILY);
+    options.add(MONTHLY);
+    spanSelector.setItems(FXCollections.observableList(options));
   }
 
   @FXML
@@ -352,7 +379,7 @@ public class CashSummaryPresenter implements Initializable {
   }
 
   private double getTotalPurchases() {
-    return junkCollector.getJunk()
+    return purchaseHandler.getJunk()
         .stream()
         .mapToDouble(value -> Double.valueOf(value.getPrice()) * Double.valueOf(value.getWeight()))
         .sum();

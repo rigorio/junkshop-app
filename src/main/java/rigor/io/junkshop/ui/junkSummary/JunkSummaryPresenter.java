@@ -8,7 +8,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import rigor.io.junkshop.models.junk.Junk;
-import rigor.io.junkshop.models.junk.JunkCollector;
+import rigor.io.junkshop.models.junk.PurchaseHandler;
 import rigor.io.junkshop.models.junk.JunkFX;
 import rigor.io.junkshop.models.materials.MaterialsProvider;
 import rigor.io.junkshop.utils.TaskTool;
@@ -27,11 +27,11 @@ public class JunkSummaryPresenter implements Initializable {
   private JFXDatePicker datePicker;
   @FXML
   private TableView<JunkFX> summaryTable;
-  private JunkCollector junkCollector;
+  private PurchaseHandler purchaseHandler;
   private MaterialsProvider materialsProvider;
 
   public JunkSummaryPresenter() {
-    junkCollector = new JunkCollector();
+    purchaseHandler = new PurchaseHandler();
     materialsProvider = new MaterialsProvider();
   }
 
@@ -98,6 +98,6 @@ public class JunkSummaryPresenter implements Initializable {
 
 
   private List<Junk> getAllJunk() {
-    return junkCollector.getJunk();
+    return purchaseHandler.getJunk();
   }
 }

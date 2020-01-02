@@ -14,7 +14,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.jetbrains.annotations.NotNull;
 import rigor.io.junkshop.models.junk.Junk;
-import rigor.io.junkshop.models.junk.JunkCollector;
+import rigor.io.junkshop.models.junk.PurchaseHandler;
 import rigor.io.junkshop.models.junk.JunkFX;
 import rigor.io.junkshop.models.materials.Material;
 import rigor.io.junkshop.models.materials.MaterialsProvider;
@@ -51,11 +51,11 @@ public class PurchasesPresenter implements Initializable {
   @FXML
   private TableView<JunkFX> junkTable;
   private MaterialsProvider materialsProvider;
-  private JunkCollector junkCollector;
+  private PurchaseHandler purchaseHandler;
 
   public PurchasesPresenter() {
     materialsProvider = new MaterialsProvider();
-    junkCollector = new JunkCollector();
+    purchaseHandler = new PurchaseHandler();
   }
 
   @Override
@@ -108,7 +108,7 @@ public class PurchasesPresenter implements Initializable {
   }
 
   private List<Junk> getJunk() {
-    return junkCollector.getJunk();
+    return purchaseHandler.getJunk();
   }
 
   private void fillMaterialBox() {
@@ -161,7 +161,7 @@ public class PurchasesPresenter implements Initializable {
         .build();
     TaskTool<Object> tool = new TaskTool<>();
     Task<Object> task = tool.createTask(() -> {
-      junkCollector.sendJunk(junk);
+      purchaseHandler.sendJunk(junk);
       fillTableData();
       return null;
     });
