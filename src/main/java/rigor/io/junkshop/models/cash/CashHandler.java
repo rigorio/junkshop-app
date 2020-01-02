@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CashHandler {
   private static final MediaType JSON
@@ -32,10 +33,40 @@ public class CashHandler {
     return cash;
   }
 
+  public List<Cash> getMonthlyCash() {
+    List<Cash> allCash = getCash();
+    List<Cash> monthlyCashes = new ArrayList<>();
+    for (Cash cash : allCash) {
+      LocalDate date = LocalDate.parse(cash.getDate());
+      String span = date.getMonth() + " " + date.getYear();
+      Optional<Cash> anyCash = monthlyCashes.stream()
+          .filter(monthlyCash -> monthlyCash.getDate().equals(span))
+          .findAny();
+      Cash monthlyCash;
+      if (anyCash.isPresent()) {
+        monthlyCash = anyCash.get();
+        monthlyCash.setCapital(futarini(monthlyCash.getCapital(), cash.getCapital()));
+        monthlyCash.setCashOnHand(futarini(monthlyCash.getCashOnHand(), cash.getCashOnHand()));
+        monthlyCash.setExpenses(futarini(monthlyCash.getExpenses(), cash.getExpenses()));
+        monthlyCash.setPurchases(futarini(monthlyCash.getPurchases(), cash.getPurchases()));
+        monthlyCash.setSales(futarini(monthlyCash.getSales(), cash.getSales()));
+      } else {
+        monthlyCash = cash;
+        monthlyCash.setDate(span);
+        monthlyCashes.add(monthlyCash);
+      }
+    }
+    return monthlyCashes;
+  }
+
+  public String futarini(String s1, String s2) {
+    return "" + ((s1 != null ? Double.valueOf(s1) : 0.0d) + (s2 != null ? Double.valueOf(s2) : 0.0d));
+  }
+
   public Cash today() {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
-        .url(URL+"/today")
+        .url(URL + "/today")
         .build();
     Call call = client.newCall(request);
     Cash cash = new Cash();
