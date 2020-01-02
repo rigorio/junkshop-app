@@ -293,8 +293,9 @@ public class CashSummaryPresenter implements Initializable {
     String amount = expenseAmountTextBox.getText();
     TaskTool<Object> tool = new TaskTool<>();
     Task<Object> task = tool.createTask(() -> {
-      expenseHandler.sendExpense(new Expense(name, amount));
+      expenseHandler.sendExpense(new Expense(name, noteTextbox.getText(), amount));
       setExpensesTable();
+      setDailies();
       return null;
     });
     tool.execute(task);
@@ -309,6 +310,7 @@ public class CashSummaryPresenter implements Initializable {
       Task<Object> task = tool.createTask(() -> {
         expenseHandler.deleteExpense(expense);
         setExpensesTable();
+        setDailies();
         return null;
       });
       tool.execute(task);

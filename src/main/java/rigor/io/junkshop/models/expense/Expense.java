@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,8 +31,10 @@ public class Expense {
     this.date = date != null ? date.get() : null;
   }
 
-  public Expense(String name, String amount) {
+  public Expense(String name, String note, String amount) {
     this.name = name;
+    this.note = note;
     this.amount = amount;
+    this.date = LocalDate.now().toString();
   }
 }
