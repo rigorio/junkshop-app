@@ -34,7 +34,7 @@ public class PurchaseHistoryPresenter implements Initializable {
   @Override
   public void initialize(URL location, ResourceBundle resources) {
     TableColumn<SaleFX, String> receiptNumber = new TableColumn<>("Receipt #");
-    receiptNumber.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue().getId().get()));
+    receiptNumber.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue().getReceiptNumber().get()));
 
     TableColumn<SaleFX, String> price = new TableColumn<>("Total Price");
     price.setCellValueFactory(e -> e.getValue().getTotalPrice());
@@ -71,7 +71,7 @@ public class PurchaseHistoryPresenter implements Initializable {
   }
 
   private List<Sale> purchaseHistory() {
-    return saleHandler.getPurchases();
+    return saleHandler.getSales();
   }
 
   @FXML

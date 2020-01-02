@@ -4,6 +4,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextField;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -23,6 +24,9 @@ import rigor.io.junkshop.models.junk.Junk;
 import rigor.io.junkshop.models.junk.JunkFX;
 import rigor.io.junkshop.models.junk.PurchaseHandler;
 import rigor.io.junkshop.models.junk.PurchaseSummaryFX;
+import rigor.io.junkshop.models.sale.Sale;
+import rigor.io.junkshop.models.sale.SaleFX;
+import rigor.io.junkshop.models.sale.SaleHandler;
 import rigor.io.junkshop.models.sales.SalesEntity;
 import rigor.io.junkshop.models.sales.SalesFX;
 import rigor.io.junkshop.models.sales.SalesMan;
@@ -78,6 +82,7 @@ public class CashSummaryPresenter implements Initializable {
   private CustomPropertyHandler customPropertyHandler;
   private CustomProperty capitalProperty;
   private CashHandler cashHandler;
+  private SaleHandler saleHandler;
   private static final String EXPENSES_KEY = "expenses";
   private static final String SALES_KEY = "sales";
   private static final String PURCHASES_KEY = "purchases";
@@ -93,6 +98,7 @@ public class CashSummaryPresenter implements Initializable {
     purchaseHandler = new PurchaseHandler();
     customPropertyHandler = new CustomPropertyHandler();
     cashHandler = new CashHandler();
+    saleHandler = new SaleHandler();
   }
 
   @Override
@@ -126,26 +132,59 @@ public class CashSummaryPresenter implements Initializable {
 
     dataTable.setItems(null);
     dataTable.getColumns().clear();
-    TableColumn<SalesFX, String> span = new TableColumn<>("Span");
-    span.setCellValueFactory(e -> e.getValue().getSpan());
+    String s = spanSelector.getValue();
+    if (s.equals(DAILY)) {
+      TableColumn<SaleFX, String> receiptNumber = new TableColumn<>("Receipt #");
+      receiptNumber.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue().getReceiptNumber().get()));
 
-    TableColumn<SalesFX, String> sales = new TableColumn<>("Sales");
-    sales.setCellValueFactory(e -> e.getValue().getSales());
+      TableColumn<SaleFX, String> price = new TableColumn<>("Total Price");
+      price.setCellValueFactory(e -> e.getValue().getTotalPrice());
+
+      TableColumn<SaleFX, String> date = new TableColumn<>("Date");
+      date.setCellValueFactory(e -> e.getValue().getDate());
+
+      TableColumn<SaleFX, String> items = new TableColumn<>("No. Items");
+      items.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue().getPurchaseItems().size()));
+
+      dataTable.getColumns().addAll(receiptNumber,
+                                    items,
+                                    price,
+                                    date);
+      TaskTool<List<Sale>> tool = new TaskTool<>();
+      Task<List<Sale>> task = tool.createTask(() -> saleHandler.getSales());
+      task.setOnSucceeded(e -> {
+        Stream<Sale> salesEntityStream = task.getValue()
+            .stream();
+        List<SaleFX> sales1 = salesEntityStream
+            .map(SaleFX::new)
+            .collect(Collectors.toList());
+        dataTable.setItems(FXCollections.observableList(sales1));
+      });
+      tool.execute(task);
+
+    } else if (s.equals(MONTHLY)) {
+      TableColumn<SalesFX, String> span = new TableColumn<>("Span");
+      span.setCellValueFactory(e -> e.getValue().getSpan());
+
+      TableColumn<SalesFX, String> sales = new TableColumn<>("Sales");
+      sales.setCellValueFactory(e -> e.getValue().getSales());
 
 
-    dataTable.getColumns().addAll(span,
-                                  sales);
-    TaskTool<List<SalesEntity>> tool = new TaskTool<>();
-    Task<List<SalesEntity>> task = tool.createTask(() -> salesMan.getSales());
-    task.setOnSucceeded(e -> {
-      Stream<SalesEntity> salesEntityStream = task.getValue()
-          .stream();
-      List<SalesFX> sales1 = salesEntityStream
-          .map(SalesFX::new)
-          .collect(Collectors.toList());
-      dataTable.setItems(FXCollections.observableList(sales1));
-    });
-    tool.execute(task);
+      dataTable.getColumns().addAll(span,
+                                    sales);
+      TaskTool<List<SalesEntity>> tool = new TaskTool<>();
+      Task<List<SalesEntity>> task = tool.createTask(() -> salesMan.getSales());
+      task.setOnSucceeded(e -> {
+        Stream<SalesEntity> salesEntityStream = task.getValue()
+            .stream();
+        List<SalesFX> sales1 = salesEntityStream
+            .map(SalesFX::new)
+            .collect(Collectors.toList());
+        dataTable.setItems(FXCollections.observableList(sales1));
+      });
+      tool.execute(task);
+    }
+
   }
 
   private void initPurchasesTable() {

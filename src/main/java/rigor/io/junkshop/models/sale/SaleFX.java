@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class SaleFX {
   private StringProperty id;
+  private StringProperty receiptNumber;
   private StringProperty totalPrice;
   private List<SaleItemFX> purchaseItems;
   private StringProperty date;
@@ -32,5 +33,7 @@ public class SaleFX {
     this.purchaseItems = saleItems.stream()
         .map(SaleItemFX::new)
         .collect(Collectors.toList());
+    String receiptNumber = sale.getReceiptNumber();
+    this.receiptNumber = receiptNumber != null ? new SimpleStringProperty(receiptNumber) : null;
   }
 }

@@ -15,7 +15,7 @@ public class SaleHandler {
       = MediaType.parse("application/json; charset=utf-8");
   private String URL = Configurations.getInstance().getHost() + "/sale";
 
-  public List<Sale> getPurchases() {
+  public List<Sale> getSales() {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
         .url(URL)

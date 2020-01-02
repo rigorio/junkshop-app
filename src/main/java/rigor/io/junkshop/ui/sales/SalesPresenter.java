@@ -218,6 +218,7 @@ public class SalesPresenter implements Initializable {
       PrintUtil.print(lines);
 
       Sale sale = Sale.builder()
+          .receiptNumber(receiptNumber.getText())
           .saleItems(saleItems)
           .date(LocalDate.now().toString())
           .totalPrice("" + totalPrice)

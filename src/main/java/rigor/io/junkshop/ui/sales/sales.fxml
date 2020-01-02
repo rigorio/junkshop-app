@@ -100,12 +100,12 @@
               </font>
             </Label>
             <JFXButton fx:id="purchaseButton" mnemonicParsing="false" onAction="#purchaseItems" prefHeight="37.0"
-                       prefWidth="143.0" style="-fx-background-color: #8BC34A;" text="Purchase" textFill="WHITE">
+                       prefWidth="143.0" style="-fx-background-color: #8BC34A;" text="Confirm Sale" textFill="WHITE">
               <font>
                 <Font name="System Bold" size="16.0"/>
               </font>
             </JFXButton>
-            <Hyperlink onAction="#viewPurchaseHistory" prefHeight="33.0" prefWidth="139.0" text="Purchase History">
+            <Hyperlink onAction="#viewPurchaseHistory" prefHeight="33.0" prefWidth="139.0" text="Sales History">
               <font>
                 <Font name="System Bold" size="16.0"/>
               </font>
