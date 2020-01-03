@@ -9,14 +9,15 @@ import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import rigor.io.junkshop.models.cash.Cash;
 import rigor.io.junkshop.models.cash.CashFX;
 import rigor.io.junkshop.models.cash.CashHandler;
 import rigor.io.junkshop.models.customProperties.CustomProperty;
 import rigor.io.junkshop.models.customProperties.CustomPropertyHandler;
+import rigor.io.junkshop.models.customProperties.CustomPropertyKeys;
 import rigor.io.junkshop.models.expense.Expense;
 import rigor.io.junkshop.models.expense.ExpenseFX;
 import rigor.io.junkshop.models.expense.ExpenseHandler;
@@ -36,6 +37,7 @@ import rigor.io.junkshop.utils.UITools;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -369,11 +371,18 @@ public class CashSummaryPresenter implements Initializable {
     TaskTool<Object> tool = new TaskTool<>();
     Task<Object> task = tool.createTask(() -> {
       expenseHandler.sendExpense(new Expense(name, noteTextbox.getText(), amount));
+      clearData();
       setExpensesTable();
       setDailies();
       return null;
     });
     tool.execute(task);
+  }
+
+  private void clearData() {
+    expenseNameTextBox.clear();
+    expenseAmountTextBox.clear();
+    noteTextbox.clear();
   }
 
   private void fillSpanSelector() {
@@ -413,6 +422,64 @@ public class CashSummaryPresenter implements Initializable {
         initSalesTable();
         break;
     }
+  }
+
+  @FXML
+  public void addCapital() {
+    TextInputDialog dialog = new TextInputDialog();
+    dialog.setTitle("Add capital");
+    dialog.setHeaderText(null);
+    dialog.setContentText("Amount to add:");
+    Optional<String> result = dialog.showAndWait();
+    result.ifPresent(capital -> {
+      Double initCap = Double.valueOf(capitalTextBox.getText());
+      String total = "" + (initCap + Double.valueOf(capital));
+      capitalTextBox.setText(total);
+      saveChanges();
+    });
+  }
+
+  @FXML
+  public void updateCapital() {
+    Dialog<String> dialog = new Dialog<>();
+    dialog.setTitle("Update capital");
+    dialog.setHeaderText(null);
+    dialog.setGraphic(null);
+    PasswordField pwd = new PasswordField();
+    HBox content = new HBox();
+    content.setAlignment(Pos.CENTER_LEFT);
+    content.setSpacing(10);
+    content.getChildren().addAll(new Label("Enter password:"), pwd);
+    dialog.getDialogPane().setContent(content);
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+    dialog.setResultConverter(dialogButton -> {
+      if (dialogButton == ButtonType.OK) {
+        return pwd.getText();
+      }
+      return null;
+    });
+    Optional<String> result = dialog.showAndWait();
+    result.ifPresent(pw -> {
+      CustomProperty property = customPropertyHandler.getProperty(CustomPropertyKeys.CAPITAL_PASSWORD.name());
+      if (property.getValue().equals(pw)) {
+        TextInputDialog updater = new TextInputDialog();
+        updater.setTitle("Update capital");
+        updater.setHeaderText(null);
+        updater.setGraphic(null);
+        updater.setContentText("Enter new amount:");
+        Optional<String> amount = updater.showAndWait();
+        amount.ifPresent(capital -> {
+          capitalTextBox.setText(capital);
+          saveChanges();
+        });
+      } else {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Not allowed");
+        alert.setHeaderText("Wrong password");
+        alert.setContentText("Wrong password was given");
+        alert.showAndWait();
+      }
+    });
   }
 
   private double getTotalExpenses() {
