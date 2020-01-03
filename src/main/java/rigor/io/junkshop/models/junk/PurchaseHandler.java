@@ -3,20 +3,65 @@ package rigor.io.junkshop.models.junk;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import okhttp3.*;
-import org.jetbrains.annotations.NotNull;
 import rigor.io.junkshop.config.Configurations;
+import rigor.io.junkshop.models.junk.junklist.JunkList;
+import rigor.io.junkshop.models.junk.junklist.PurchaseFX;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class PurchaseHandler {
   private static final MediaType JSON
       = MediaType.parse("application/json; charset=utf-8");
   private String URL = Configurations.getInstance().getHost() + "/junk";
+
+  public ObservableList<PurchaseFX> getAllPurchases() {
+    OkHttpClient client = new OkHttpClient();
+    Request request = new Request.Builder()
+        .url(URL + "/list")
+        .build();
+    Call call = client.newCall(request);
+    List<JunkList> junks = new ArrayList<>();
+    try {
+      ResponseBody body = call.execute().body();
+      if (body != null) {
+        String string = body.string();
+        junks = new ObjectMapper().readValue(string, new TypeReference<List<JunkList>>() {});
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return FXCollections.observableList(junks.stream().map(PurchaseFX::new).collect(Collectors.toList()));
+  }
+
+  public void savePurchases(JunkList purchase) {
+    OkHttpClient client = new OkHttpClient();
+    try {
+      purchase.setDate(LocalDate.now().toString());
+      String jsonString = new ObjectMapper().writeValueAsString(purchase);
+      RequestBody reqbody = RequestBody.create(JSON, jsonString);
+      Request request = new Request.Builder()
+          .url(URL + "/list")
+          .post(reqbody)
+          .build();
+      Call call = client.newCall(request);
+      JunkList junks = new JunkList();
+      ResponseBody body = call.execute().body();
+      if (body != null) {
+        String string = body.string();
+        junks = new ObjectMapper().readValue(string, new TypeReference<JunkList>() {});
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
   public List<Junk> getJunk() {
     OkHttpClient client = new OkHttpClient();
@@ -71,8 +116,10 @@ public class PurchaseHandler {
       Call call = client.newCall(request);
       Junk junks = new Junk();
       ResponseBody body = call.execute().body();
-      String string = body.string();
-      junks = new ObjectMapper().readValue(string, new TypeReference<Junk>() {});
+      if (body != null) {
+        String string = body.string();
+        junks = new ObjectMapper().readValue(string, new TypeReference<Junk>() {});
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }

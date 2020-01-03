@@ -164,6 +164,7 @@ public class SalesPresenter implements Initializable {
         .mapToDouble(purchase -> Double.valueOf(purchase.getTotalPrice().get()))
         .sum();
     totalTextbox.setText("₱ " + UITools.roundToTwo(total));
+    omotteta();
   }
 
   @FXML
@@ -182,7 +183,7 @@ public class SalesPresenter implements Initializable {
       alert.showAndWait();
       return;
     }
-    if (receiptNumber.getText() == null || receiptNumber.getText().length() < 1 || purchaseTable.getItems().isEmpty()) {
+    if (receiptNumber.getText() == null || receiptNumber.getText().length() < 1) {
       Alert alert = new Alert(Alert.AlertType.WARNING);
       alert.setTitle("No receipt number found");
       alert.setHeaderText("Please enter the receipt number");
@@ -202,8 +203,8 @@ public class SalesPresenter implements Initializable {
           .sum();
 
       List<String> lines = new ArrayList<>();
-      lines.add("Steelman Junkshop");
-      lines.add("Sales");
+      lines.add("Steelman Junkshop\n");
+      lines.add("Sales\n");
       lines.add("Receipt #: " + receiptNumber.getText() + "\n");
       lines.add("Date: " + date.getText() + "\n");
       lines.add("Items:" + "\n");
@@ -212,10 +213,9 @@ public class SalesPresenter implements Initializable {
       for (SaleItem purchaseItem : saleItems) {
         lines.add(purchaseItem.getMaterial());
         lines.add(purchaseItem.getNote());
-        lines.add(purchaseItem.getWeight() + "kg * ₱" + purchaseItem.getPrice() + " = ₱" + purchaseItem.getTotalPrice());
+        lines.add(purchaseItem.getWeight() + "kg * ₱" + purchaseItem.getPrice() + " = ₱" + purchaseItem.getTotalPrice() + "\n");
       }
       lines.add("GRAND TOTAL: ₱ " + totalPrice);
-      PrintUtil.print(lines);
 
       Sale sale = Sale.builder()
           .receiptNumber(receiptNumber.getText())
@@ -224,11 +224,39 @@ public class SalesPresenter implements Initializable {
           .totalPrice("" + totalPrice)
           .build();
       saleHandler.sendPurchase(sale);
+      PrintUtil.print(lines);
       return null;
     });
-    task.setOnSucceeded(e -> purchaseButton.setText("Purchase"));
+    task.setOnSucceeded(e -> {
+      purchaseButton.setText("Purchase");
+      Alert alert = new Alert(Alert.AlertType.INFORMATION);
+      alert.setTitle("Printing");
+      alert.setHeaderText("Sale confirmed! Please wait for receipt");
+      alert.setContentText(null);
+      alert.showAndWait();
+      clearFields();
+    });
     tool.execute(task);
     selectMaterial();
+  }
+
+  private void clearFields() {
+    purchaseTable.setItems(null);
+    purchaseTable.getItems().clear();
+    receiptNumber.clear();
+    omotteta();
+    totalTextbox.setText("₱ 0.0");
+//    selectMaterial();
+  }
+
+  private void omotteta() {
+    materialBox.setValue(null);
+    materialBox.setPromptText("Select Material");
+    otherText.clear();
+    noteText.clear();
+    quantityLabel.setText("0.0");
+    weightText.clear();
+    priceText.clear();
   }
 
   @FXML
@@ -266,6 +294,7 @@ public class SalesPresenter implements Initializable {
       Stream<Material> materialStream = task.getValue().stream();
       List<String> materials = materialStream
           .map(Material::getMaterial)
+          .sorted(String.CASE_INSENSITIVE_ORDER)
           .collect(Collectors.toList());
       materialBox.setItems(FXCollections.observableList(materials));
       loadingLabel.setVisible(false);

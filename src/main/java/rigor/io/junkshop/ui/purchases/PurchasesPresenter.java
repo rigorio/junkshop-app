@@ -8,14 +8,12 @@ import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import org.jetbrains.annotations.NotNull;
 import rigor.io.junkshop.models.junk.Junk;
-import rigor.io.junkshop.models.junk.PurchaseHandler;
 import rigor.io.junkshop.models.junk.JunkFX;
+import rigor.io.junkshop.models.junk.PurchaseHandler;
+import rigor.io.junkshop.models.junk.junklist.JunkList;
 import rigor.io.junkshop.models.materials.Material;
 import rigor.io.junkshop.models.materials.MaterialsProvider;
 import rigor.io.junkshop.printing.PrintUtil;
@@ -35,6 +33,10 @@ import java.util.stream.Stream;
 
 public class PurchasesPresenter implements Initializable {
   @FXML
+  private Label grandTotal;
+  @FXML
+  private JFXTextField receiptNumber;
+  @FXML
   private JFXTextField otherTextBox;
   @FXML
   private JFXTextArea noteTextBox;
@@ -52,6 +54,7 @@ public class PurchasesPresenter implements Initializable {
   private TableView<JunkFX> junkTable;
   private MaterialsProvider materialsProvider;
   private PurchaseHandler purchaseHandler;
+  private List<JunkFX> purchaseItemList = new ArrayList<>();
 
   public PurchasesPresenter() {
     materialsProvider = new MaterialsProvider();
@@ -60,6 +63,7 @@ public class PurchasesPresenter implements Initializable {
 
   @Override
   public void initialize(URL location, ResourceBundle resources) {
+    grandTotal.setText("₱ 0.0");
     fillMaterialBox();
     TableColumn<JunkFX, String> material = new TableColumn<>("Material");
     material.setCellValueFactory(e -> e.getValue().getMaterial());
@@ -81,7 +85,8 @@ public class PurchasesPresenter implements Initializable {
                                   weight,
                                   price,
                                   totalPrice);
-    fillTableData();
+    junkTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+//    fillTableData();
 
     UITools.numberOnlyTextField(priceText);
     UITools.numberOnlyTextField(weightText);
@@ -118,8 +123,10 @@ public class PurchasesPresenter implements Initializable {
       Stream<Material> materialStream = task.getValue().stream();
       List<String> materials = materialStream
           .map(Material::getMaterial)
+          .sorted(String.CASE_INSENSITIVE_ORDER)
           .collect(Collectors.toList());
       materialBox.setItems(FXCollections.observableList(materials));
+      loadingLabel.setVisible(false);
     });
     tool.execute(task);
   }
@@ -130,7 +137,7 @@ public class PurchasesPresenter implements Initializable {
 
   @FXML
   public void addItem() {
-    if (materialBox.getValue() == null) {
+    if (materialBox.getValue() == null && (otherTextBox.getText() == null || otherTextBox.getText().length() < 1)) {
       Alert alert = new Alert(Alert.AlertType.WARNING);
       alert.setTitle("No material selected");
       alert.setHeaderText("Please select a material from the list");
@@ -159,27 +166,39 @@ public class PurchasesPresenter implements Initializable {
         .note(note)
         .totalPrice("" + (Double.valueOf(price) * Double.valueOf(weight)))
         .build();
-    TaskTool<Object> tool = new TaskTool<>();
-    Task<Object> task = tool.createTask(() -> {
-      purchaseHandler.sendJunk(junk);
-      fillTableData();
-      return null;
-    });
-    tool.execute(task);
+    purchaseItemList.add(new JunkFX(junk));
+    junkTable.setItems(FXCollections.observableList(purchaseItemList));
+    double sum = junkTable.getItems().stream()
+        .mapToDouble(j -> Double.valueOf(j.getTotalPrice().get()))
+        .sum();
+    grandTotal.setText("₱ " + UITools.roundToTwo(sum));
+    omotetta();
+
+  }
+
+  @FXML
+  public void deleteItem() {
+    junkTable.getItems()
+        .removeAll(junkTable.getSelectionModel().getSelectedItems());
+    double sum = junkTable.getItems().stream()
+        .mapToDouble(j -> Double.valueOf(j.getTotalPrice().get()))
+        .sum();
+    grandTotal.setText("₱ " + UITools.roundToTwo(sum));
   }
 
   @FXML
   public void selectMaterial() {
     loadingLabel.setVisible(true);
     String materialName = materialBox.getValue();
-    Optional<Material> any = getMaterials().stream()
+    TaskTool<Optional<Material>> tool = new TaskTool<>();
+    Task<Optional<Material>> task = tool.createTask(() -> getMaterials().stream()
         .filter(material -> material.getMaterial().equalsIgnoreCase(materialName))
-        .findAny();
-    if (any.isPresent()) {
-      Material material = any.get();
-      priceText.setText(material.getStandardPrice());
-    }
-    loadingLabel.setVisible(false);
+        .findAny());
+    task.setOnSucceeded(e -> {
+      task.getValue().ifPresent(material -> priceText.setText(material.getStandardPrice()));
+      loadingLabel.setVisible(false);
+    });
+    tool.execute(task);
   }
 
   @FXML
@@ -189,28 +208,94 @@ public class PurchasesPresenter implements Initializable {
 
   @FXML
   public void printSelectedItems() {
+    if (junkTable.getItems().isEmpty()) {
+      Alert alert = new Alert(Alert.AlertType.WARNING);
+      alert.setTitle("No items found");
+      alert.setHeaderText("Add items to the table/list");
+      alert.setContentText(null);
+      alert.showAndWait();
+      return;
+    }
+    if (receiptNumber.getText() == null || receiptNumber.getText().length() < 1) {
+      Alert alert = new Alert(Alert.AlertType.WARNING);
+      alert.setTitle("No receipt number");
+      alert.setHeaderText("Please enter receipt number");
+      alert.setContentText(null);
+      alert.showAndWait();
+      return;
+    }
+    if (weightText.getText() == null || priceText.getText() == null || weightText.getText().length() < 1 || priceText.getText().length() < 1) {
+      Alert alert = new Alert(Alert.AlertType.WARNING);
+      alert.setTitle("Enter weight/price");
+      alert.setHeaderText("Weight/Price was not entered");
+      alert.setContentText(null);
+      alert.showAndWait();
+      return;
+    }
     List<Junk> junkList = getSelectedJunk();
+    JunkList purchase = JunkList.builder()
+        .receiptNumber(receiptNumber.getText())
+        .date(LocalDate.now().toString())
+        .purchaseItems(junkList)
+        .totalPrice("" + junkList.stream().mapToDouble(junk -> Double.valueOf(junk.getTotalPrice())).sum())
+        .build();
+    TaskTool<Object> tool = new TaskTool<>();
+    Task<Object> task = tool.createTask(() -> {
+      loadingLabel.setVisible(true);
+      purchaseHandler.savePurchases(purchase);
+      return null;
+    });
+
     List<String> lines = new ArrayList<>();
-    lines.add("Steelman Junkshop");
-    lines.add("Purchases");
+    lines.add("Steelman Junkshop\n");
+    lines.add("Purchases\n");
+    lines.add("Receipt #" + receiptNumber.getText() + "\n");
     lines.add("Date: " + LocalDate.now().toString() + "\n");
     lines.add("Items:" + "\n");
     for (Junk junk : junkList) {
-      lines.add(junk.getMaterial());
-      lines.add(junk.getNote());
-      lines.add(junk.getWeight() + "kg * ₱" + junk.getPrice() + " = ₱" + junk.getTotalPrice());
+      lines.add(junk.getMaterial() + "\n");
+      lines.add(junk.getNote() + "\n");
+      lines.add(junk.getWeight() + "kg * ₱" + junk.getPrice() + " = ₱" + junk.getTotalPrice() + "\n");
     }
     double grandTotal = junkList.stream()
-        .mapToDouble(junk -> Double.valueOf(junk.getTotalPrice()))
+        .mapToDouble(junk -> Double.valueOf(junk.getWeight()) * Double.valueOf(junk.getPrice()))
         .sum();
     lines.add("GRAND TOTAL: ₱" + grandTotal);
-    PrintUtil.print(lines);
+    task.setOnSucceeded(e -> {
+      PrintUtil.print(lines);
+      loadingLabel.setVisible(false);
+      Alert alert = new Alert(Alert.AlertType.INFORMATION);
+      alert.setTitle("Printing");
+      alert.setHeaderText("Items purchased successfully! Please wait for receipt");
+      alert.setContentText(null);
+      alert.showAndWait();
+      clearFields();
+    });
+
+    tool.execute(task);
+  }
+
+  private void clearFields() {
+    junkTable.setItems(null);
+    junkTable.getItems().clear();
+    receiptNumber.clear();
+    omotetta();
+    grandTotal.setText("₱ 0.0");
+//    selectMaterial();
+  }
+
+  private void omotetta() {
+    otherTextBox.clear();
+    noteTextBox.clear();
+    materialBox.setValue(null);
+    materialBox.setPromptText("Choose Material");
+    priceText.clear();
+    weightText.clear();
   }
 
   @NotNull
   private List<Junk> getSelectedJunk() {
-    return junkTable.getSelectionModel()
-        .getSelectedItems()
+    return junkTable.getItems()
         .stream()
         .map(Junk::new)
         .collect(Collectors.toList());
