@@ -11,4 +11,9 @@ public class CustomProperty {
   private String id;
   private String property;
   private String value;
+
+  public CustomProperty(String property, String value) {
+    this.property = property;
+    this.value = value;
+  }
 }

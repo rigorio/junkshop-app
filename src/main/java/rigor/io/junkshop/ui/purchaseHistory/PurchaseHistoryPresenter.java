@@ -71,7 +71,7 @@ public class PurchaseHistoryPresenter implements Initializable {
   }
 
   private List<Sale> purchaseHistory() {
-    return saleHandler.getSales();
+    return saleHandler.getSales(null);
   }
 
   @FXML

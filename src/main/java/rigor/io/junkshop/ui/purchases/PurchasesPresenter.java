@@ -1,5 +1,7 @@
 package rigor.io.junkshop.ui.purchases;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextArea;
@@ -9,7 +11,10 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.util.Callback;
 import org.jetbrains.annotations.NotNull;
+import rigor.io.junkshop.cache.PublicCache;
+import rigor.io.junkshop.models.client.Client;
 import rigor.io.junkshop.models.junk.Junk;
 import rigor.io.junkshop.models.junk.JunkFX;
 import rigor.io.junkshop.models.junk.PurchaseHandler;
@@ -22,16 +27,15 @@ import rigor.io.junkshop.utils.GuiManager;
 import rigor.io.junkshop.utils.TaskTool;
 import rigor.io.junkshop.utils.UITools;
 
+import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PurchasesPresenter implements Initializable {
+  public JFXComboBox<Client> clientBox;
   @FXML
   private Label grandTotal;
   @FXML
@@ -63,6 +67,7 @@ public class PurchasesPresenter implements Initializable {
 
   @Override
   public void initialize(URL location, ResourceBundle resources) {
+    customClientCellFactory();
     grandTotal.setText("₱ 0.0");
     fillMaterialBox();
     TableColumn<JunkFX, String> material = new TableColumn<>("Material");
@@ -113,26 +118,41 @@ public class PurchasesPresenter implements Initializable {
   }
 
   private List<Junk> getJunk() {
-    return purchaseHandler.getJunk();
+    return purchaseHandler.getJunk(null);
   }
 
   private void fillMaterialBox() {
-    TaskTool<List<Material>> tool = new TaskTool<>();
-    Task<List<Material>> task = tool.createTask(this::getMaterials);
+    TaskTool<Map<String, Object>> tool = new TaskTool<>();
+    Task<Map<String, Object>> task = tool.createTask(this::getItems);
     task.setOnSucceeded(e -> {
-      Stream<Material> materialStream = task.getValue().stream();
-      List<String> materials = materialStream
-          .map(Material::getMaterial)
-          .sorted(String.CASE_INSENSITIVE_ORDER)
-          .collect(Collectors.toList());
-      materialBox.setItems(FXCollections.observableList(materials));
-      loadingLabel.setVisible(false);
+      ObjectMapper mapper = new ObjectMapper();
+      Map<String, Object> map = task.getValue();
+      try {
+        List<Client> clients = mapper.readValue(mapper.writeValueAsString(map.get("clients")), new TypeReference<List<Client>>() {});
+        if (clients != null && !clients.isEmpty())
+          clientBox.setItems(FXCollections.observableList(clients));
+        List<String> materials = mapper
+            .<List<Material>>readValue(mapper.writeValueAsString(map.get("materials")), new TypeReference<List<Material>>() {})
+            .stream()
+            .map(Material::getMaterial)
+            .sorted(String.CASE_INSENSITIVE_ORDER)
+            .collect(Collectors.toList());
+        materialBox.setItems(FXCollections.observableList(materials));
+        loadingLabel.setVisible(false);
+
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      }
     });
     tool.execute(task);
   }
 
   private List<Material> getMaterials() {
     return materialsProvider.getMaterials();
+  }
+
+  private Map<String, Object> getItems() {
+    return materialsProvider.getItems();
   }
 
   @FXML
@@ -224,18 +244,12 @@ public class PurchasesPresenter implements Initializable {
       alert.showAndWait();
       return;
     }
-    if (weightText.getText() == null || priceText.getText() == null || weightText.getText().length() < 1 || priceText.getText().length() < 1) {
-      Alert alert = new Alert(Alert.AlertType.WARNING);
-      alert.setTitle("Enter weight/price");
-      alert.setHeaderText("Weight/Price was not entered");
-      alert.setContentText(null);
-      alert.showAndWait();
-      return;
-    }
+    Client client = clientBox.getValue();
     List<Junk> junkList = getSelectedJunk();
     JunkList purchase = JunkList.builder()
         .receiptNumber(receiptNumber.getText())
         .date(LocalDate.now().toString())
+        .clientId(client.getId())
         .purchaseItems(junkList)
         .totalPrice("" + junkList.stream().mapToDouble(junk -> Double.valueOf(junk.getTotalPrice())).sum())
         .build();
@@ -248,6 +262,7 @@ public class PurchasesPresenter implements Initializable {
 
     List<String> lines = new ArrayList<>();
     lines.add("Steelman Junkshop\n");
+    lines.add(PublicCache.getContact() + "\n");
     lines.add("Purchases\n");
     lines.add("Receipt #" + receiptNumber.getText() + "\n");
     lines.add("Date: " + LocalDate.now().toString() + "\n");
@@ -262,7 +277,6 @@ public class PurchasesPresenter implements Initializable {
         .sum();
     lines.add("GRAND TOTAL: ₱" + grandTotal);
     task.setOnSucceeded(e -> {
-      PrintUtil.print(lines);
       loadingLabel.setVisible(false);
       Alert alert = new Alert(Alert.AlertType.INFORMATION);
       alert.setTitle("Printing");
@@ -270,6 +284,15 @@ public class PurchasesPresenter implements Initializable {
       alert.setContentText(null);
       alert.showAndWait();
       clearFields();
+      try {
+        PrintUtil.print(lines);
+        Thread.sleep(3500L);
+        PrintUtil.print(lines);
+        Thread.sleep(3500L);
+        PrintUtil.print(lines);
+      } catch (InterruptedException ex) {
+        ex.printStackTrace();
+      }
     });
 
     tool.execute(task);
@@ -277,8 +300,9 @@ public class PurchasesPresenter implements Initializable {
 
   private void clearFields() {
     junkTable.setItems(null);
-    junkTable.getItems().clear();
     receiptNumber.clear();
+    clientBox.setValue(null);
+    clientBox.setPromptText("Select Client");
     omotetta();
     grandTotal.setText("₱ 0.0");
 //    selectMaterial();
@@ -288,7 +312,7 @@ public class PurchasesPresenter implements Initializable {
     otherTextBox.clear();
     noteTextBox.clear();
     materialBox.setValue(null);
-    materialBox.setPromptText("Choose Material");
+    materialBox.setPromptText("Select Material");
     priceText.clear();
     weightText.clear();
   }
@@ -299,5 +323,20 @@ public class PurchasesPresenter implements Initializable {
         .stream()
         .map(Junk::new)
         .collect(Collectors.toList());
+  }
+
+  private void customClientCellFactory() {
+    clientBox.setCellFactory(new Callback<ListView<Client>, ListCell<Client>>() {
+      @Override
+      public ListCell<Client> call(ListView<Client> param) {
+        return new ListCell<Client>() {
+          @Override
+          protected void updateItem(Client c, boolean bln) {
+            super.updateItem(c, bln);
+            setText(c != null ? c.getName() : null);
+          }
+        };
+      }
+    });
   }
 }

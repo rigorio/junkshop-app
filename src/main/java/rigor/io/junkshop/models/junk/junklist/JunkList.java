@@ -18,4 +18,5 @@ public class JunkList {
   private List<Junk> purchaseItems;
   private String totalPrice;
   private String date;
+  private String clientId;
 }

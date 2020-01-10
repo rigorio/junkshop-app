@@ -18,6 +18,7 @@ public class SaleFX {
   private StringProperty totalPrice;
   private List<SaleItemFX> purchaseItems;
   private StringProperty date;
+  private StringProperty clientId;
 
   public SaleFX(Sale sale) {
     String id = sale.getId();
@@ -35,5 +36,8 @@ public class SaleFX {
         .collect(Collectors.toList());
     String receiptNumber = sale.getReceiptNumber();
     this.receiptNumber = receiptNumber != null ? new SimpleStringProperty(receiptNumber) : null;
+
+    String clientId = sale.getClientId();
+    this.clientId = clientId != null ? new SimpleStringProperty(clientId) : null;
   }
 }

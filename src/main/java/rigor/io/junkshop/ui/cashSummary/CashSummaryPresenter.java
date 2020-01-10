@@ -31,10 +31,12 @@ import rigor.io.junkshop.models.sale.SaleHandler;
 import rigor.io.junkshop.models.sales.SalesEntity;
 import rigor.io.junkshop.models.sales.SalesFX;
 import rigor.io.junkshop.models.sales.SalesMan;
+import rigor.io.junkshop.printing.PrintUtil;
 import rigor.io.junkshop.utils.TaskTool;
 import rigor.io.junkshop.utils.UITools;
 
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +46,10 @@ import java.util.stream.Stream;
 
 public class CashSummaryPresenter implements Initializable {
 
+  @FXML
+  private Hyperlink printLink;
+  @FXML
+  private JFXComboBox<String> expenseSpan;
   @FXML
   private JFXComboBox<String> spanSelector;
   @FXML
@@ -93,6 +99,7 @@ public class CashSummaryPresenter implements Initializable {
   private static final String SELECT_OVERALL = "Overall";
   private static final String DAILY = "Daily";
   private static final String MONTHLY = "Monthly";
+  private static final String TODAY = "Today";
 
   public CashSummaryPresenter() {
     expenseHandler = new ExpenseHandler();
@@ -109,16 +116,8 @@ public class CashSummaryPresenter implements Initializable {
     fillSpanSelector();
     dataSelector.setValue(SELECT_OVERALL);
     spanSelector.setValue(MONTHLY);
-
-    TableColumn<ExpenseFX, String> expense = new TableColumn<>("Expense");
-    expense.setCellValueFactory(e -> e.getValue().getName());
-
-    TableColumn<ExpenseFX, String> amount = new TableColumn<>("Amount");
-    amount.setCellValueFactory(e -> e.getValue().getAmount());
-
-
-    expensesTable.getColumns().addAll(expense,
-                                      amount);
+    expenseSpan.setValue(TODAY);
+    expensesTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
     initOverallTable();
     setDailies();
@@ -135,36 +134,7 @@ public class CashSummaryPresenter implements Initializable {
     dataTable.setItems(null);
     dataTable.getColumns().clear();
     String s = spanSelector.getValue();
-    if (s.equals(DAILY)) {
-      TableColumn<SaleFX, String> receiptNumber = new TableColumn<>("Receipt #");
-      receiptNumber.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue().getReceiptNumber().get()));
-
-      TableColumn<SaleFX, String> price = new TableColumn<>("Total Price");
-      price.setCellValueFactory(e -> e.getValue().getTotalPrice());
-
-      TableColumn<SaleFX, String> date = new TableColumn<>("Date");
-      date.setCellValueFactory(e -> e.getValue().getDate());
-
-      TableColumn<SaleFX, String> items = new TableColumn<>("No. Items");
-      items.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue().getPurchaseItems().size()));
-
-      dataTable.getColumns().addAll(receiptNumber,
-                                    items,
-                                    price,
-                                    date);
-      TaskTool<List<Sale>> tool = new TaskTool<>();
-      Task<List<Sale>> task = tool.createTask(() -> saleHandler.getSales());
-      task.setOnSucceeded(e -> {
-        Stream<Sale> salesEntityStream = task.getValue()
-            .stream();
-        List<SaleFX> sales1 = salesEntityStream
-            .map(SaleFX::new)
-            .collect(Collectors.toList());
-        dataTable.setItems(FXCollections.observableList(sales1));
-      });
-      tool.execute(task);
-
-    } else if (s.equals(MONTHLY)) {
+    if (s.equals(MONTHLY)) {
       TableColumn<SalesFX, String> span = new TableColumn<>("Span");
       span.setCellValueFactory(e -> e.getValue().getSpan());
 
@@ -185,6 +155,40 @@ public class CashSummaryPresenter implements Initializable {
         dataTable.setItems(FXCollections.observableList(sales1));
       });
       tool.execute(task);
+    } else {
+      TableColumn<SaleFX, String> receiptNumber = new TableColumn<>("Receipt #");
+      receiptNumber.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue().getReceiptNumber().get()));
+
+      TableColumn<SaleFX, String> price = new TableColumn<>("Total Price");
+      price.setCellValueFactory(e -> e.getValue().getTotalPrice());
+
+      TableColumn<SaleFX, String> date = new TableColumn<>("Date");
+      date.setCellValueFactory(e -> e.getValue().getDate());
+
+      TableColumn<SaleFX, String> items = new TableColumn<>("No. Items");
+      items.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue().getPurchaseItems().size()));
+
+      dataTable.getColumns().addAll(receiptNumber,
+                                    items,
+                                    price,
+                                    date);
+      TaskTool<List<Sale>> tool = new TaskTool<>();
+      Task<List<Sale>> task = tool.createTask(() -> saleHandler.getSales(null));
+      task.setOnSucceeded(e -> {
+        Stream<Sale> salesEntityStream = task.getValue()
+            .stream();
+        List<SaleFX> sales1 = salesEntityStream
+            .map(SaleFX::new)
+            .collect(Collectors.toList());
+        sales1 = s.equals(DAILY)
+            ? sales1
+            : sales1.stream()
+            .filter(sa -> sa.getDate().get().equals(LocalDate.now().toString()))
+            .collect(Collectors.toList());
+        dataTable.setItems(FXCollections.observableList(sales1));
+      });
+      tool.execute(task);
+
     }
 
   }
@@ -193,7 +197,21 @@ public class CashSummaryPresenter implements Initializable {
     dataTable.setItems(null);
     dataTable.getColumns().clear();
     String span = spanSelector.getValue();
-    if (span.equals(DAILY)) {
+    if (span.equals(MONTHLY)) {
+      TableColumn<PurchaseSummaryFX, String> s = new TableColumn<>("Span");
+      s.setCellValueFactory(e -> e.getValue().getSpan());
+
+      TableColumn<PurchaseSummaryFX, String> t = new TableColumn<>("Total");
+      t.setCellValueFactory(e -> e.getValue().getAmount());
+
+
+      dataTable.getColumns().addAll(s,
+                                    t);
+      TaskTool<List<PurchaseSummaryFX>> tool = new TaskTool<>();
+      Task<List<PurchaseSummaryFX>> task = tool.createTask(() -> purchaseHandler.getMonthlyPurchaseSummary());
+      task.setOnSucceeded(e -> dataTable.setItems(FXCollections.observableList(task.getValue())));
+      tool.execute(task);
+    } else {
       TableColumn<JunkFX, String> totalPrice = new TableColumn<>("Total Price");
       totalPrice.setCellValueFactory(e -> e.getValue().getTotalPrice());
 
@@ -208,31 +226,23 @@ public class CashSummaryPresenter implements Initializable {
                                     material,
                                     totalPrice);
       TaskTool<List<Junk>> tool = new TaskTool<>();
-      Task<List<Junk>> task = tool.createTask(() -> purchaseHandler.getJunk());
+      Task<List<Junk>> task = tool.createTask(() -> purchaseHandler.getJunk(null));
       task.setOnSucceeded(e -> {
         Stream<Junk> junkStream = task.getValue()
             .stream();
         List<JunkFX> junkFXList = junkStream
             .map(JunkFX::new)
             .collect(Collectors.toList());
+        junkFXList = span.equals(DAILY)
+            ? junkFXList
+            : junkFXList.stream()
+            .filter(j -> j.getDate().get().equals(LocalDate.now().toString()))
+            .collect(Collectors.toList());
         dataTable.setItems(FXCollections.observableList(junkFXList));
       });
       tool.execute(task);
-    } else if (span.equals(MONTHLY)) {
-      TableColumn<PurchaseSummaryFX, String> s = new TableColumn<>("Span");
-      s.setCellValueFactory(e -> e.getValue().getSpan());
-
-      TableColumn<PurchaseSummaryFX, String> t = new TableColumn<>("Total");
-      t.setCellValueFactory(e -> e.getValue().getAmount());
-
-
-      dataTable.getColumns().addAll(s,
-                                    t);
-      TaskTool<List<PurchaseSummaryFX>> tool = new TaskTool<>();
-      Task<List<PurchaseSummaryFX>> task = tool.createTask(() -> purchaseHandler.getMonthlyPurchaseSummary());
-      task.setOnSucceeded(e -> dataTable.setItems(FXCollections.observableList(task.getValue())));
-      tool.execute(task);
     }
+
 
   }
 
@@ -266,6 +276,8 @@ public class CashSummaryPresenter implements Initializable {
     String span = spanSelector.getValue();
     Task<List<Cash>> task = tool.createTask(() -> span.equals(DAILY)
         ? cashHandler.getCash()
+        : span.equals(TODAY)
+        ? cashHandler.getCash().stream().filter(c -> c.getDate().equals(LocalDate.now().toString())).collect(Collectors.toList())
         : cashHandler.getMonthlyCash());
     task.setOnSucceeded(e -> {
       Stream<Cash> cashStream = task.getValue().stream();
@@ -276,12 +288,18 @@ public class CashSummaryPresenter implements Initializable {
 
   }
 
-  private void fillDataSelector() {
-    List<String> options = new ArrayList<>();
-    options.add(SELECT_SALES);
-    options.add(SELECT_PURCHASES);
-    options.add(SELECT_OVERALL);
-    dataSelector.setItems(FXCollections.observableList(options));
+  @FXML
+  public void saveChanges() {
+    String capital = capitalTextBox.getText();
+    Cash cash = cashHandler.today();
+    cash.setCapital(capital);
+    TaskTool<Cash> tool = new TaskTool<>();
+    Task<Cash> task = tool.createTask(() -> {
+      cashHandler.sendCash(cash);
+      setDailies();
+      return null;
+    });
+    tool.execute(task);
   }
 
 
@@ -301,7 +319,10 @@ public class CashSummaryPresenter implements Initializable {
   */
   private void setDailies() {
     TaskTool<Cash> tool = new TaskTool<>();
-    Task<Cash> task = tool.createTask(() -> cashHandler.today());
+    Task<Cash> task = tool.createTask(() -> {
+      loadingLabel.setVisible(true);
+      return cashHandler.today();
+    });
     task.setOnSucceeded(e -> {
       Cash cash = task.getValue();
       capitalTextBox.setText(cash.getCapital());
@@ -309,6 +330,7 @@ public class CashSummaryPresenter implements Initializable {
       purchasesTextBox.setText(cash.getPurchases());
       expensesTextBox.setText(cash.getExpenses());
       cashOnHandTextBox.setText(cash.getCashOnHand());
+      loadingLabel.setVisible(false);
     });
     tool.execute(task);
   }
@@ -333,24 +355,64 @@ public class CashSummaryPresenter implements Initializable {
       });
       tool.execute(task);
     }*/
-  @FXML
-  public void saveChanges() {
-    String capital = capitalTextBox.getText();
-    Cash cash = cashHandler.today();
-    cash.setCapital(capital);
-    TaskTool<Cash> tool = new TaskTool<>();
-    Task<Cash> task = tool.createTask(() -> {
-      cashHandler.sendCash(cash);
-      setDailies();
-      return null;
-    });
-    tool.execute(task);
-  }
-
   private void setExpensesTable() {
-    loadingLabel.setVisible(true);
+    String span = expenseSpan.getValue();
+    expensesTable.setItems(null);
+    expensesTable.getColumns().clear();
+    switch (span) {
+      case DAILY: {
+
+        TableColumn<ExpenseFX, String> expense = new TableColumn<>("Expense");
+        expense.setCellValueFactory(e -> e.getValue().getName());
+
+        TableColumn<ExpenseFX, String> date = new TableColumn<>("Date");
+        date.setCellValueFactory(e -> e.getValue().getDate());
+
+        TableColumn<ExpenseFX, String> amount = new TableColumn<>("Amount");
+        amount.setCellValueFactory(e -> e.getValue().getAmount());
+
+
+        expensesTable.getColumns().addAll(date,
+                                          expense,
+                                          amount);
+        break;
+      }
+      case MONTHLY: {
+
+        TableColumn<ExpenseFX, String> date = new TableColumn<>("Month");
+        date.setCellValueFactory(e -> e.getValue().getDate());
+
+        TableColumn<ExpenseFX, String> amount = new TableColumn<>("Amount");
+        amount.setCellValueFactory(e -> e.getValue().getAmount());
+
+
+        expensesTable.getColumns().addAll(date,
+                                          amount);
+        break;
+      }
+      case TODAY: {
+        TableColumn<ExpenseFX, String> expense = new TableColumn<>("Expense");
+        expense.setCellValueFactory(e -> e.getValue().getName());
+
+        TableColumn<ExpenseFX, String> amount = new TableColumn<>("Amount");
+        amount.setCellValueFactory(e -> e.getValue().getAmount());
+
+        expensesTable.getColumns().addAll(expense,
+                                          amount);
+        break;
+      }
+    }
     TaskTool<List<Expense>> tool = new TaskTool<>();
-    Task<List<Expense>> task = tool.createTask(this::getExpenses);
+    Task<List<Expense>> task = tool.createTask(() -> {
+      loadingLabel.setVisible(true);
+      return span.equals(DAILY)
+          ? getExpenses()
+          : span.equals(MONTHLY)
+          ? expenseHandler.getMonthlyExpenses()
+          : getExpenses().stream()
+          .filter(e -> e.getDate().equals(LocalDate.now().toString()))
+          .collect(Collectors.toList());
+    });
     task.setOnSucceeded(e -> {
       Stream<Expense> expenseStream = task.getValue()
           .stream();
@@ -358,6 +420,7 @@ public class CashSummaryPresenter implements Initializable {
           .map(ExpenseFX::new)
           .collect(Collectors.toList());
       expensesTable.setItems(FXCollections.observableList(expenses));
+      setDailies();
       loadingLabel.setVisible(false);
 //      setAmounts();
     });
@@ -370,13 +433,46 @@ public class CashSummaryPresenter implements Initializable {
     String amount = expenseAmountTextBox.getText();
     TaskTool<Object> tool = new TaskTool<>();
     Task<Object> task = tool.createTask(() -> {
+      loadingLabel.setVisible(true);
       expenseHandler.sendExpense(new Expense(name, noteTextbox.getText(), amount));
       clearData();
-      setExpensesTable();
-      setDailies();
       return null;
     });
+    task.setOnSucceeded(e -> {
+      setExpensesTable();
+      System.out.println("arE?");
+      saveChanges();
+    });
     tool.execute(task);
+  }
+
+  @FXML
+  public void deleteExpense() {
+    List<Expense> selectedItem = expensesTable.getSelectionModel().getSelectedItems()
+        .stream()
+        .map(Expense::new)
+        .collect(Collectors.toList());
+    if (selectedItem.size() > 0) {
+      TaskTool<Object> tool = new TaskTool<>();
+      Task<Object> task = tool.createTask(() -> {
+        loadingLabel.setVisible(true);
+        expenseHandler.deleteExpense(selectedItem);
+        return null;
+      });
+      task.setOnSucceeded(e -> {
+        setExpensesTable();
+        saveChanges();
+      });
+      tool.execute(task);
+    }
+  }
+
+  private void fillDataSelector() {
+    List<String> options = new ArrayList<>();
+    options.add(SELECT_SALES);
+    options.add(SELECT_PURCHASES);
+    options.add(SELECT_OVERALL);
+    dataSelector.setItems(FXCollections.observableList(options));
   }
 
   private void clearData() {
@@ -390,22 +486,8 @@ public class CashSummaryPresenter implements Initializable {
     options.add(DAILY);
     options.add(MONTHLY);
     spanSelector.setItems(FXCollections.observableList(options));
-  }
-
-  @FXML
-  public void deleteExpense() {
-    ExpenseFX selectedItem = expensesTable.getSelectionModel().getSelectedItem();
-    if (selectedItem != null) {
-      Expense expense = new Expense(selectedItem);
-      TaskTool<Object> tool = new TaskTool<>();
-      Task<Object> task = tool.createTask(() -> {
-        expenseHandler.deleteExpense(expense);
-        setExpensesTable();
-        setDailies();
-        return null;
-      });
-      tool.execute(task);
-    }
+    options.add(TODAY);
+    expenseSpan.setItems(FXCollections.observableList(options));
   }
 
   @FXML
@@ -482,28 +564,35 @@ public class CashSummaryPresenter implements Initializable {
     });
   }
 
-  private double getTotalExpenses() {
-    return getExpenses()
-        .stream()
-        .mapToDouble(value -> Double.valueOf(value.getAmount()))
-        .sum();
-  }
-
   private List<Expense> getExpenses() {
     return expenseHandler.getExpenses();
   }
 
-  private double getTotalSales() {
-    return salesMan.getSales()
-        .stream()
-        .mapToDouble(value -> Double.valueOf(value.getSales()))
-        .sum();
+
+  @FXML
+  public void printExpenses() {
+    List<String> lines = new ArrayList<>();
+    lines.add("Steelman Junkshop\n");
+    lines.add("Expenses\n");
+    lines.add("Date: " + LocalDate.now().toString() + "\n");
+    expensesTable.getItems().forEach(expense -> {
+      lines.add(expense.getDate().get() + "\n");
+      lines.add(expense.getName().get() + "\n");
+      if (expense.getNote() != null)
+        lines.add(expense.getNote().get() + "\n");
+      lines.add(UITools.PESO + " " + expense.getAmount().get() + "\n");
+      lines.add("-------\n");
+    });
+    lines.add("Total: " + UITools.PESO + " " + expensesTable.getItems().stream()
+        .mapToDouble(ex -> Double.valueOf(ex.getAmount().get()))
+        .sum());
+    PrintUtil.print(lines);
   }
 
-  private double getTotalPurchases() {
-    return purchaseHandler.getJunk()
-        .stream()
-        .mapToDouble(value -> Double.valueOf(value.getPrice()) * Double.valueOf(value.getWeight()))
-        .sum();
+  @FXML
+  public void showExpenses() {
+    String value = expenseSpan.getValue();
+    deleteExpenseButton.setDisable(value.equals(MONTHLY));
+    setExpensesTable();
   }
 }

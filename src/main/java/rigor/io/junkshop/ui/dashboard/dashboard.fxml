@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.*?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
@@ -16,6 +16,7 @@
         </columnConstraints>
         <rowConstraints>
           <RowConstraints maxHeight="96.0" minHeight="10.0" prefHeight="79.0" vgrow="NEVER"/>
+          <RowConstraints maxHeight="95.0" minHeight="10.0" prefHeight="45.0" vgrow="NEVER"/>
           <RowConstraints maxHeight="95.0" minHeight="10.0" prefHeight="45.0" vgrow="NEVER"/>
           <RowConstraints maxHeight="95.0" minHeight="10.0" prefHeight="45.0" vgrow="NEVER"/>
           <RowConstraints maxHeight="95.0" minHeight="10.0" prefHeight="45.0" vgrow="NEVER"/>
@@ -44,15 +45,22 @@
             <Font name="System Bold" size="18.0"/>
           </font>
         </JFXButton>
-        <JFXButton mnemonicParsing="false" onAction="#viewCashSummary" prefHeight="60.0" prefWidth="193.0"
-                   style="-fx-background-color: #2E7D32;" text="Cash Summary" textFill="WHITE" GridPane.hgrow="NEVER"
+        <JFXButton mnemonicParsing="false" onAction="#viewClients" prefHeight="60.0" prefWidth="193.0"
+                   style="-fx-background-color: #2E7D32;" text="Clients" textFill="WHITE" GridPane.hgrow="NEVER"
                    GridPane.rowIndex="3" GridPane.valignment="TOP" GridPane.vgrow="NEVER">
           <font>
             <Font name="System Bold" size="18.0"/>
           </font>
         </JFXButton>
+        <JFXButton mnemonicParsing="false" onAction="#viewCashSummary" prefHeight="60.0" prefWidth="193.0"
+                   style="-fx-background-color: #2E7D32;" text="Cash Summary" textFill="WHITE" GridPane.hgrow="NEVER"
+                   GridPane.rowIndex="4" GridPane.valignment="TOP" GridPane.vgrow="NEVER">
+          <font>
+            <Font name="System Bold" size="18.0"/>
+          </font>
+        </JFXButton>
         <JFXButton mnemonicParsing="false" onAction="#viewSettings" prefHeight="60.0" prefWidth="193.0"
-                   style="-fx-background-color: #2E7D32;" text="Settings" textFill="WHITE" GridPane.rowIndex="4">
+                   style="-fx-background-color: #2E7D32;" text="Settings" textFill="WHITE" GridPane.rowIndex="5">
           <font>
             <Font name="System Bold" size="18.0"/>
           </font>

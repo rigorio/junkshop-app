@@ -2,9 +2,26 @@
 
 <?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane prefHeight="550" prefWidth="825" xmlns="http://javafx.com/javafx/8.0.999-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.ui.settings.SettingsPresenter">
-  <JFXTextField fx:id="hostTextBox" layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="425.0" />
-   <JFXButton layoutX="458.0" layoutY="14.0" mnemonicParsing="false" onAction="#updateHost" text="Update" />
+  <JFXTextField fx:id="hostTextBox" layoutX="14.0" layoutY="39.0" prefHeight="25.0" prefWidth="425.0" />
+   <JFXButton layoutX="458.0" layoutY="39.0" mnemonicParsing="false" onAction="#updateHost" text="Update" />
+   <JFXTextField fx:id="contactText" layoutX="14.0" layoutY="108.0" prefHeight="37.0" prefWidth="179.0" promptText="Contact...">
+      <font>
+         <Font size="16.0" />
+      </font>
+   </JFXTextField>
+   <JFXButton layoutX="193.0" layoutY="108.0" mnemonicParsing="false" onAction="#updateContact" text="Update Contact">
+      <font>
+         <Font size="16.0" />
+      </font>
+   </JFXButton>
+   <Label layoutX="14.0" layoutY="84.0" text="Receipt Contact">
+      <font>
+         <Font size="16.0" />
+      </font>
+   </Label>
 </AnchorPane>

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ExpenseHandler {
 
@@ -34,6 +35,33 @@ public class ExpenseHandler {
     return expenses;
   }
 
+  public List<Expense> getMonthlyExpenses() {
+    List<Expense> expenses = getExpenses();
+    List<Expense> monthlyExpenses = new ArrayList<>();
+    for (Expense expense : expenses) {
+      LocalDate date = LocalDate.parse(expense.getDate());
+      String span = date.getMonth() + " " + date.getYear();
+      Optional<Expense> any = monthlyExpenses.stream()
+          .filter(monthlyExpense -> monthlyExpense.getDate().equals(span))
+          .findAny();
+      Expense monthlyExpense;
+      if (any.isPresent()) {
+        monthlyExpense = any.get();
+        monthlyExpense.setAmount(futarini(monthlyExpense.getAmount(), expense.getAmount()));
+      } else {
+        monthlyExpense = new Expense();
+        monthlyExpense.setDate(span);
+        monthlyExpense.setAmount(expense.getAmount());
+        monthlyExpenses.add(monthlyExpense);
+      }
+    }
+    return monthlyExpenses;
+  }
+
+  public String futarini(String s1, String s2) {
+    return "" + ((s1 != null ? Double.valueOf(s1) : 0.0d) + (s2 != null ? Double.valueOf(s2) : 0.0d));
+  }
+
   public void sendExpense(Expense expense) {
     OkHttpClient client = new OkHttpClient();
     try {
@@ -53,10 +81,11 @@ public class ExpenseHandler {
     }
   }
 
-  public void deleteExpense(Expense expense) {
+  public void deleteExpense(List<Expense> expense) {
     OkHttpClient client = new OkHttpClient();
     try {
       String jsonString = new ObjectMapper().writeValueAsString(expense);
+      System.out.println(jsonString);
       RequestBody reqBody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
           .url(URL)
@@ -65,8 +94,10 @@ public class ExpenseHandler {
       Call call = client.newCall(request);
       Expense expenses = new Expense();
       ResponseBody body = call.execute().body();
-      String string = body.string();
-      expenses = new ObjectMapper().readValue(string, new TypeReference<Expense>() {});
+      if (body != null) {
+        String string = body.string();
+        expenses = new ObjectMapper().readValue(string, new TypeReference<Expense>() {});
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }

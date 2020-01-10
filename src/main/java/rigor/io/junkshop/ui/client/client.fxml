@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="550" prefWidth="825.0" style="-fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/8.0.999-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.ui.client.ClientPresenter">
+  <BorderPane prefHeight="550" prefWidth="730.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <top>
+      <BorderPane prefHeight="290.0" prefWidth="842.0" BorderPane.alignment="CENTER">
+        <right>
+          <VBox alignment="TOP_RIGHT" prefHeight="290.0" prefWidth="349.0" BorderPane.alignment="CENTER">
+            <padding>
+              <Insets right="10.0" top="10.0" />
+            </padding>
+            <Hyperlink fx:id="addClientLink" onAction="#addClient" text="+ Add Client">
+              <font>
+                <Font size="16.0" />
+              </font>
+            </Hyperlink>
+            <JFXComboBox fx:id="clientBox" onAction="#selectClient" prefWidth="150.0" />
+            <HBox alignment="TOP_RIGHT" prefHeight="46.0" prefWidth="339.0">
+              <Label fx:id="cashAdvanceLabel" text="Cash Advance Balance: ₱">
+                <font>
+                  <Font name="System Italic" size="16.0" />
+                </font>
+                <HBox.margin>
+                  <Insets right="2.0" top="6.0" />
+                </HBox.margin>
+              </Label>
+              <JFXTextField fx:id="cashAdvanceAmount" prefHeight="37.0" prefWidth="150.0" text="0.0">
+                <font>
+                  <Font size="16.0" />
+                </font>
+              </JFXTextField>
+            </HBox>
+            <JFXButton fx:id="addCashButton" mnemonicParsing="false" onAction="#addCash" prefHeight="30.0" prefWidth="145.0" style="-fx-background-color: #8BC34A;" text="Add Cash Advance" textFill="WHITE">
+              <font>
+                <Font name="System Bold" size="14.0" />
+              </font>
+              <VBox.margin>
+                <Insets top="10.0" />
+              </VBox.margin>
+            </JFXButton>
+            <JFXButton fx:id="payCashButton" mnemonicParsing="false" onAction="#payCash" prefHeight="30.0" prefWidth="145.0" style="-fx-background-color: #FF3D00;" text="Pay Cash Advance" textFill="WHITE">
+              <font>
+                <Font name="System Bold" size="14.0" />
+              </font>
+              <VBox.margin>
+                <Insets top="10.0" />
+              </VBox.margin>
+            </JFXButton>
+          </VBox>
+        </right>
+        <left>
+          <AnchorPane prefHeight="290.0" prefWidth="482.0" BorderPane.alignment="CENTER">
+            <JFXTextField fx:id="nameText" layoutX="14.0" layoutY="14.0" prefHeight="37.0" prefWidth="400.0" promptText="Name">
+              <font>
+                <Font name="System Bold" size="16.0" />
+              </font>
+            </JFXTextField>
+            <JFXTextField fx:id="contactText" layoutX="14.0" layoutY="51.0" prefHeight="37.0" prefWidth="400.0" promptText="Contact">
+              <font>
+                <Font size="16.0" />
+              </font>
+            </JFXTextField>
+            <JFXTextField fx:id="addressText" layoutX="14.0" layoutY="88.0" prefHeight="37.0" prefWidth="400.0" promptText="Address">
+              <font>
+                <Font size="16.0" />
+              </font>
+            </JFXTextField>
+            <Label fx:id="purchasesLabel" layoutX="14.0" layoutY="188.0" text="Total Purchases" />
+            <Label fx:id="salesLabel" layoutX="194.0" layoutY="188.0" text="Total Sales" />
+            <JFXTextField fx:id="purchasesText" layoutX="14.0" layoutY="205.0" prefHeight="37.0" prefWidth="150.0">
+              <font>
+                <Font size="16.0" />
+              </font>
+            </JFXTextField>
+            <JFXTextField fx:id="salesText" layoutX="194.0" layoutY="205.0" prefHeight="37.0" prefWidth="150.0">
+              <font>
+                <Font size="16.0" />
+              </font>
+            </JFXTextField>
+            <JFXComboBox fx:id="tableSelector" layoutX="14.0" layoutY="252.0" onAction="#changeTable" prefWidth="150.0" />
+            <JFXComboBox fx:id="spanSelector" layoutX="194.0" layoutY="252.0" onAction="#changeSpan" prefWidth="150.0" />
+            <JFXButton fx:id="saveChangesButton" layoutX="14.0" layoutY="145.0" mnemonicParsing="false" onAction="#saveChanges" prefHeight="30.0" prefWidth="150.0" style="-fx-background-color: #8BC34A;" text="Save changes" textFill="WHITE">
+              <font>
+                <Font name="System Bold" size="14.0" />
+              </font>
+            </JFXButton>
+            <JFXButton fx:id="deleteButton" layoutX="194.0" layoutY="145.0" mnemonicParsing="false" onAction="#deleteClient" prefHeight="30.0" prefWidth="145.0" style="-fx-background-color: #FF3D00;" text="Delete Client" textFill="WHITE">
+              <font>
+                <Font name="System Bold" size="14.0" />
+              </font>
+            </JFXButton>
+          </AnchorPane>
+        </left>
+      </BorderPane>
+    </top>
+    <center>
+      <TableView fx:id="dataTable" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <padding>
+          <Insets bottom="10.0" left="10.0" right="10.0" />
+        </padding>
+      </TableView>
+    </center>
+  </BorderPane>
+
+</AnchorPane>

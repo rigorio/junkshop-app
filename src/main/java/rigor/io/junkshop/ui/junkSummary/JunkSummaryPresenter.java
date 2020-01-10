@@ -98,6 +98,6 @@ public class JunkSummaryPresenter implements Initializable {
 
 
   private List<Junk> getAllJunk() {
-    return purchaseHandler.getJunk();
+    return purchaseHandler.getJunk(null);
   }
 }

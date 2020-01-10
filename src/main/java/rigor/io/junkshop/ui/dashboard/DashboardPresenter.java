@@ -1,15 +1,21 @@
 package rigor.io.junkshop.ui.dashboard;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.layout.AnchorPane;
+import rigor.io.junkshop.printing.PrintUtil;
 import rigor.io.junkshop.ui.cashSummary.CashSummaryView;
+import rigor.io.junkshop.ui.client.ClientView;
 import rigor.io.junkshop.ui.sales.SalesView;
 import rigor.io.junkshop.ui.purchases.PurchasesView;
 import rigor.io.junkshop.ui.settings.SettingsView;
 
 import java.net.URL;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class DashboardPresenter implements Initializable {
@@ -52,4 +58,7 @@ public class DashboardPresenter implements Initializable {
     updateDynamicPaneContent(new SettingsView().getView());
   }
 
+  public void viewClients() {
+    updateDynamicPaneContent(new ClientView().getView());
+  }
 }

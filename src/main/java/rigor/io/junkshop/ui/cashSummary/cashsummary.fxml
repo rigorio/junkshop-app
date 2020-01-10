@@ -19,50 +19,51 @@
                 <Font name="System Bold" size="16.0"/>
               </font>
             </Label>
-            <Label layoutX="228.0" layoutY="54.0" text="Sales:">
+            <Label layoutX="158.0" layoutY="53.0" text="Sales:">
               <font>
                 <Font name="System Bold" size="16.0"/>
               </font>
             </Label>
-            <Label layoutX="359.0" layoutY="54.0" text="Purchases:">
+            <Label layoutX="289.0" layoutY="53.0" text="Purchases:">
               <font>
                 <Font name="System Bold" size="16.0"/>
               </font>
             </Label>
-            <Label layoutX="489.0" layoutY="54.0" text="Expenses:">
+            <Label layoutX="419.0" layoutY="53.0" text="Expenses:">
               <font>
                 <Font name="System Bold" size="16.0"/>
               </font>
             </Label>
-            <JFXTextField fx:id="capitalTextBox" layoutX="14.0" layoutY="88.0" prefHeight="37.0" prefWidth="120.0">
-              <font>
-                <Font size="16.0"/>
-              </font>
-            </JFXTextField>
-            <JFXTextField fx:id="salesTextBox" editable="false" layoutX="229.0" layoutY="88.0" prefHeight="37.0"
+            <JFXTextField fx:id="capitalTextBox" editable="false" layoutX="14.0" layoutY="88.0" prefHeight="37.0"
                           prefWidth="120.0">
               <font>
                 <Font size="16.0"/>
               </font>
             </JFXTextField>
-            <JFXTextField fx:id="purchasesTextBox" editable="false" layoutX="360.0" layoutY="88.0" prefHeight="37.0"
+            <JFXTextField fx:id="salesTextBox" editable="false" layoutX="159.0" layoutY="87.0" prefHeight="37.0"
                           prefWidth="120.0">
               <font>
                 <Font size="16.0"/>
               </font>
             </JFXTextField>
-            <JFXTextField fx:id="expensesTextBox" editable="false" layoutX="489.0" layoutY="88.0" prefHeight="37.0"
+            <JFXTextField fx:id="purchasesTextBox" editable="false" layoutX="290.0" layoutY="87.0" prefHeight="37.0"
                           prefWidth="120.0">
               <font>
                 <Font size="16.0"/>
               </font>
             </JFXTextField>
-            <Label layoutX="619.0" layoutY="54.0" text="Cash On-Hand:">
+            <JFXTextField fx:id="expensesTextBox" editable="false" layoutX="419.0" layoutY="87.0" prefHeight="37.0"
+                          prefWidth="120.0">
+              <font>
+                <Font size="16.0"/>
+              </font>
+            </JFXTextField>
+            <Label layoutX="549.0" layoutY="53.0" text="Cash On-Hand:">
               <font>
                 <Font name="System Bold" size="16.0"/>
               </font>
             </Label>
-            <JFXTextField fx:id="cashOnHandTextBox" editable="false" layoutX="619.0" layoutY="88.0" prefHeight="37.0"
+            <JFXTextField fx:id="cashOnHandTextBox" editable="false" layoutX="549.0" layoutY="87.0" prefHeight="37.0"
                           prefWidth="119.0">
               <font>
                 <Font size="16.0"/>
@@ -73,9 +74,8 @@
                 <Font name="System Italic" size="18.0"/>
               </font>
             </Label>
-            <JFXButton layoutX="90.0" layoutY="39.0" mnemonicParsing="false" onAction="#addCapital"
-                       prefHeight="29.0" prefWidth="44.0" style="-fx-background-color: #8BC34A;" text="Add"
-                       textFill="WHITE">
+            <JFXButton layoutX="90.0" layoutY="39.0" mnemonicParsing="false" onAction="#addCapital" prefHeight="29.0"
+                       prefWidth="44.0" style="-fx-background-color: #8BC34A;" text="Add" textFill="WHITE">
               <font>
                 <Font name="System Bold" size="13.0"/>
               </font>
@@ -152,6 +152,13 @@
                 <Font size="16.0"/>
               </font>
             </Label>
+            <JFXComboBox fx:id="expenseSpan" layoutX="152.0" layoutY="130.0" onAction="#showExpenses" prefHeight="29.0"
+                         prefWidth="137.0"/>
+            <Hyperlink fx:id="printLink" layoutX="320.0" layoutY="13.0" onAction="#printExpenses" text="Print">
+              <font>
+                <Font size="16.0"/>
+              </font>
+            </Hyperlink>
           </AnchorPane>
         </top>
       </BorderPane>

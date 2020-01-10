@@ -19,6 +19,7 @@ public class Sale {
   private List<SaleItem> saleItems;
   private String totalPrice;
   private String date;
+  private String clientId;
 
   public Sale(SaleFX sale) {
     StringProperty id = sale.getId();

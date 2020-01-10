@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 import rigor.io.junkshop.config.Configurations;
 import rigor.io.junkshop.models.junk.junklist.JunkList;
 import rigor.io.junkshop.models.junk.junklist.PurchaseFX;
@@ -63,8 +64,11 @@ public class PurchaseHandler {
     }
   }
 
-  public List<Junk> getJunk() {
+  public List<Junk> getJunk(String clientId) {
     OkHttpClient client = new OkHttpClient();
+    if (clientId != null) {
+      URL += "?clientId=" + clientId;
+    }
     Request request = new Request.Builder()
         .url(URL)
         .build();
@@ -81,7 +85,11 @@ public class PurchaseHandler {
   }
 
   public List<PurchaseSummaryFX> getMonthlyPurchaseSummary() {
-    List<Junk> junkList = getJunk();
+    List<Junk> junkList = getJunk(null);
+    return getMonthlies(junkList);
+  }
+
+  public List<PurchaseSummaryFX> getMonthlies(List<Junk> junkList) {
     List<PurchaseSummaryFX> fxList = new ArrayList<>();
     for (Junk junk : junkList) {
       LocalDate date = LocalDate.parse(junk.getDate());

@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import rigor.io.junkshop.models.junk.Junk;
 import rigor.io.junkshop.models.junk.JunkFX;
 
 import java.util.List;
@@ -22,6 +21,7 @@ public class PurchaseFX {
   private List<JunkFX> purchaseItems;
   private StringProperty totalPrice;
   private StringProperty date;
+  private StringProperty clientId;
 
   public PurchaseFX(JunkList purchase) {
     String id = purchase.getId();
@@ -37,5 +37,8 @@ public class PurchaseFX {
 
     String date = purchase.getDate();
     this.date = date != null ? new SimpleStringProperty(date) : null;
+
+    String clientId = purchase.getClientId();
+    this.clientId = clientId != null ? new SimpleStringProperty(clientId) : null;
   }
 }

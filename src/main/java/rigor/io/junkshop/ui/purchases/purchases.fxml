@@ -18,35 +18,35 @@
   <BorderPane prefHeight="550" prefWidth="640" style="-fx-background-color: #ffffff;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
     <left>
       <BorderPane prefHeight="550.0" prefWidth="188.0" BorderPane.alignment="CENTER">
-            <center>
+        <center>
           <AnchorPane prefHeight="550.0" prefWidth="318.0" style="-fx-background-color: #ffffff;" BorderPane.alignment="CENTER">
-            <JFXComboBox fx:id="materialBox" layoutX="14.0" layoutY="57.0" onAction="#selectMaterial" prefHeight="40.0" prefWidth="150.0" promptText="Choose Material" />
-            <JFXTextField fx:id="priceText" layoutX="14.0" layoutY="171.0" prefHeight="40.0" prefWidth="80.0" promptText="Price...">
+            <JFXComboBox fx:id="materialBox" layoutX="19.0" layoutY="55.0" onAction="#selectMaterial" prefHeight="40.0" prefWidth="150.0" promptText="Select Material" />
+            <JFXTextField fx:id="priceText" layoutX="19.0" layoutY="246.0" prefHeight="40.0" prefWidth="80.0" promptText="Price...">
               <font>
                 <Font size="16.0" />
               </font>
             </JFXTextField>
-            <JFXTextField fx:id="weightText" layoutX="14.0" layoutY="242.0" prefHeight="40.0" prefWidth="80.0" promptText="Weight...">
+            <JFXTextField fx:id="weightText" layoutX="19.0" layoutY="174.0" prefHeight="40.0" prefWidth="80.0" promptText="Weight...">
               <font>
                 <Font size="16.0" />
               </font>
             </JFXTextField>
-            <JFXButton layoutX="18.0" layoutY="414.0" mnemonicParsing="false" onAction="#addItem" prefHeight="37.0" prefWidth="58.0" style="-fx-background-color: #8BC34A;" text="Add" textFill="WHITE">
+            <JFXButton layoutX="23.0" layoutY="412.0" mnemonicParsing="false" onAction="#addItem" prefHeight="37.0" prefWidth="58.0" style="-fx-background-color: #8BC34A;" text="Add" textFill="WHITE">
               <font>
                 <Font name="System Bold" size="16.0" />
               </font>
             </JFXButton>
-            <Label layoutX="14.0" layoutY="32.0" text="Material">
+            <Label layoutX="19.0" layoutY="30.0" text="Material">
               <font>
                 <Font name="System Bold" size="16.0" />
               </font>
             </Label>
-            <Label layoutX="14.0" layoutY="146.0" text="Price">
+            <Label layoutX="19.0" layoutY="221.0" text="Price">
               <font>
                 <Font name="System Bold" size="16.0" />
               </font>
             </Label>
-            <Label layoutX="14.0" layoutY="217.0" text="Weight">
+            <Label layoutX="19.0" layoutY="149.0" text="Weight">
               <font>
                 <Font name="System Bold" size="16.0" />
               </font>
@@ -56,28 +56,28 @@
                 <Font name="System Italic" size="17.0" />
               </font>
             </Label>
-            <Label layoutX="14.0" layoutY="294.0" text="Note">
+            <Label layoutX="19.0" layoutY="292.0" text="Note">
               <font>
                 <Font name="System Bold" size="16.0" />
               </font>
             </Label>
-            <JFXTextArea fx:id="noteTextBox" layoutX="14.0" layoutY="320.0" prefHeight="80.0" prefWidth="150.0" promptText="Note...">
+            <JFXTextArea fx:id="noteTextBox" layoutX="19.0" layoutY="318.0" prefHeight="80.0" prefWidth="150.0" promptText="Note...">
               <font>
                 <Font size="16.0" />
               </font>
             </JFXTextArea>
-            <JFXTextField fx:id="otherTextBox" layoutX="14.0" layoutY="102.0" prefHeight="37.0" prefWidth="150.0" promptText="Other...">
+            <JFXTextField fx:id="otherTextBox" layoutX="19.0" layoutY="100.0" prefHeight="37.0" prefWidth="150.0" promptText="Other...">
               <font>
                 <Font size="16.0" />
               </font>
             </JFXTextField>
-                  <JFXButton layoutX="89.0" layoutY="414.0" mnemonicParsing="false" onAction="#deleteItem" prefHeight="37.0" prefWidth="76.0" style="-fx-background-color: #FF3D00;" text="Delete" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="16.0" />
-                     </font>
-                  </JFXButton>
+            <JFXButton layoutX="94.0" layoutY="412.0" mnemonicParsing="false" onAction="#deleteItem" prefHeight="37.0" prefWidth="76.0" style="-fx-background-color: #FF3D00;" text="Delete" textFill="WHITE">
+              <font>
+                <Font name="System Bold" size="16.0" />
+              </font>
+            </JFXButton>
           </AnchorPane>
-            </center>
+        </center>
       </BorderPane>
     </left>
     <center>
@@ -93,12 +93,18 @@
           </TableView>
         </center>
         <top>
-          <BorderPane prefHeight="81.0" prefWidth="570.0" BorderPane.alignment="CENTER">
+          <BorderPane prefHeight="139.0" prefWidth="637.0" BorderPane.alignment="CENTER">
             <left>
-              <VBox alignment="BOTTOM_LEFT" prefHeight="76.0" prefWidth="211.0" BorderPane.alignment="CENTER">
+              <VBox alignment="BOTTOM_LEFT" prefHeight="120.0" prefWidth="211.0" BorderPane.alignment="CENTER">
                 <BorderPane.margin>
                   <Insets bottom="10.0" />
                 </BorderPane.margin>
+                  <Label text="Client">
+                    <font>
+                      <Font name="System Bold" size="16.0" />
+                    </font>
+                  </Label>
+                  <JFXComboBox fx:id="clientBox" prefHeight="39.0" prefWidth="173.0" promptText="Select client" />
                 <Label text="Receipt Number:">
                   <font>
                     <Font name="System Bold" size="16.0" />

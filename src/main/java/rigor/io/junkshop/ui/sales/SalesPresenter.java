@@ -1,5 +1,7 @@
 package rigor.io.junkshop.ui.sales;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextArea;
@@ -10,6 +12,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.util.Callback;
+import rigor.io.junkshop.cache.PublicCache;
+import rigor.io.junkshop.models.client.Client;
+import rigor.io.junkshop.models.client.ClientHandler;
 import rigor.io.junkshop.models.materials.Material;
 import rigor.io.junkshop.models.materials.MaterialsProvider;
 import rigor.io.junkshop.models.sale.Sale;
@@ -22,17 +28,15 @@ import rigor.io.junkshop.utils.GuiManager;
 import rigor.io.junkshop.utils.TaskTool;
 import rigor.io.junkshop.utils.UITools;
 
+import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SalesPresenter implements Initializable {
 
+  public JFXComboBox<Client> clientBox;
   @FXML
   private JFXTextField otherText;
   @FXML
@@ -45,8 +49,6 @@ public class SalesPresenter implements Initializable {
   private JFXTextField receiptNumber;
   @FXML
   private Label totalTextbox;
-  @FXML
-  private Label date;
   @FXML
   private Label loadingLabel;
   @FXML
@@ -68,14 +70,18 @@ public class SalesPresenter implements Initializable {
 
   private List<SaleItemFX> purchaseItemList = new ArrayList<>();
   private MaterialsProvider materialsProvider;
+  private ClientHandler clientHandler;
 
   public SalesPresenter() {
     saleHandler = new SaleHandler();
     materialsProvider = new MaterialsProvider();
+    clientHandler = new ClientHandler();
   }
 
   @Override
   public void initialize(URL location, ResourceBundle resources) {
+    customClientCellFactory();
+
     TableColumn<SaleItemFX, String> material = new TableColumn<>("Material");
     material.setCellValueFactory(e -> e.getValue().getMaterial());
 
@@ -100,7 +106,6 @@ public class SalesPresenter implements Initializable {
     fillMaterialBox();
     UITools.numberOnlyTextField(weightText);
     UITools.numberOnlyTextField(priceText);
-    date.setText(LocalDate.now().toString());
     totalTextbox.setText("₱ 0.0");
   }
 
@@ -175,7 +180,7 @@ public class SalesPresenter implements Initializable {
 
   @FXML
   public void purchaseItems() {
-    if ( purchaseTable.getItems().isEmpty()) {
+    if (purchaseTable.getItems().isEmpty()) {
       Alert alert = new Alert(Alert.AlertType.WARNING);
       alert.setTitle("No items found");
       alert.setHeaderText("Add items to the table/list");
@@ -204,27 +209,37 @@ public class SalesPresenter implements Initializable {
 
       List<String> lines = new ArrayList<>();
       lines.add("Steelman Junkshop\n");
+      lines.add(PublicCache.getContact() + "\n");
       lines.add("Sales\n");
       lines.add("Receipt #: " + receiptNumber.getText() + "\n");
-      lines.add("Date: " + date.getText() + "\n");
+      lines.add("Date: " + LocalDate.now().toString() + "\n");
       lines.add("Items:" + "\n");
 
 
       for (SaleItem purchaseItem : saleItems) {
-        lines.add(purchaseItem.getMaterial());
-        lines.add(purchaseItem.getNote());
+        lines.add(purchaseItem.getMaterial() + "\n");
+        lines.add(purchaseItem.getNote() + "\n");
         lines.add(purchaseItem.getWeight() + "kg * ₱" + purchaseItem.getPrice() + " = ₱" + purchaseItem.getTotalPrice() + "\n");
       }
       lines.add("GRAND TOTAL: ₱ " + totalPrice);
-
+      Client client = clientBox.getValue();
       Sale sale = Sale.builder()
           .receiptNumber(receiptNumber.getText())
           .saleItems(saleItems)
+          .clientId(client.getId())
           .date(LocalDate.now().toString())
           .totalPrice("" + totalPrice)
           .build();
       saleHandler.sendPurchase(sale);
-      PrintUtil.print(lines);
+      try {
+        PrintUtil.print(lines);
+        Thread.sleep(3500L);
+        PrintUtil.print(lines);
+        Thread.sleep(3500L);
+        PrintUtil.print(lines);
+      } catch (InterruptedException ex) {
+        ex.printStackTrace();
+      }
       return null;
     });
     task.setOnSucceeded(e -> {
@@ -244,6 +259,8 @@ public class SalesPresenter implements Initializable {
     purchaseTable.setItems(null);
     purchaseTable.getItems().clear();
     receiptNumber.clear();
+    clientBox.setValue(null);
+    clientBox.setPromptText("Select Client");
     omotteta();
     totalTextbox.setText("₱ 0.0");
 //    selectMaterial();
@@ -288,16 +305,27 @@ public class SalesPresenter implements Initializable {
   }
 
   private void fillMaterialBox() {
-    TaskTool<List<Material>> tool = new TaskTool<>();
-    Task<List<Material>> task = tool.createTask(this::getMaterials);
+    TaskTool<Map<String, Object>> tool = new TaskTool<>();
+    Task<Map<String, Object>> task = tool.createTask(this::getItems);
     task.setOnSucceeded(e -> {
-      Stream<Material> materialStream = task.getValue().stream();
-      List<String> materials = materialStream
-          .map(Material::getMaterial)
-          .sorted(String.CASE_INSENSITIVE_ORDER)
-          .collect(Collectors.toList());
-      materialBox.setItems(FXCollections.observableList(materials));
-      loadingLabel.setVisible(false);
+      ObjectMapper mapper = new ObjectMapper();
+      Map<String, Object> map = task.getValue();
+      try {
+        List<Client> clients = mapper.readValue(mapper.writeValueAsString(map.get("clients")), new TypeReference<List<Client>>() {});
+        if (clients != null)
+          clientBox.setItems(FXCollections.observableList(clients));
+        List<String> materials = mapper
+            .<List<Material>>readValue(mapper.writeValueAsString(map.get("materials")), new TypeReference<List<Material>>() {})
+            .stream()
+            .map(Material::getMaterial)
+            .sorted(String.CASE_INSENSITIVE_ORDER)
+            .collect(Collectors.toList());
+        materialBox.setItems(FXCollections.observableList(materials));
+        loadingLabel.setVisible(false);
+
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      }
     });
     tool.execute(task);
   }
@@ -306,4 +334,22 @@ public class SalesPresenter implements Initializable {
     return materialsProvider.getMaterials();
   }
 
+  private void customClientCellFactory() {
+    clientBox.setCellFactory(new Callback<ListView<Client>, ListCell<Client>>() {
+      @Override
+      public ListCell<Client> call(ListView<Client> param) {
+        return new ListCell<Client>() {
+          @Override
+          protected void updateItem(Client c, boolean bln) {
+            super.updateItem(c, bln);
+            setText(c != null ? c.getName() : null);
+          }
+        };
+      }
+    });
+  }
+
+  private Map<String, Object> getItems() {
+    return materialsProvider.getItems();
+  }
 }
