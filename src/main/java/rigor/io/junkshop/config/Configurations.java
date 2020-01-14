@@ -22,6 +22,8 @@ public class Configurations {
   private static final String DIR_NAME = "steelman";
 
   private ObjectMapper mapper = new ObjectMapper();
+  private static final String AWS_HOST = "http://junkshop-env.27gxaeyq9n.us-east-2.elasticbeanstalk.com/api";
+  private static final String LOCALHOST = "http://localhost:8080/api";
 
   public static Configurations getInstance() {
     return configurations;
@@ -44,10 +46,11 @@ public class Configurations {
   }
 
   public String getHost() {
-    Map<String, Object> map = getData();
-//    System.out.println(map);
-    Object o = map.get(ConfigKeys.DB_HOST.toString());
-    return o != null ? o.toString() : null;
+    return AWS_HOST;
+//    Map<String, Object> map = getData();
+////    System.out.println(map);
+//    Object o = map.get(ConfigKeys.DB_HOST.toString());
+//    return o != null ? o.toString() : null;
   }
 
   public void save(ConfigKeys key, Object value) {
