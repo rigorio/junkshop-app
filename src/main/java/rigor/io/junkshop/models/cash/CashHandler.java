@@ -3,6 +3,7 @@ package rigor.io.junkshop.models.cash;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
+import rigor.io.junkshop.cache.PublicCache;
 import rigor.io.junkshop.config.Configurations;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ public class CashHandler {
   public List<Cash> getCash() {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
-        .url(URL)
+        .url(URL + "?accountId=" + PublicCache.getAccountId())
         .build();
     Call call = client.newCall(request);
     List<Cash> cash = new ArrayList<>();
@@ -66,7 +67,7 @@ public class CashHandler {
   public Cash today() {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
-        .url(URL + "/today")
+        .url(URL + "/today" + "?accountId=" + PublicCache.getAccountId())
         .build();
     Call call = client.newCall(request);
     Cash cash = new Cash();
@@ -84,10 +85,11 @@ public class CashHandler {
     OkHttpClient client = new OkHttpClient();
     try {
       cash.setDate(LocalDate.now().toString());
+      cash.setAccountId(PublicCache.getAccountId());
       String jsonString = new ObjectMapper().writeValueAsString(cash);
       RequestBody reqbody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
-          .url(URL)
+          .url(URL + "?accountId="+ PublicCache.getAccountId())
           .post(reqbody)
           .build();
       Call call = client.newCall(request);

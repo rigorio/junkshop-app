@@ -11,6 +11,7 @@ public class CustomProperty {
   private String id;
   private String property;
   private String value;
+  private String accountId;
 
   public CustomProperty(String property, String value) {
     this.property = property;

@@ -22,6 +22,7 @@ public class PurchaseFX {
   private StringProperty totalPrice;
   private StringProperty date;
   private StringProperty clientId;
+  private StringProperty accountId;
 
   public PurchaseFX(JunkList purchase) {
     String id = purchase.getId();
@@ -40,5 +41,8 @@ public class PurchaseFX {
 
     String clientId = purchase.getClientId();
     this.clientId = clientId != null ? new SimpleStringProperty(clientId) : null;
+
+    String accountId = purchase.getAccountId();
+    this.accountId = accountId != null ? new SimpleStringProperty(accountId) : null;
   }
 }

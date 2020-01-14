@@ -15,6 +15,7 @@ public class Client {
   private String contact;
   private String address;
   private String cashAdvance;
+  private String accountId;
 
   @Override
   public String toString() {

@@ -3,6 +3,7 @@ package rigor.io.junkshop.models.customProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
+import rigor.io.junkshop.cache.PublicCache;
 import rigor.io.junkshop.config.Configurations;
 import rigor.io.junkshop.models.expense.Expense;
 
@@ -18,7 +19,7 @@ public class CustomPropertyHandler {
   public CustomProperty getProperty(String property) {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
-        .url(URL + "/" + property)
+        .url(URL + "/" + property + "?accountId="+ PublicCache.getAccountId())
         .build();
     Call call = client.newCall(request);
     CustomProperty customProperty = new CustomProperty();
@@ -35,10 +36,11 @@ public class CustomPropertyHandler {
   public void sendProperty(CustomProperty customProperty) {
     OkHttpClient client = new OkHttpClient();
     try {
+      customProperty.setAccountId(PublicCache.getAccountId());
       String jsonString = new ObjectMapper().writeValueAsString(customProperty);
       RequestBody reqBody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
-          .url(URL)
+          .url(URL + "?accountId="+ PublicCache.getAccountId())
           .post(reqBody)
           .build();
       Call call = client.newCall(request);

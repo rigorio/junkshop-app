@@ -357,6 +357,8 @@ public class ClientPresenter implements Initializable {
   }
 
   public void deleteClient() {
+    Client client = clientBox.getValue();
+    clientHandler.deleteClient(client);
   }
 
   private void hideFields(boolean hontou) {

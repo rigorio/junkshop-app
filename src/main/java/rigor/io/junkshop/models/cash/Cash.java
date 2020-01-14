@@ -17,4 +17,5 @@ public class Cash {
   private String expenses;
   private String cashOnHand;
   private String date;
+  private String accountId;
 }

@@ -20,6 +20,7 @@ public class Sale {
   private String totalPrice;
   private String date;
   private String clientId;
+  private String accountId;
 
   public Sale(SaleFX sale) {
     StringProperty id = sale.getId();
@@ -38,5 +39,8 @@ public class Sale {
 
     StringProperty receiptNumber = sale.getReceiptNumber();
     this.receiptNumber = receiptNumber != null ? receiptNumber.get() : null;
+
+    StringProperty accountId = sale.getAccountId();
+    this.accountId = accountId != null ? accountId.get() : null;
   }
 }

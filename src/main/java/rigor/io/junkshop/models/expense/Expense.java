@@ -16,6 +16,7 @@ public class Expense {
   private String amount;
   private String note;
   private String date;
+  private String accountId;
 
   public Expense(ExpenseFX expenseFX) {
     StringProperty id = expenseFX.getId();
@@ -29,6 +30,9 @@ public class Expense {
 
     StringProperty date = expenseFX.getDate();
     this.date = date != null ? date.get() : null;
+
+    StringProperty accountId = expenseFX.getAccountId();
+    this.accountId = accountId != null ? accountId.get() : null;
   }
 
   public Expense(String name, String note, String amount) {

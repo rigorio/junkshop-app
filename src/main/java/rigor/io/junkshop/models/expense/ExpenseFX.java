@@ -15,6 +15,7 @@ public class ExpenseFX {
   private StringProperty amount;
   private StringProperty note;
   private StringProperty date;
+  private StringProperty accountId;
 
   public ExpenseFX(Expense expense) {
     String id = expense.getId();
@@ -31,5 +32,8 @@ public class ExpenseFX {
 
     String note = expense.getNote();
     this.note = note != null ? new SimpleStringProperty(note) : null;
+
+    String accountId = expense.getAccountId();
+    this.accountId = accountId != null ? new SimpleStringProperty(accountId) : null;
   }
 }

@@ -6,7 +6,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import okhttp3.*;
-import org.jetbrains.annotations.NotNull;
+import rigor.io.junkshop.cache.PublicCache;
 import rigor.io.junkshop.config.Configurations;
 import rigor.io.junkshop.models.junk.junklist.JunkList;
 import rigor.io.junkshop.models.junk.junklist.PurchaseFX;
@@ -45,11 +45,12 @@ public class PurchaseHandler {
   public void savePurchases(JunkList purchase) {
     OkHttpClient client = new OkHttpClient();
     try {
+      purchase.setAccountId(PublicCache.getAccountId());
       purchase.setDate(LocalDate.now().toString());
       String jsonString = new ObjectMapper().writeValueAsString(purchase);
       RequestBody reqbody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
-          .url(URL + "/list")
+          .url(URL + "/list" + "?accountId=" + PublicCache.getAccountId())
           .post(reqbody)
           .build();
       Call call = client.newCall(request);
@@ -66,8 +67,9 @@ public class PurchaseHandler {
 
   public List<Junk> getJunk(String clientId) {
     OkHttpClient client = new OkHttpClient();
+    URL += "?accountId=" + PublicCache.getAccountId();
     if (clientId != null) {
-      URL += "?clientId=" + clientId;
+      URL += "&clientId=" + clientId;
     }
     Request request = new Request.Builder()
         .url(URL)

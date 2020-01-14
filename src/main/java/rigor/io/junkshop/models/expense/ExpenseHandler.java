@@ -3,6 +3,7 @@ package rigor.io.junkshop.models.expense;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
+import rigor.io.junkshop.cache.PublicCache;
 import rigor.io.junkshop.config.Configurations;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class ExpenseHandler {
   public List<Expense> getExpenses() {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
-        .url(URL)
+        .url(URL + "?accountId="+ PublicCache.getAccountId())
         .build();
     Call call = client.newCall(request);
     List<Expense> expenses = new ArrayList<>();
@@ -65,10 +66,11 @@ public class ExpenseHandler {
   public void sendExpense(Expense expense) {
     OkHttpClient client = new OkHttpClient();
     try {
+      expense.setAccountId(PublicCache.getAccountId());
       String jsonString = new ObjectMapper().writeValueAsString(expense);
       RequestBody reqBody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
-          .url(URL)
+          .url(URL + "?accountId="+ PublicCache.getAccountId())
           .post(reqBody)
           .build();
       Call call = client.newCall(request);
@@ -85,10 +87,9 @@ public class ExpenseHandler {
     OkHttpClient client = new OkHttpClient();
     try {
       String jsonString = new ObjectMapper().writeValueAsString(expense);
-      System.out.println(jsonString);
       RequestBody reqBody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
-          .url(URL)
+          .url(URL + "?accountId="+ PublicCache.getAccountId())
           .delete(reqBody)
           .build();
       Call call = client.newCall(request);

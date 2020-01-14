@@ -17,6 +17,7 @@ public class ClientFX {
   private StringProperty contact;
   private StringProperty address;
   private StringProperty cashAdvance;
+  private StringProperty accountId;
 
   public ClientFX(Client client) {
     String id = client.getId();
@@ -33,5 +34,8 @@ public class ClientFX {
 
     String cashAdvance = client.getCashAdvance();
     this.cashAdvance = cashAdvance != null ? new SimpleStringProperty(cashAdvance) : null;
+
+    String accountId = client.getAccountId();
+    this.accountId = accountId != null ? new SimpleStringProperty(accountId) : null;
   }
 }

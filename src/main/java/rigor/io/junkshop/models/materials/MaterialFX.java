@@ -14,6 +14,7 @@ public class MaterialFX {
   private StringProperty material;
   private StringProperty standardPrice;
   private StringProperty weight;
+  private StringProperty accountId;
 
   public MaterialFX(Material material) {
     String id = material.getId();
@@ -27,5 +28,8 @@ public class MaterialFX {
 
     String weight = material.getWeight();
     this.weight = weight != null ? new SimpleStringProperty(weight) : null;
+
+    String accountId = material.getAccountId();
+    this.accountId = accountId != null ? new SimpleStringProperty(accountId) : null;
   }
 }

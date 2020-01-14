@@ -17,6 +17,7 @@ public class CashFX {
   private StringProperty expenses;
   private StringProperty cashOnHand;
   private StringProperty date;
+  private StringProperty accountId;
 
   public CashFX(Cash cash) {
     String id = cash.getId();
@@ -39,5 +40,8 @@ public class CashFX {
 
     String date = cash.getDate();
     this.date = date != null ? new SimpleStringProperty(date) : null;
+
+    String accountId = cash.getAccountId();
+    this.accountId = accountId != null ? new SimpleStringProperty(accountId) : null;
   }
 }

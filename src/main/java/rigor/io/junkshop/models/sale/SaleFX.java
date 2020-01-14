@@ -19,6 +19,7 @@ public class SaleFX {
   private List<SaleItemFX> purchaseItems;
   private StringProperty date;
   private StringProperty clientId;
+  private StringProperty accountId;
 
   public SaleFX(Sale sale) {
     String id = sale.getId();
@@ -39,5 +40,8 @@ public class SaleFX {
 
     String clientId = sale.getClientId();
     this.clientId = clientId != null ? new SimpleStringProperty(clientId) : null;
+
+    String accountId = sale.getAccountId();
+    this.accountId = accountId != null ? new SimpleStringProperty(accountId) : null;
   }
 }
