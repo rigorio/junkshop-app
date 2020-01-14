@@ -18,4 +18,8 @@ public class PublicCache {
     CustomProperty property = handler.getProperty(CustomPropertyKeys.RECEIPT_CONTACT.name());
     return property.getValue();
   }
+
+  public static String getAccountId() {
+    return values.get("id");
+  }
 }
