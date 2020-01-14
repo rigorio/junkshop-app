@@ -3,6 +3,7 @@ package rigor.io.junkshop;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import rigor.io.junkshop.ui.dashboard.DashboardView;
+import rigor.io.junkshop.ui.login.LoginView;
 import rigor.io.junkshop.utils.GuiManager;
 
 public class JunkshopApp extends Application {
@@ -20,7 +21,7 @@ public class JunkshopApp extends Application {
     stage.setResizable(true);
 //    stage.getIcons().add(ngew Image("/img/.png"));
     MANAGER.setPrimaryStage(stage);
-    MANAGER.changeView(new DashboardView());
+    MANAGER.changeView(new LoginView());
 //    MANAGER.changeView(new LoginView());
   }
 
