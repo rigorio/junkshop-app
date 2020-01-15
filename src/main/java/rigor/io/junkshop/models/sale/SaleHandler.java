@@ -16,8 +16,8 @@ public class SaleHandler {
       = MediaType.parse("application/json; charset=utf-8");
   private String URL = Configurations.getInstance().getHost() + "/sale";
 
-  public List<Sale> getSales(String clientId) {
-    URL += "?accountId=" + PublicCache.getAccountId();
+  public List<Sale> getSales(String clientId, String accountId) {
+    URL += "?accountId=" + accountId;
     if (clientId != null) {
       URL += "&clientId=" + clientId;
     }

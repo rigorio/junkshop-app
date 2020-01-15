@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import rigor.io.junkshop.cache.PublicCache;
 import rigor.io.junkshop.models.junk.Junk;
 import rigor.io.junkshop.models.junk.PurchaseHandler;
 import rigor.io.junkshop.models.junk.JunkFX;
@@ -98,6 +99,6 @@ public class JunkSummaryPresenter implements Initializable {
 
 
   private List<Junk> getAllJunk() {
-    return purchaseHandler.getJunk(null);
+    return purchaseHandler.getJunk(null, PublicCache.getAccountId());
   }
 }

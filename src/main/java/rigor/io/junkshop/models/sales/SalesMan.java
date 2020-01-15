@@ -6,7 +6,6 @@ import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
-import rigor.io.junkshop.cache.PublicCache;
 import rigor.io.junkshop.config.Configurations;
 
 import java.io.IOException;
@@ -16,10 +15,10 @@ import java.util.List;
 public class SalesMan {
   private String URL = Configurations.getInstance().getHost() + "/salessummary";
 
-  public List<SalesEntity> getSales() {
+  public List<SalesEntity> getSales(String accountId) {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
-        .url(URL + "/month" + "?accountId=" + PublicCache.getAccountId())
+        .url(URL + "/month" + "?accountId=" + accountId)
         .build();
     Call call = client.newCall(request);
     List<SalesEntity> sales = new ArrayList<>();

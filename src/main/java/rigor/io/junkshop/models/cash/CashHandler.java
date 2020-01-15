@@ -17,10 +17,10 @@ public class CashHandler {
       = MediaType.parse("application/json; charset=utf-8");
   private String URL = Configurations.getInstance().getHost() + "/cash";
 
-  public List<Cash> getCash() {
+  public List<Cash> getCash(String accountId) {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
-        .url(URL + "?accountId=" + PublicCache.getAccountId())
+        .url(URL + "?accountId=" + accountId)
         .build();
     Call call = client.newCall(request);
     List<Cash> cash = new ArrayList<>();
@@ -34,8 +34,8 @@ public class CashHandler {
     return cash;
   }
 
-  public List<Cash> getMonthlyCash() {
-    List<Cash> allCash = getCash();
+  public List<Cash> getMonthlyCash(String accountId) {
+    List<Cash> allCash = getCash(accountId);
     List<Cash> monthlyCashes = new ArrayList<>();
     for (Cash cash : allCash) {
       LocalDate date = LocalDate.parse(cash.getDate());

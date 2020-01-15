@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import rigor.io.junkshop.cache.PublicCache;
 import rigor.io.junkshop.models.sale.Sale;
 import rigor.io.junkshop.models.sale.SaleFX;
 import rigor.io.junkshop.models.sale.SaleHandler;
@@ -71,7 +72,7 @@ public class PurchaseHistoryPresenter implements Initializable {
   }
 
   private List<Sale> purchaseHistory() {
-    return saleHandler.getSales(null);
+    return saleHandler.getSales(null, PublicCache.getAccountId());
   }
 
   @FXML

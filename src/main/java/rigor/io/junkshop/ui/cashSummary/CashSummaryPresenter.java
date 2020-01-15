@@ -12,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import rigor.io.junkshop.cache.PublicCache;
 import rigor.io.junkshop.models.cash.Cash;
 import rigor.io.junkshop.models.cash.CashFX;
 import rigor.io.junkshop.models.cash.CashHandler;
@@ -129,6 +130,111 @@ public class CashSummaryPresenter implements Initializable {
     UITools.numberOnlyTextField(expensesTextBox);
   }
 
+  @FXML
+  public void saveChanges() {
+    String capital = capitalTextBox.getText();
+    Cash cash = cashHandler.today();
+    cash.setCapital(capital);
+    TaskTool<Cash> tool = new TaskTool<>();
+    Task<Cash> task = tool.createTask(() -> {
+      cashHandler.sendCash(cash);
+      setDailies();
+      return null;
+    });
+    tool.execute(task);
+  }
+
+
+
+  /*
+    private void setCapitalTextbox() {
+      TaskTool<CustomProperty> tool = new TaskTool<>();
+      Task<CustomProperty> task = tool.createTask(() -> customPropertyHandler.getProperty(CustomPropertyKeys.CAPITAL.name()));
+      task.setOnSucceeded(e -> {
+        capitalProperty = task.getValue();
+        if (capitalProperty.getProperty() != null) {
+          String capitalValue = task.getValue().getValue();
+          capitalTextBox.setText(capitalValue);
+        }
+      });
+      tool.execute(task);
+    }
+  */
+
+  /*  private void setAmounts() {
+      TaskTool<Map<String, Double>> tool = new TaskTool<>();
+      Task<Map<String, Double>> task = tool.createTask(() -> {
+        Map<String, Double> values = new HashMap<>();
+
+        values.put(EXPENSES_KEY, getTotalExpenses());
+        values.put(SALES_KEY, getTotalSales());
+        values.put(PURCHASES_KEY, getTotalPurchases());
+        return values;
+      });
+      task.setOnSucceeded(e -> {
+        Map<String, Double> map = task.getValue();
+        expensesTextBox.setText("" + map.get(EXPENSES_KEY));
+        salesTextBox.setText("" + map.get(SALES_KEY));
+        purchasesTextBox.setText("" + map.get(PURCHASES_KEY));
+        saveChanges();
+      });
+      tool.execute(task);
+    }*/
+  @FXML
+  public void addExpense() {
+    String name = expenseNameTextBox.getText();
+    String amount = expenseAmountTextBox.getText();
+    TaskTool<Object> tool = new TaskTool<>();
+    Task<Object> task = tool.createTask(() -> {
+      loadingLabel.setVisible(true);
+      expenseHandler.sendExpense(new Expense(name, noteTextbox.getText(), amount));
+      clearData();
+      return null;
+    });
+    task.setOnSucceeded(e -> {
+      setExpensesTable();
+      System.out.println("arE?");
+      saveChanges();
+    });
+    tool.execute(task);
+  }
+
+  @FXML
+  public void deleteExpense() {
+    List<Expense> selectedItem = expensesTable.getSelectionModel().getSelectedItems()
+        .stream()
+        .map(Expense::new)
+        .collect(Collectors.toList());
+    if (selectedItem.size() > 0) {
+      TaskTool<Object> tool = new TaskTool<>();
+      Task<Object> task = tool.createTask(() -> {
+        loadingLabel.setVisible(true);
+        expenseHandler.deleteExpense(selectedItem);
+        return null;
+      });
+      task.setOnSucceeded(e -> {
+        setExpensesTable();
+        saveChanges();
+      });
+      tool.execute(task);
+    }
+  }
+  @FXML
+  public void changeData() {
+    String option = dataSelector.getValue();
+    switch (option) {
+      case SELECT_PURCHASES:
+        initPurchasesTable();
+        break;
+      case SELECT_OVERALL:
+        initOverallTable();
+        break;
+      case SELECT_SALES:
+        initSalesTable();
+        break;
+    }
+  }
+
   private void initSalesTable() {
 
     dataTable.setItems(null);
@@ -145,7 +251,7 @@ public class CashSummaryPresenter implements Initializable {
       dataTable.getColumns().addAll(span,
                                     sales);
       TaskTool<List<SalesEntity>> tool = new TaskTool<>();
-      Task<List<SalesEntity>> task = tool.createTask(() -> salesMan.getSales());
+      Task<List<SalesEntity>> task = tool.createTask(() -> salesMan.getSales(PublicCache.getAccountId()));
       task.setOnSucceeded(e -> {
         Stream<SalesEntity> salesEntityStream = task.getValue()
             .stream();
@@ -173,7 +279,7 @@ public class CashSummaryPresenter implements Initializable {
                                     price,
                                     date);
       TaskTool<List<Sale>> tool = new TaskTool<>();
-      Task<List<Sale>> task = tool.createTask(() -> saleHandler.getSales(null));
+      Task<List<Sale>> task = tool.createTask(() -> saleHandler.getSales(null, PublicCache.getAccountId()));
       task.setOnSucceeded(e -> {
         Stream<Sale> salesEntityStream = task.getValue()
             .stream();
@@ -208,7 +314,7 @@ public class CashSummaryPresenter implements Initializable {
       dataTable.getColumns().addAll(s,
                                     t);
       TaskTool<List<PurchaseSummaryFX>> tool = new TaskTool<>();
-      Task<List<PurchaseSummaryFX>> task = tool.createTask(() -> purchaseHandler.getMonthlyPurchaseSummary());
+      Task<List<PurchaseSummaryFX>> task = tool.createTask(() -> purchaseHandler.getMonthlyPurchaseSummary(PublicCache.getAccountId()));
       task.setOnSucceeded(e -> dataTable.setItems(FXCollections.observableList(task.getValue())));
       tool.execute(task);
     } else {
@@ -226,7 +332,7 @@ public class CashSummaryPresenter implements Initializable {
                                     material,
                                     totalPrice);
       TaskTool<List<Junk>> tool = new TaskTool<>();
-      Task<List<Junk>> task = tool.createTask(() -> purchaseHandler.getJunk(null));
+      Task<List<Junk>> task = tool.createTask(() -> purchaseHandler.getJunk(null, PublicCache.getAccountId()));
       task.setOnSucceeded(e -> {
         Stream<Junk> junkStream = task.getValue()
             .stream();
@@ -275,10 +381,10 @@ public class CashSummaryPresenter implements Initializable {
     TaskTool<List<Cash>> tool = new TaskTool<>();
     String span = spanSelector.getValue();
     Task<List<Cash>> task = tool.createTask(() -> span.equals(DAILY)
-        ? cashHandler.getCash()
+        ? cashHandler.getCash(PublicCache.getAccountId())
         : span.equals(TODAY)
-        ? cashHandler.getCash().stream().filter(c -> c.getDate().equals(LocalDate.now().toString())).collect(Collectors.toList())
-        : cashHandler.getMonthlyCash());
+        ? cashHandler.getCash(PublicCache.getAccountId()).stream().filter(c -> c.getDate().equals(LocalDate.now().toString())).collect(Collectors.toList())
+        : cashHandler.getMonthlyCash(PublicCache.getAccountId()));
     task.setOnSucceeded(e -> {
       Stream<Cash> cashStream = task.getValue().stream();
       List<CashFX> cash = cashStream.map(CashFX::new).collect(Collectors.toList());
@@ -289,72 +395,117 @@ public class CashSummaryPresenter implements Initializable {
   }
 
   @FXML
-  public void saveChanges() {
-    String capital = capitalTextBox.getText();
-    Cash cash = cashHandler.today();
-    cash.setCapital(capital);
-    TaskTool<Cash> tool = new TaskTool<>();
-    Task<Cash> task = tool.createTask(() -> {
-      cashHandler.sendCash(cash);
-      setDailies();
+  public void addCapital() {
+    TextInputDialog dialog = new TextInputDialog();
+    dialog.setTitle("Add capital");
+    dialog.setHeaderText(null);
+    dialog.setContentText("Amount to add:");
+    Optional<String> result = dialog.showAndWait();
+    result.ifPresent(capital -> {
+      Double initCap = Double.valueOf(capitalTextBox.getText());
+      String total = "" + (initCap + Double.valueOf(capital));
+      capitalTextBox.setText(total);
+      saveChanges();
+    });
+  }
+
+  @FXML
+  public void updateCapital() {
+    Dialog<String> dialog = new Dialog<>();
+    dialog.setTitle("Update capital");
+    dialog.setHeaderText(null);
+    dialog.setGraphic(null);
+    PasswordField pwd = new PasswordField();
+    HBox content = new HBox();
+    content.setAlignment(Pos.CENTER_LEFT);
+    content.setSpacing(10);
+    content.getChildren().addAll(new Label("Enter password:"), pwd);
+    dialog.getDialogPane().setContent(content);
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+    dialog.setResultConverter(dialogButton -> {
+      if (dialogButton == ButtonType.OK) {
+        return pwd.getText();
+      }
       return null;
     });
-    tool.execute(task);
+    Optional<String> result = dialog.showAndWait();
+    result.ifPresent(pw -> {
+      CustomProperty property = customPropertyHandler.getProperty(CustomPropertyKeys.CAPITAL_PASSWORD.name());
+      if (property.getValue().equals(pw)) {
+        TextInputDialog updater = new TextInputDialog();
+        updater.setTitle("Update capital");
+        updater.setHeaderText(null);
+        updater.setGraphic(null);
+        updater.setContentText("Enter new amount:");
+        Optional<String> amount = updater.showAndWait();
+        amount.ifPresent(capital -> {
+          capitalTextBox.setText(capital);
+          saveChanges();
+        });
+      } else {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Not allowed");
+        alert.setHeaderText("Wrong password");
+        alert.setContentText("Wrong password was given");
+        alert.showAndWait();
+      }
+    });
   }
 
-
-  /*
-    private void setCapitalTextbox() {
-      TaskTool<CustomProperty> tool = new TaskTool<>();
-      Task<CustomProperty> task = tool.createTask(() -> customPropertyHandler.getProperty(CustomPropertyKeys.CAPITAL.name()));
-      task.setOnSucceeded(e -> {
-        capitalProperty = task.getValue();
-        if (capitalProperty.getProperty() != null) {
-          String capitalValue = task.getValue().getValue();
-          capitalTextBox.setText(capitalValue);
-        }
-      });
-      tool.execute(task);
-    }
-  */
-  private void setDailies() {
-    TaskTool<Cash> tool = new TaskTool<>();
-    Task<Cash> task = tool.createTask(() -> {
-      loadingLabel.setVisible(true);
-      return cashHandler.today();
+  @FXML
+  public void printExpenses() {
+    List<String> lines = new ArrayList<>();
+    lines.add("Steelman Junkshop\n");
+    lines.add("Expenses\n");
+    lines.add("Date: " + LocalDate.now().toString() + "\n");
+    expensesTable.getItems().forEach(expense -> {
+      lines.add(expense.getDate().get() + "\n");
+      lines.add(expense.getName().get() + "\n");
+      if (expense.getNote() != null)
+        lines.add(expense.getNote().get() + "\n");
+      lines.add(UITools.PESO + " " + expense.getAmount().get() + "\n");
+      lines.add("-------\n");
     });
-    task.setOnSucceeded(e -> {
-      Cash cash = task.getValue();
-      capitalTextBox.setText(cash.getCapital());
-      salesTextBox.setText(cash.getSales());
-      purchasesTextBox.setText(cash.getPurchases());
-      expensesTextBox.setText(cash.getExpenses());
-      cashOnHandTextBox.setText(cash.getCashOnHand());
-      loadingLabel.setVisible(false);
-    });
-    tool.execute(task);
+    lines.add("Total: " + UITools.PESO + " " + expensesTable.getItems().stream()
+        .mapToDouble(ex -> Double.valueOf(ex.getAmount().get()))
+        .sum());
+    PrintUtil.print(lines);
   }
 
+  @FXML
+  public void showExpenses() {
+    String value = expenseSpan.getValue();
+    deleteExpenseButton.setDisable(value.equals(MONTHLY));
+    setExpensesTable();
+  }
 
-  /*  private void setAmounts() {
-      TaskTool<Map<String, Double>> tool = new TaskTool<>();
-      Task<Map<String, Double>> task = tool.createTask(() -> {
-        Map<String, Double> values = new HashMap<>();
+  private void clearData() {
+    expenseNameTextBox.clear();
+    expenseAmountTextBox.clear();
+    noteTextbox.clear();
+  }
 
-        values.put(EXPENSES_KEY, getTotalExpenses());
-        values.put(SALES_KEY, getTotalSales());
-        values.put(PURCHASES_KEY, getTotalPurchases());
-        return values;
-      });
-      task.setOnSucceeded(e -> {
-        Map<String, Double> map = task.getValue();
-        expensesTextBox.setText("" + map.get(EXPENSES_KEY));
-        salesTextBox.setText("" + map.get(SALES_KEY));
-        purchasesTextBox.setText("" + map.get(PURCHASES_KEY));
-        saveChanges();
-      });
-      tool.execute(task);
-    }*/
+  private void fillDataSelector() {
+    List<String> options = new ArrayList<>();
+    options.add(SELECT_SALES);
+    options.add(SELECT_PURCHASES);
+    options.add(SELECT_OVERALL);
+    dataSelector.setItems(FXCollections.observableList(options));
+  }
+
+  private void fillSpanSelector() {
+    List<String> options = new ArrayList<>();
+    options.add(DAILY);
+    options.add(MONTHLY);
+    spanSelector.setItems(FXCollections.observableList(options));
+    options.add(TODAY);
+    expenseSpan.setItems(FXCollections.observableList(options));
+  }
+
+  private List<Expense> getExpenses() {
+    return expenseHandler.getExpenses();
+  }
+
   private void setExpensesTable() {
     String span = expenseSpan.getValue();
     expensesTable.setItems(null);
@@ -427,172 +578,21 @@ public class CashSummaryPresenter implements Initializable {
     tool.execute(task);
   }
 
-  @FXML
-  public void addExpense() {
-    String name = expenseNameTextBox.getText();
-    String amount = expenseAmountTextBox.getText();
-    TaskTool<Object> tool = new TaskTool<>();
-    Task<Object> task = tool.createTask(() -> {
+  private void setDailies() {
+    TaskTool<Cash> tool = new TaskTool<>();
+    Task<Cash> task = tool.createTask(() -> {
       loadingLabel.setVisible(true);
-      expenseHandler.sendExpense(new Expense(name, noteTextbox.getText(), amount));
-      clearData();
-      return null;
+      return cashHandler.today();
     });
     task.setOnSucceeded(e -> {
-      setExpensesTable();
-      System.out.println("arE?");
-      saveChanges();
+      Cash cash = task.getValue();
+      capitalTextBox.setText(cash.getCapital());
+      salesTextBox.setText(cash.getSales());
+      purchasesTextBox.setText(cash.getPurchases());
+      expensesTextBox.setText(cash.getExpenses());
+      cashOnHandTextBox.setText(cash.getCashOnHand());
+      loadingLabel.setVisible(false);
     });
     tool.execute(task);
-  }
-
-  @FXML
-  public void deleteExpense() {
-    List<Expense> selectedItem = expensesTable.getSelectionModel().getSelectedItems()
-        .stream()
-        .map(Expense::new)
-        .collect(Collectors.toList());
-    if (selectedItem.size() > 0) {
-      TaskTool<Object> tool = new TaskTool<>();
-      Task<Object> task = tool.createTask(() -> {
-        loadingLabel.setVisible(true);
-        expenseHandler.deleteExpense(selectedItem);
-        return null;
-      });
-      task.setOnSucceeded(e -> {
-        setExpensesTable();
-        saveChanges();
-      });
-      tool.execute(task);
-    }
-  }
-
-  private void fillDataSelector() {
-    List<String> options = new ArrayList<>();
-    options.add(SELECT_SALES);
-    options.add(SELECT_PURCHASES);
-    options.add(SELECT_OVERALL);
-    dataSelector.setItems(FXCollections.observableList(options));
-  }
-
-  private void clearData() {
-    expenseNameTextBox.clear();
-    expenseAmountTextBox.clear();
-    noteTextbox.clear();
-  }
-
-  private void fillSpanSelector() {
-    List<String> options = new ArrayList<>();
-    options.add(DAILY);
-    options.add(MONTHLY);
-    spanSelector.setItems(FXCollections.observableList(options));
-    options.add(TODAY);
-    expenseSpan.setItems(FXCollections.observableList(options));
-  }
-
-  @FXML
-  public void changeData() {
-    String option = dataSelector.getValue();
-    switch (option) {
-      case SELECT_PURCHASES:
-        initPurchasesTable();
-        break;
-      case SELECT_OVERALL:
-        initOverallTable();
-        break;
-      case SELECT_SALES:
-        initSalesTable();
-        break;
-    }
-  }
-
-  @FXML
-  public void addCapital() {
-    TextInputDialog dialog = new TextInputDialog();
-    dialog.setTitle("Add capital");
-    dialog.setHeaderText(null);
-    dialog.setContentText("Amount to add:");
-    Optional<String> result = dialog.showAndWait();
-    result.ifPresent(capital -> {
-      Double initCap = Double.valueOf(capitalTextBox.getText());
-      String total = "" + (initCap + Double.valueOf(capital));
-      capitalTextBox.setText(total);
-      saveChanges();
-    });
-  }
-
-  @FXML
-  public void updateCapital() {
-    Dialog<String> dialog = new Dialog<>();
-    dialog.setTitle("Update capital");
-    dialog.setHeaderText(null);
-    dialog.setGraphic(null);
-    PasswordField pwd = new PasswordField();
-    HBox content = new HBox();
-    content.setAlignment(Pos.CENTER_LEFT);
-    content.setSpacing(10);
-    content.getChildren().addAll(new Label("Enter password:"), pwd);
-    dialog.getDialogPane().setContent(content);
-    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-    dialog.setResultConverter(dialogButton -> {
-      if (dialogButton == ButtonType.OK) {
-        return pwd.getText();
-      }
-      return null;
-    });
-    Optional<String> result = dialog.showAndWait();
-    result.ifPresent(pw -> {
-      CustomProperty property = customPropertyHandler.getProperty(CustomPropertyKeys.CAPITAL_PASSWORD.name());
-      if (property.getValue().equals(pw)) {
-        TextInputDialog updater = new TextInputDialog();
-        updater.setTitle("Update capital");
-        updater.setHeaderText(null);
-        updater.setGraphic(null);
-        updater.setContentText("Enter new amount:");
-        Optional<String> amount = updater.showAndWait();
-        amount.ifPresent(capital -> {
-          capitalTextBox.setText(capital);
-          saveChanges();
-        });
-      } else {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Not allowed");
-        alert.setHeaderText("Wrong password");
-        alert.setContentText("Wrong password was given");
-        alert.showAndWait();
-      }
-    });
-  }
-
-  private List<Expense> getExpenses() {
-    return expenseHandler.getExpenses();
-  }
-
-
-  @FXML
-  public void printExpenses() {
-    List<String> lines = new ArrayList<>();
-    lines.add("Steelman Junkshop\n");
-    lines.add("Expenses\n");
-    lines.add("Date: " + LocalDate.now().toString() + "\n");
-    expensesTable.getItems().forEach(expense -> {
-      lines.add(expense.getDate().get() + "\n");
-      lines.add(expense.getName().get() + "\n");
-      if (expense.getNote() != null)
-        lines.add(expense.getNote().get() + "\n");
-      lines.add(UITools.PESO + " " + expense.getAmount().get() + "\n");
-      lines.add("-------\n");
-    });
-    lines.add("Total: " + UITools.PESO + " " + expensesTable.getItems().stream()
-        .mapToDouble(ex -> Double.valueOf(ex.getAmount().get()))
-        .sum());
-    PrintUtil.print(lines);
-  }
-
-  @FXML
-  public void showExpenses() {
-    String value = expenseSpan.getValue();
-    deleteExpenseButton.setDisable(value.equals(MONTHLY));
-    setExpensesTable();
   }
 }

@@ -22,4 +22,8 @@ public class PublicCache {
   public static String getAccountId() {
     return values.get("id");
   }
+
+  public static String getRole() {
+    return values.get("role");
+  }
 }

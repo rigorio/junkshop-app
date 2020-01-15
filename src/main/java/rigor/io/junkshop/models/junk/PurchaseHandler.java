@@ -65,9 +65,9 @@ public class PurchaseHandler {
     }
   }
 
-  public List<Junk> getJunk(String clientId) {
+  public List<Junk> getJunk(String clientId, String accountId) {
     OkHttpClient client = new OkHttpClient();
-    URL += "?accountId=" + PublicCache.getAccountId();
+    URL += "?accountId=" + accountId;
     if (clientId != null) {
       URL += "&clientId=" + clientId;
     }
@@ -86,8 +86,8 @@ public class PurchaseHandler {
     return junks;
   }
 
-  public List<PurchaseSummaryFX> getMonthlyPurchaseSummary() {
-    List<Junk> junkList = getJunk(null);
+  public List<PurchaseSummaryFX> getMonthlyPurchaseSummary(String accountId) {
+    List<Junk> junkList = getJunk(null, accountId);
     return getMonthlies(junkList);
   }
 

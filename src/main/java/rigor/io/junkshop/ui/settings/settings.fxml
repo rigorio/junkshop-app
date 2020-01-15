@@ -2,17 +2,19 @@
 
 <?import com.jfoenix.controls.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <AnchorPane prefHeight="550" prefWidth="825" xmlns="http://javafx.com/javafx/8.0.999-ea"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.ui.settings.SettingsPresenter">
-  <BorderPane prefHeight="550.0" prefWidth="825.0">
+  <BorderPane prefHeight="550.0" prefWidth="825.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
     <left>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-        <JFXTextField fx:id="hostTextBox" layoutX="14.0" layoutY="85.0" prefHeight="25.0" prefWidth="220.0" visible="false"/>
-        <JFXButton layoutX="242.0" layoutY="85.0" mnemonicParsing="false" onAction="#updateHost" text="Update" visible="false"/>
+        <JFXTextField fx:id="hostTextBox" layoutX="14.0" layoutY="85.0" prefHeight="25.0" prefWidth="220.0"
+                      visible="false"/>
+        <JFXButton layoutX="242.0" layoutY="85.0" mnemonicParsing="false" onAction="#updateHost" text="Update"
+                   visible="false"/>
         <JFXTextField fx:id="contactText" layoutX="14.0" layoutY="39.0" prefHeight="37.0" prefWidth="179.0"
                       promptText="Contact...">
           <font>

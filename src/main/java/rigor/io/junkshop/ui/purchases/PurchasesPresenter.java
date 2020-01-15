@@ -118,7 +118,7 @@ public class PurchasesPresenter implements Initializable {
   }
 
   private List<Junk> getJunk() {
-    return purchaseHandler.getJunk(null);
+    return purchaseHandler.getJunk(null, PublicCache.getAccountId());
   }
 
   private void fillMaterialBox() {
