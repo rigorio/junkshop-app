@@ -13,7 +13,7 @@ import java.util.List;
 public class ClientHandler {
   private static final MediaType JSON
       = MediaType.parse("application/json; charset=utf-8");
-  private String URL = Configurations.getInstance().getHost() + "clients";
+  private String URL = Configurations.getInstance().getHost() + "/clients";
 
   public List<Client> getClients() {
     OkHttpClient client = new OkHttpClient();

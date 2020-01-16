@@ -19,10 +19,10 @@ public class ExpenseHandler {
   private String URL = Configurations.getInstance().getHost() + "/expenses";
 
 
-  public List<Expense> getExpenses() {
+  public List<Expense> getExpenses(String accountId) {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
-        .url(URL + "?accountId="+ PublicCache.getAccountId())
+        .url(URL + "?accountId="+ accountId)
         .build();
     Call call = client.newCall(request);
     List<Expense> expenses = new ArrayList<>();
@@ -36,8 +36,8 @@ public class ExpenseHandler {
     return expenses;
   }
 
-  public List<Expense> getMonthlyExpenses() {
-    List<Expense> expenses = getExpenses();
+  public List<Expense> getMonthlyExpenses(String accountId) {
+    List<Expense> expenses = getExpenses(accountId);
     List<Expense> monthlyExpenses = new ArrayList<>();
     for (Expense expense : expenses) {
       LocalDate date = LocalDate.parse(expense.getDate());

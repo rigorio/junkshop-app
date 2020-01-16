@@ -16,9 +16,13 @@ import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
 import rigor.io.junkshop.account.Account;
 import rigor.io.junkshop.account.AccountCoordinator;
+import rigor.io.junkshop.cache.PublicCache;
 import rigor.io.junkshop.models.cash.Cash;
 import rigor.io.junkshop.models.cash.CashFX;
 import rigor.io.junkshop.models.cash.CashHandler;
+import rigor.io.junkshop.models.expense.Expense;
+import rigor.io.junkshop.models.expense.ExpenseFX;
+import rigor.io.junkshop.models.expense.ExpenseHandler;
 import rigor.io.junkshop.models.junk.Junk;
 import rigor.io.junkshop.models.junk.JunkFX;
 import rigor.io.junkshop.models.junk.PurchaseHandler;
@@ -57,16 +61,18 @@ public class AdminPresenter implements Initializable {
   private static final String SELECT_SALES = "Sales";
   private static final String SELECT_PURCHASES = "Purchases";
   private static final String SELECT_OVERALL = "Overall";
+  private static final String SELECT_EXPENSES = "Expenses";
   private static final String DAILY = "Daily";
   private static final String MONTHLY = "Monthly";
   private static final String TODAY = "Today";
   private static final String USERNAME = "username";
   private static final String PASSWORD = "password";
   private static final String CONF_PASSWORD = "conf_password";
+  private ExpenseHandler expenseHandler;
 
   public AdminPresenter() {
     accountCoordinator = new AccountCoordinator();
-
+    expenseHandler = new ExpenseHandler();
     salesMan = new SalesMan();
     purchaseHandler = new PurchaseHandler();
     cashHandler = new CashHandler();
@@ -93,13 +99,13 @@ public class AdminPresenter implements Initializable {
     Task<List<Account>> task = tool.createTask(() -> accountCoordinator.allAccounts());
     task.setOnSucceeded(e -> {
       setAccountCellFactory();
-      accountBox.setItems(FXCollections.observableList(task.getValue()));
       dataSelector.setValue(SELECT_OVERALL);
       spanSelector.setValue(MONTHLY);
+      accountBox.setItems(FXCollections.observableList(task.getValue()));
       accountBox.getSelectionModel().selectFirst();
       Account account = accountBox.getValue();
       usernameText.setText(account.getUsername());
-      initOverallTable(account.getId());
+//      initOverallTable(account.getId());
 
     });
     tool.execute(task);
@@ -186,18 +192,24 @@ public class AdminPresenter implements Initializable {
 
   public void changeData() {
     Account account = accountBox.getValue();
-    String accountId = account.getId();
-    String option = dataSelector.getValue();
-    switch (option) {
-      case SELECT_PURCHASES:
-        initPurchasesTable(accountId);
-        break;
-      case SELECT_OVERALL:
-        initOverallTable(accountId);
-        break;
-      case SELECT_SALES:
-        initSalesTable(accountId);
-        break;
+    if (account != null) {
+
+      String accountId = account.getId();
+      String option = dataSelector.getValue();
+      switch (option) {
+        case SELECT_PURCHASES:
+          initPurchasesTable(accountId);
+          break;
+        case SELECT_OVERALL:
+          initOverallTable(accountId);
+          break;
+        case SELECT_SALES:
+          initSalesTable(accountId);
+          break;
+        case SELECT_EXPENSES:
+          setExpensesTable(accountId);
+          break;
+      }
     }
   }
 
@@ -253,6 +265,7 @@ public class AdminPresenter implements Initializable {
     options.add(SELECT_SALES);
     options.add(SELECT_PURCHASES);
     options.add(SELECT_OVERALL);
+    options.add(SELECT_EXPENSES);
     dataSelector.setItems(FXCollections.observableList(options));
   }
 
@@ -423,6 +436,75 @@ public class AdminPresenter implements Initializable {
 
   }
 
+  private void setExpensesTable(String accountId) {
+    String span = spanSelector.getValue();
+    dataTable.setItems(null);
+    dataTable.getColumns().clear();
+    switch (span) {
+      case DAILY: {
+
+        TableColumn<ExpenseFX, String> expense = new TableColumn<>("Expense");
+        expense.setCellValueFactory(e -> e.getValue().getName());
+
+        TableColumn<ExpenseFX, String> date = new TableColumn<>("Date");
+        date.setCellValueFactory(e -> e.getValue().getDate());
+
+        TableColumn<ExpenseFX, String> amount = new TableColumn<>("Amount");
+        amount.setCellValueFactory(e -> e.getValue().getAmount());
+
+
+        dataTable.getColumns().addAll(date,
+                                      expense,
+                                      amount);
+        break;
+      }
+      case MONTHLY: {
+
+        TableColumn<ExpenseFX, String> date = new TableColumn<>("Month");
+        date.setCellValueFactory(e -> e.getValue().getDate());
+
+        TableColumn<ExpenseFX, String> amount = new TableColumn<>("Amount");
+        amount.setCellValueFactory(e -> e.getValue().getAmount());
+
+
+        dataTable.getColumns().addAll(date,
+                                      amount);
+        break;
+      }
+      case TODAY: {
+        TableColumn<ExpenseFX, String> expense = new TableColumn<>("Expense");
+        expense.setCellValueFactory(e -> e.getValue().getName());
+
+        TableColumn<ExpenseFX, String> amount = new TableColumn<>("Amount");
+        amount.setCellValueFactory(e -> e.getValue().getAmount());
+
+        dataTable.getColumns().addAll(expense,
+                                      amount);
+        break;
+      }
+    }
+    TaskTool<List<Expense>> tool = new TaskTool<>();
+    Task<List<Expense>> task = tool.createTask(() -> span.equals(DAILY)
+        ? getExpenses(accountId)
+        : span.equals(MONTHLY)
+        ? expenseHandler.getMonthlyExpenses(accountId)
+        : getExpenses(accountId).stream()
+        .filter(e -> e.getDate().equals(LocalDate.now().toString()))
+        .collect(Collectors.toList()));
+    task.setOnSucceeded(e -> {
+      Stream<Expense> expenseStream = task.getValue()
+          .stream();
+      List<ExpenseFX> expenses = expenseStream
+          .map(ExpenseFX::new)
+          .collect(Collectors.toList());
+      dataTable.setItems(FXCollections.observableList(expenses));
+    });
+    tool.execute(task);
+  }
+
+  private List<Expense> getExpenses(String accountId) {
+    return expenseHandler.getExpenses(accountId);
+  }
 
   private boolean checkFields(String newPass, String confPass, String username) {
     if (newPass == null || confPass == null || username == null) {

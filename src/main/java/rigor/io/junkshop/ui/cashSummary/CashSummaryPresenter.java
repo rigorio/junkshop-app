@@ -503,7 +503,7 @@ public class CashSummaryPresenter implements Initializable {
   }
 
   private List<Expense> getExpenses() {
-    return expenseHandler.getExpenses();
+    return expenseHandler.getExpenses(PublicCache.getAccountId());
   }
 
   private void setExpensesTable() {
@@ -559,7 +559,7 @@ public class CashSummaryPresenter implements Initializable {
       return span.equals(DAILY)
           ? getExpenses()
           : span.equals(MONTHLY)
-          ? expenseHandler.getMonthlyExpenses()
+          ? expenseHandler.getMonthlyExpenses(PublicCache.getAccountId())
           : getExpenses().stream()
           .filter(e -> e.getDate().equals(LocalDate.now().toString()))
           .collect(Collectors.toList());
