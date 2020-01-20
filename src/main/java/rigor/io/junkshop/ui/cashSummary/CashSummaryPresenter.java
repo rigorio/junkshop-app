@@ -133,11 +133,11 @@ public class CashSummaryPresenter implements Initializable {
   @FXML
   public void saveChanges() {
     String capital = capitalTextBox.getText();
-    Cash cash = cashHandler.today();
+    Cash cash = cashHandler.today(PublicCache.getAccountId());
     cash.setCapital(capital);
     TaskTool<Cash> tool = new TaskTool<>();
     Task<Cash> task = tool.createTask(() -> {
-      cashHandler.sendCash(cash);
+      cashHandler.sendCash(cash, PublicCache.getAccountId());
       setDailies();
       return null;
     });
@@ -582,7 +582,7 @@ public class CashSummaryPresenter implements Initializable {
     TaskTool<Cash> tool = new TaskTool<>();
     Task<Cash> task = tool.createTask(() -> {
       loadingLabel.setVisible(true);
-      return cashHandler.today();
+      return cashHandler.today(PublicCache.getAccountId());
     });
     task.setOnSucceeded(e -> {
       Cash cash = task.getValue();

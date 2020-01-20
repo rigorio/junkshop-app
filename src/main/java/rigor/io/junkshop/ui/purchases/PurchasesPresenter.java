@@ -129,8 +129,13 @@ public class PurchasesPresenter implements Initializable {
       Map<String, Object> map = task.getValue();
       try {
         List<Client> clients = mapper.readValue(mapper.writeValueAsString(map.get("clients")), new TypeReference<List<Client>>() {});
-        if (clients != null && !clients.isEmpty())
+        if (clients != null && !clients.isEmpty()) {
           clientBox.setItems(FXCollections.observableList(clients));
+          Optional<Client> walk_in = clients.stream()
+              .filter(c -> c.getName().equalsIgnoreCase("walk in"))
+              .findAny();
+          walk_in.ifPresent(client -> clientBox.getSelectionModel().select(client));
+        }
         List<String> materials = mapper
             .<List<Material>>readValue(mapper.writeValueAsString(map.get("materials")), new TypeReference<List<Material>>() {})
             .stream()
@@ -264,6 +269,7 @@ public class PurchasesPresenter implements Initializable {
     lines.add("Steelman Junkshop\n");
     lines.add(PublicCache.getContact() + "\n");
     lines.add("Purchases\n");
+    lines.add("Client: " + clientBox.getValue().getName() + "\n");
     lines.add("Receipt #" + receiptNumber.getText() + "\n");
     lines.add("Date: " + LocalDate.now().toString() + "\n");
     lines.add("Items:" + "\n");

@@ -64,10 +64,10 @@ public class CashHandler {
     return "" + ((s1 != null ? Double.valueOf(s1) : 0.0d) + (s2 != null ? Double.valueOf(s2) : 0.0d));
   }
 
-  public Cash today() {
+  public Cash today(String accountId) {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
-        .url(URL + "/today" + "?accountId=" + PublicCache.getAccountId())
+        .url(URL + "/today" + "?accountId=" + accountId)
         .build();
     Call call = client.newCall(request);
     Cash cash = new Cash();
@@ -81,7 +81,7 @@ public class CashHandler {
     return cash;
   }
 
-  public void sendCash(Cash cash) {
+  public void sendCash(Cash cash, String accountId) {
     OkHttpClient client = new OkHttpClient();
     try {
       cash.setDate(LocalDate.now().toString());
@@ -89,7 +89,7 @@ public class CashHandler {
       String jsonString = new ObjectMapper().writeValueAsString(cash);
       RequestBody reqbody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
-          .url(URL + "?accountId="+ PublicCache.getAccountId())
+          .url(URL + "?accountId="+ accountId)
           .post(reqbody)
           .build();
       Call call = client.newCall(request);

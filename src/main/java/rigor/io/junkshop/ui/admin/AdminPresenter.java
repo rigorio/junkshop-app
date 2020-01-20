@@ -16,7 +16,6 @@ import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
 import rigor.io.junkshop.account.Account;
 import rigor.io.junkshop.account.AccountCoordinator;
-import rigor.io.junkshop.cache.PublicCache;
 import rigor.io.junkshop.models.cash.Cash;
 import rigor.io.junkshop.models.cash.CashFX;
 import rigor.io.junkshop.models.cash.CashHandler;
@@ -52,6 +51,8 @@ public class AdminPresenter implements Initializable {
   public TableView dataTable;
   public JFXButton saveButton;
   public Label confirmLabel;
+  public JFXPasswordField capitalText;
+  public JFXPasswordField cashText;
   private AccountCoordinator accountCoordinator;
 
   private SalesMan salesMan;
@@ -69,6 +70,7 @@ public class AdminPresenter implements Initializable {
   private static final String PASSWORD = "password";
   private static final String CONF_PASSWORD = "conf_password";
   private ExpenseHandler expenseHandler;
+  private Cash cash;
 
   public AdminPresenter() {
     accountCoordinator = new AccountCoordinator();
@@ -104,6 +106,15 @@ public class AdminPresenter implements Initializable {
       accountBox.setItems(FXCollections.observableList(task.getValue()));
       accountBox.getSelectionModel().selectFirst();
       Account account = accountBox.getValue();
+
+      TaskTool<Cash> cashTaskTool = new TaskTool<>();
+      Task<Cash> cashTask = cashTaskTool.createTask(() -> cashHandler.today(account.getId()));
+      cashTask.setOnSucceeded(b -> {
+        cash = cashTask.getValue();
+        capitalText.setText(cash.getCapital());
+        cashText.setText(cash.getCashOnHand());
+      });
+      cashTaskTool.execute(cashTask);
       usernameText.setText(account.getUsername());
 //      initOverallTable(account.getId());
 
@@ -225,20 +236,33 @@ public class AdminPresenter implements Initializable {
     String newPass = newPassText.getText();
     String confPass = confirmPassText.getText();
     String username = usernameText.getText();
-    if (checkFields(newPass, confPass, username)) return;
     Account account = accountBox.getValue();
-    account.setUsername(username);
-    account.setPassword(newPass);
-    Alert alert = UITools.quickLoadingAlert();
-    TaskTool<Account> tool = new TaskTool<>();
-    Task<Account> task = tool.createTask(() -> {
-      alert.showAndWait();
-      return accountCoordinator.save(account);
-    });
-    task.setOnSucceeded(e -> {
-      alert.close();
-    });
-    tool.execute(task);
+    boolean ub = !account.getUsername().equals(username);
+    if (ub) {
+      account.setUsername(username);
+    }
+    boolean pb = areBlank(newPass, confPass);
+    if (pb) {
+      account.setPassword(newPass);
+    }
+    if (ub || pb) {
+      Alert alert = UITools.quickLoadingAlert();
+      TaskTool<Account> tool = new TaskTool<>();
+      Task<Account> task = tool.createTask(() -> {
+        alert.showAndWait();
+        String capital = capitalText.getText();
+        if (!cash.getCapital().equals(capital)) {
+          cash.setCapital(capital);
+          cashHandler.sendCash(cash, account.getId());
+        }
+        return accountCoordinator.save(account);
+      });
+      task.setOnSucceeded(e -> {
+        alert.close();
+      });
+      tool.execute(task);
+    }
+
 
   }
 
@@ -506,8 +530,8 @@ public class AdminPresenter implements Initializable {
     return expenseHandler.getExpenses(accountId);
   }
 
-  private boolean checkFields(String newPass, String confPass, String username) {
-    if (newPass == null || confPass == null || username == null) {
+  private boolean areBlank(String newPass, String confPass) {
+    if (newPass == null || confPass == null) {
       Alert alert = new Alert(Alert.AlertType.ERROR);
       alert.setTitle("Missing info");
       alert.setHeaderText(null);
