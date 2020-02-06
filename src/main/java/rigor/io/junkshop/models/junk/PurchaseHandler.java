@@ -23,10 +23,11 @@ public class PurchaseHandler {
       = MediaType.parse("application/json; charset=utf-8");
   private String URL = Configurations.getInstance().getHost() + "/junk";
 
-  public ObservableList<PurchaseFX> getAllPurchases() {
+  public ObservableList<PurchaseFX> getAllPurchases(String accountId) {
     OkHttpClient client = new OkHttpClient();
+    String url = URL + "/list?accountId=" + accountId;
     Request request = new Request.Builder()
-        .url(URL + "/list")
+        .url(url)
         .build();
     Call call = client.newCall(request);
     List<JunkList> junks = new ArrayList<>();
@@ -67,12 +68,13 @@ public class PurchaseHandler {
 
   public List<Junk> getJunk(String clientId, String accountId) {
     OkHttpClient client = new OkHttpClient();
-    URL += "?accountId=" + accountId;
+    String url = URL;
+    url += "?accountId=" + accountId;
     if (clientId != null) {
-      URL += "&clientId=" + clientId;
+      url += "&clientId=" + clientId;
     }
     Request request = new Request.Builder()
-        .url(URL)
+        .url(url)
         .build();
     Call call = client.newCall(request);
     List<Junk> junks = new ArrayList<>();

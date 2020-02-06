@@ -61,6 +61,7 @@ public class AccountCoordinator {
   public Account save(Account account) {
     try {
       String jsonString = new ObjectMapper().writeValueAsString(account);
+      System.out.println(jsonString);
       RequestBody reqbody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
           .url(URL + "/create")

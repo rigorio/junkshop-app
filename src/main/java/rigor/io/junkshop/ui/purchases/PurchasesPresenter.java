@@ -58,6 +58,7 @@ public class PurchasesPresenter implements Initializable {
   private TableView<JunkFX> junkTable;
   private MaterialsProvider materialsProvider;
   private PurchaseHandler purchaseHandler;
+  private Client defaultClient;
   private List<JunkFX> purchaseItemList = new ArrayList<>();
 
   public PurchasesPresenter() {
@@ -134,7 +135,10 @@ public class PurchasesPresenter implements Initializable {
           Optional<Client> walk_in = clients.stream()
               .filter(c -> c.getName().equalsIgnoreCase("walk in"))
               .findAny();
-          walk_in.ifPresent(client -> clientBox.getSelectionModel().select(client));
+          walk_in.ifPresent(client -> {
+            defaultClient = client;
+            clientBox.getSelectionModel().select(client);
+          });
         }
         List<String> materials = mapper
             .<List<Material>>readValue(mapper.writeValueAsString(map.get("materials")), new TypeReference<List<Material>>() {})
@@ -289,16 +293,16 @@ public class PurchasesPresenter implements Initializable {
       alert.setHeaderText("Items purchased successfully! Please wait for receipt");
       alert.setContentText(null);
       alert.showAndWait();
-      clearFields();
       try {
-        PrintUtil.print(lines);
+        new PrintUtil().print(lines);
         Thread.sleep(3500L);
-        PrintUtil.print(lines);
+        new PrintUtil().print(lines);
         Thread.sleep(3500L);
-        PrintUtil.print(lines);
+        new PrintUtil().print(lines);
       } catch (InterruptedException ex) {
         ex.printStackTrace();
       }
+      clearFields();
     });
 
     tool.execute(task);
@@ -308,7 +312,8 @@ public class PurchasesPresenter implements Initializable {
     junkTable.setItems(null);
     receiptNumber.clear();
     clientBox.setValue(null);
-    clientBox.setPromptText("Select Client");
+    clientBox.setValue(defaultClient);
+//    clientBox.setPromptText("Select Client");
     omotetta();
     grandTotal.setText("₱ 0.0");
 //    selectMaterial();
@@ -321,6 +326,7 @@ public class PurchasesPresenter implements Initializable {
     materialBox.setPromptText("Select Material");
     priceText.clear();
     weightText.clear();
+    purchaseItemList = new ArrayList<>();
   }
 
   @NotNull

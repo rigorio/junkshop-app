@@ -6,7 +6,8 @@ import javafx.scene.control.TextArea;
 import java.util.List;
 
 public class PrintUtil {
-  public static void print(List<String> lines) {
+
+  public void print(List<String> lines) {
     TextArea textArea = new TextArea();
     lines.forEach(textArea::appendText);
     PrinterJob job = PrinterJob.createPrinterJob();
@@ -20,5 +21,4 @@ public class PrintUtil {
     if (printed)
       job.endJob();
   }
-
 }

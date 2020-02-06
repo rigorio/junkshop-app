@@ -82,21 +82,21 @@
                   <Font size="16.0" />
                </font>
             </Hyperlink>
-            <JFXPasswordField fx:id="capitalText" layoutX="12.0" layoutY="308.0" promptText="type here...">
+            <JFXTextField fx:id="capitalText" layoutX="12.0" layoutY="308.0" promptText="type here...">
                <font>
                   <Font size="16.0" />
                </font>
-            </JFXPasswordField>
+            </JFXTextField>
             <Label layoutX="12.0" layoutY="283.0" text="Current Capital:">
                <font>
                   <Font size="16.0" />
                </font>
             </Label>
-            <JFXPasswordField fx:id="cashText" layoutX="12.0" layoutY="370.0" promptText="type here...">
+            <JFXTextField fx:id="cashText" layoutX="12.0" layoutY="370.0" promptText="type here...">
                <font>
                   <Font size="16.0" />
                </font>
-            </JFXPasswordField>
+            </JFXTextField>
             <Label layoutX="12.0" layoutY="345.0" text="Current Cash on hand">
                <font>
                   <Font size="16.0" />

@@ -8,9 +8,7 @@ import rigor.io.junkshop.config.Configurations;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ExpenseHandler {
 
@@ -22,7 +20,7 @@ public class ExpenseHandler {
   public List<Expense> getExpenses(String accountId) {
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
-        .url(URL + "?accountId="+ accountId)
+        .url(URL + "?accountId=" + accountId)
         .build();
     Call call = client.newCall(request);
     List<Expense> expenses = new ArrayList<>();
@@ -30,6 +28,23 @@ public class ExpenseHandler {
       ResponseBody body = call.execute().body();
       String string = body.string();
       expenses = new ObjectMapper().readValue(string, new TypeReference<List<Expense>>() {});
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return expenses;
+  }
+
+  public Map<String, Object> getExpensesAndDailies(String accountId) {
+    OkHttpClient client = new OkHttpClient();
+    Request request = new Request.Builder()
+        .url(URL + "/daily?accountId=" + accountId)
+        .build();
+    Call call = client.newCall(request);
+    Map<String, Object> expenses = new HashMap<>();
+    try {
+      ResponseBody body = call.execute().body();
+      String string = body.string();
+      expenses = new ObjectMapper().readValue(string, new TypeReference<Map<String, Object>>() {});
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -63,45 +78,49 @@ public class ExpenseHandler {
     return "" + ((s1 != null ? Double.valueOf(s1) : 0.0d) + (s2 != null ? Double.valueOf(s2) : 0.0d));
   }
 
-  public void sendExpense(Expense expense) {
+  public Map<String, Object> sendExpense(Expense expense) {
     OkHttpClient client = new OkHttpClient();
+    Map<String, Object> expenses = new HashMap<>();
     try {
       expense.setAccountId(PublicCache.getAccountId());
       String jsonString = new ObjectMapper().writeValueAsString(expense);
       RequestBody reqBody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
-          .url(URL + "?accountId="+ PublicCache.getAccountId())
+          .url(URL + "/daily?accountId=" + PublicCache.getAccountId())
           .post(reqBody)
           .build();
       Call call = client.newCall(request);
-      Expense expenses = new Expense();
       ResponseBody body = call.execute().body();
       String string = body.string();
-      expenses = new ObjectMapper().readValue(string, new TypeReference<Expense>() {});
+//      System.out.println(string);
+      expenses = new ObjectMapper().readValue(string, new TypeReference<Map<String, Object>>() {});
     } catch (IOException e) {
       e.printStackTrace();
     }
+    return expenses;
   }
 
-  public void deleteExpense(List<Expense> expense) {
+  public Map<String, Object> deleteExpense(List<Expense> expense) {
     OkHttpClient client = new OkHttpClient();
+      Map<String, Object> expenses = new HashMap<>();
     try {
       String jsonString = new ObjectMapper().writeValueAsString(expense);
       RequestBody reqBody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
-          .url(URL + "?accountId="+ PublicCache.getAccountId())
+          .url(URL + "/daily?accountId=" + PublicCache.getAccountId())
           .delete(reqBody)
           .build();
       Call call = client.newCall(request);
-      Expense expenses = new Expense();
       ResponseBody body = call.execute().body();
       if (body != null) {
         String string = body.string();
-        expenses = new ObjectMapper().readValue(string, new TypeReference<Expense>() {});
+        if (string != null && string.length() > 0)
+          expenses = new ObjectMapper().readValue(string, new TypeReference<Map<String, Object>>() {});
       }
     } catch (IOException e) {
       e.printStackTrace();
     }
+    return expenses;
   }
 
 }

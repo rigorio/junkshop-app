@@ -81,24 +81,25 @@ public class CashHandler {
     return cash;
   }
 
-  public void sendCash(Cash cash, String accountId) {
+  public Cash sendCash(Cash cash, String accountId) {
     OkHttpClient client = new OkHttpClient();
+    Cash savedCash = new Cash();
     try {
       cash.setDate(LocalDate.now().toString());
       cash.setAccountId(PublicCache.getAccountId());
       String jsonString = new ObjectMapper().writeValueAsString(cash);
       RequestBody reqbody = RequestBody.create(JSON, jsonString);
       Request request = new Request.Builder()
-          .url(URL + "?accountId="+ accountId)
+          .url(URL + "?accountId=" + accountId)
           .post(reqbody)
           .build();
       Call call = client.newCall(request);
-      Cash savedCash = new Cash();
       ResponseBody body = call.execute().body();
       String string = body.string();
       savedCash = new ObjectMapper().readValue(string, new TypeReference<Cash>() {});
     } catch (IOException e) {
       e.printStackTrace();
     }
+    return savedCash;
   }
 }

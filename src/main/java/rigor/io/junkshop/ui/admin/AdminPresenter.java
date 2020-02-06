@@ -51,8 +51,8 @@ public class AdminPresenter implements Initializable {
   public TableView dataTable;
   public JFXButton saveButton;
   public Label confirmLabel;
-  public JFXPasswordField capitalText;
-  public JFXPasswordField cashText;
+  public JFXTextField capitalText;
+  public JFXTextField cashText;
   private AccountCoordinator accountCoordinator;
 
   private SalesMan salesMan;
@@ -160,7 +160,7 @@ public class AdminPresenter implements Initializable {
 
     username.textProperty().addListener((observable, oldValue, newValue) -> createButton.setDisable(newValue.trim().isEmpty()));
     confPass.textProperty().addListener((o, ov, nv) -> {
-      matcher.setVisible(password.getText().equals(confPass.getText()));
+      matcher.setVisible(!password.getText().equals(confPass.getText()));
       createButton.setDisable(!(password.getText().equals(confPass.getText())) || username.getText().trim().isEmpty());
     });
 
@@ -188,7 +188,6 @@ public class AdminPresenter implements Initializable {
       acc.setPassword(pash);
       TaskTool<Account> tool = new TaskTool<>();
       Task<Account> task = tool.createTask(() -> {
-        alert.showAndWait();
         return accountCoordinator.save(acc);
       });
       task.setOnSucceeded(e -> {
@@ -197,6 +196,7 @@ public class AdminPresenter implements Initializable {
         accountBox.setValue(task.getValue());
       });
       tool.execute(task);
+      alert.showAndWait();
     }
 
   }

@@ -233,11 +233,11 @@ public class SalesPresenter implements Initializable {
           .build();
       saleHandler.sendPurchase(sale);
       try {
-        PrintUtil.print(lines);
+        new PrintUtil().print(lines);
         Thread.sleep(3500L);
-        PrintUtil.print(lines);
+        new PrintUtil().print(lines);
         Thread.sleep(3500L);
-        PrintUtil.print(lines);
+        new PrintUtil().print(lines);
       } catch (InterruptedException ex) {
         ex.printStackTrace();
       }
@@ -275,6 +275,7 @@ public class SalesPresenter implements Initializable {
     quantityLabel.setText("0.0");
     weightText.clear();
     priceText.clear();
+    purchaseItemList = new ArrayList<>();
   }
 
   @FXML
