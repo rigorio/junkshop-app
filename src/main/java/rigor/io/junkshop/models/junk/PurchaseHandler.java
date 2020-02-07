@@ -23,9 +23,12 @@ public class PurchaseHandler {
       = MediaType.parse("application/json; charset=utf-8");
   private String URL = Configurations.getInstance().getHost() + "/junk";
 
-  public ObservableList<PurchaseFX> getAllPurchases(String accountId) {
+  public ObservableList<PurchaseFX> getAllPurchases(String accountId, String date) {
     OkHttpClient client = new OkHttpClient();
     String url = URL + "/list?accountId=" + accountId;
+    if (date != null)
+      url += "&date=" + date;
+    System.out.println(url);
     Request request = new Request.Builder()
         .url(url)
         .build();
@@ -35,6 +38,7 @@ public class PurchaseHandler {
       ResponseBody body = call.execute().body();
       if (body != null) {
         String string = body.string();
+        System.out.println(string);
         junks = new ObjectMapper().readValue(string, new TypeReference<List<JunkList>>() {});
       }
     } catch (IOException e) {
@@ -131,6 +135,27 @@ public class PurchaseHandler {
       if (body != null) {
         String string = body.string();
         junks = new ObjectMapper().readValue(string, new TypeReference<Junk>() {});
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void deleteJunk(List<JunkList> purchase) {
+    OkHttpClient client = new OkHttpClient();
+    try {
+      String jsonString = new ObjectMapper().writeValueAsString(purchase);
+      System.out.println(jsonString);
+      RequestBody reqbody = RequestBody.create(JSON, jsonString);
+      Request request = new Request.Builder()
+          .url(URL+"/list")
+          .delete(reqbody)
+          .build();
+      Call call = client.newCall(request);
+      Response response = call.execute();
+      ResponseBody body = response.body();
+      if (body != null) {
+        System.out.println(response.code());
       }
     } catch (IOException e) {
       e.printStackTrace();

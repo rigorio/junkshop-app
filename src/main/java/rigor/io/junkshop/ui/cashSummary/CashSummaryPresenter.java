@@ -27,6 +27,7 @@ import rigor.io.junkshop.models.expense.ExpenseFX;
 import rigor.io.junkshop.models.expense.ExpenseHandler;
 import rigor.io.junkshop.models.junk.PurchaseHandler;
 import rigor.io.junkshop.models.junk.PurchaseSummaryFX;
+import rigor.io.junkshop.models.junk.junklist.JunkList;
 import rigor.io.junkshop.models.junk.junklist.PurchaseFX;
 import rigor.io.junkshop.models.sale.Sale;
 import rigor.io.junkshop.models.sale.SaleFX;
@@ -47,6 +48,8 @@ import java.util.stream.Stream;
 
 public class CashSummaryPresenter implements Initializable {
 
+  public JFXDatePicker customDate;
+  public JFXButton deleteItemButton;
   @FXML
   private Hyperlink printLink;
   @FXML
@@ -101,6 +104,7 @@ public class CashSummaryPresenter implements Initializable {
   private static final String DAILY = "Daily";
   private static final String MONTHLY = "Monthly";
   private static final String TODAY = "Today";
+  private static final String CUSTOM = "Custom";
 
   public CashSummaryPresenter() {
     expenseHandler = new ExpenseHandler();
@@ -124,6 +128,9 @@ public class CashSummaryPresenter implements Initializable {
     initOverallTable();
 //    setDailies();
     setExpensesTable();
+    String option = dataSelector.getValue();
+    String span = spanSelector.getValue();
+    CLEARBOIOTBP(option, span);
     UITools.numberOnlyTextField(capitalTextBox);
     UITools.numberOnlyTextField(expenseAmountTextBox);
     UITools.numberOnlyTextField(salesTextBox);
@@ -275,6 +282,8 @@ public class CashSummaryPresenter implements Initializable {
   @FXML
   public void changeData() {
     String option = dataSelector.getValue();
+    String span = spanSelector.getValue();
+    CLEARBOIOTBP(option, span);
     switch (option) {
       case SELECT_PURCHASES:
         initPurchasesTable();
@@ -286,6 +295,11 @@ public class CashSummaryPresenter implements Initializable {
         initSalesTable();
         break;
     }
+  }
+
+  private void CLEARBOIOTBP(String option, String span) {
+    customDate.setVisible(span.equals(CUSTOM) && !option.equals(SELECT_OVERALL));
+    deleteItemButton.setVisible(!span.equals(MONTHLY) && !option.equals(SELECT_OVERALL));
   }
 
   private void initSalesTable() {
@@ -313,7 +327,6 @@ public class CashSummaryPresenter implements Initializable {
             .collect(Collectors.toList());
         dataTable.setItems(FXCollections.observableList(sales1));
         alert.close();
-        ;
       });
       tool.execute(task);
     } else {
@@ -334,14 +347,15 @@ public class CashSummaryPresenter implements Initializable {
                                     price,
                                     date);
       TaskTool<List<Sale>> tool = new TaskTool<>();
-      Task<List<Sale>> task = tool.createTask(() -> saleHandler.getSales(null, PublicCache.getAccountId()));
+      String deto = customDate.isVisible() && customDate.getValue() != null ? customDate.getValue().toString() : null;
+      Task<List<Sale>> task = tool.createTask(() -> saleHandler.getSales(null, PublicCache.getAccountId(), deto));
       task.setOnSucceeded(e -> {
         Stream<Sale> salesEntityStream = task.getValue()
             .stream();
         List<SaleFX> sales1 = salesEntityStream
             .map(SaleFX::new)
             .collect(Collectors.toList());
-        sales1 = s.equals(DAILY)
+        sales1 = s.equals(DAILY) || s.equals(CUSTOM)
             ? sales1
             : sales1.stream()
             .filter(sa -> sa.getDate().get().equals(LocalDate.now().toString()))
@@ -380,8 +394,6 @@ public class CashSummaryPresenter implements Initializable {
       });
       tool.execute(task);
     } else {
-//      TableColumn<JunkFX, String> receiptNumber = new TableColumn<>("Receipt #");
-//      receiptNumber.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue()..get()));
       TableColumn<PurchaseFX, String> receiptNumber = new TableColumn<>("Receipt #");
       receiptNumber.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue().getReceiptNumber().get()));
 
@@ -401,11 +413,13 @@ public class CashSummaryPresenter implements Initializable {
       TaskTool<ObservableList<PurchaseFX>> tool = new TaskTool<>();
       Task<ObservableList<PurchaseFX>> task = tool.createTask(() -> {
 //        alert.show();
-        return purchaseHandler.getAllPurchases(PublicCache.getAccountId());
+        String deto = customDate.isVisible() && customDate.getValue() != null ? customDate.getValue().toString() : null;
+        System.out.println(deto);
+        return purchaseHandler.getAllPurchases(PublicCache.getAccountId(), deto);
       });
       task.setOnSucceeded(e -> {
         List<PurchaseFX> junkStream = new ArrayList<>(task.getValue());
-        junkStream = span.equals(DAILY)
+        junkStream = span.equals(DAILY) || span.equals(CUSTOM)
             ? junkStream
             : junkStream.stream()
             .filter(j -> j.getDate().get().equals(LocalDate.now().toString()))
@@ -545,6 +559,48 @@ public class CashSummaryPresenter implements Initializable {
     new PrintUtil().print(lines);
   }
 
+  public void deleteItem() {
+    Alert alert = UITools.quickLoadingAlert();
+    String data = dataSelector.getValue();
+    switch (data) {
+      case SELECT_PURCHASES:
+        ObservableList<PurchaseFX> selectedItems = dataTable.getSelectionModel().getSelectedItems();
+        TaskTool<Object> tool = new TaskTool<>();
+        List<JunkList> junklists = selectedItems.stream()
+            .map(JunkList::new)
+            .collect(Collectors.toList());
+        Task<Object> task = tool.createTask(() -> {
+          purchaseHandler.deleteJunk(junklists);
+          return null;
+        });
+        task.setOnSucceeded(e->{
+          dataTable.getItems().removeAll(selectedItems);
+          alert.close();
+        });
+        tool.execute(task);
+        break;
+      case SELECT_SALES:
+        ObservableList<SaleFX> selectedSales = dataTable.getSelectionModel().getSelectedItems();
+        TaskTool<Object> t = new TaskTool<>();
+        List<Sale> sales = selectedSales.stream()
+            .map(Sale::new)
+            .collect(Collectors.toList());
+        Task<Object> ta = t.createTask(() -> {
+          saleHandler.deleteSale(sales);
+          return null;
+        });
+        ta.setOnSucceeded(e->{
+          dataTable.getItems().removeAll(selectedSales);
+          alert.close();
+        });
+        t.execute(ta);
+        break;
+      default:
+        break;
+    }
+    alert.show();
+  }
+
   @FXML
   public void showExpenses() {
     String value = expenseSpan.getValue();
@@ -570,9 +626,10 @@ public class CashSummaryPresenter implements Initializable {
     List<String> options = new ArrayList<>();
     options.add(DAILY);
     options.add(MONTHLY);
-    spanSelector.setItems(FXCollections.observableList(options));
     options.add(TODAY);
-    expenseSpan.setItems(FXCollections.observableList(options));
+    expenseSpan.setItems(FXCollections.observableList(new ArrayList<>(options)));
+    options.add(CUSTOM);
+    spanSelector.setItems(FXCollections.observableList(options));
   }
 
   private List<Expense> getExpenses() {

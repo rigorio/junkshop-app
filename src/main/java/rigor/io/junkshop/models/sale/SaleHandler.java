@@ -16,14 +16,18 @@ public class SaleHandler {
       = MediaType.parse("application/json; charset=utf-8");
   private String URL = Configurations.getInstance().getHost() + "/sale";
 
-  public List<Sale> getSales(String clientId, String accountId) {
-    URL += "?accountId=" + accountId;
+  public List<Sale> getSales(String clientId, String accountId, String date) {
+    String url = URL;
+    url += "?accountId=" + accountId;
     if (clientId != null) {
-      URL += "&clientId=" + clientId;
+      url += "&clientId=" + clientId;
     }
+    if (date != null)
+      url += "&date=" + date;
+
     OkHttpClient client = new OkHttpClient();
     Request request = new Request.Builder()
-        .url(URL)
+        .url(url)
         .build();
     Call call = client.newCall(request);
     List<Sale> sales = new ArrayList<>();
@@ -51,6 +55,22 @@ public class SaleHandler {
       Call call = client.newCall(request);
       ResponseBody body = call.execute().body();
       String string = body.string();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void deleteSale(List<Sale> sale) {
+    OkHttpClient client = new OkHttpClient();
+    try {
+      String jsonString = new ObjectMapper().writeValueAsString(sale);
+      RequestBody reqbody = RequestBody.create(JSON, jsonString);
+      Request request = new Request.Builder()
+          .url(URL)
+          .delete(reqbody)
+          .build();
+      Call call = client.newCall(request);
+      ResponseBody body = call.execute().body();
     } catch (IOException e) {
       e.printStackTrace();
     }

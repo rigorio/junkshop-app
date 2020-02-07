@@ -1,5 +1,7 @@
 package rigor.io.junkshop.ui.admin;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXPasswordField;
@@ -7,6 +9,7 @@ import com.jfoenix.controls.JFXTextField;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -16,16 +19,16 @@ import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
 import rigor.io.junkshop.account.Account;
 import rigor.io.junkshop.account.AccountCoordinator;
+import rigor.io.junkshop.cache.PublicCache;
 import rigor.io.junkshop.models.cash.Cash;
 import rigor.io.junkshop.models.cash.CashFX;
 import rigor.io.junkshop.models.cash.CashHandler;
 import rigor.io.junkshop.models.expense.Expense;
 import rigor.io.junkshop.models.expense.ExpenseFX;
 import rigor.io.junkshop.models.expense.ExpenseHandler;
-import rigor.io.junkshop.models.junk.Junk;
-import rigor.io.junkshop.models.junk.JunkFX;
 import rigor.io.junkshop.models.junk.PurchaseHandler;
 import rigor.io.junkshop.models.junk.PurchaseSummaryFX;
+import rigor.io.junkshop.models.junk.junklist.PurchaseFX;
 import rigor.io.junkshop.models.sale.Sale;
 import rigor.io.junkshop.models.sale.SaleFX;
 import rigor.io.junkshop.models.sale.SaleHandler;
@@ -35,6 +38,7 @@ import rigor.io.junkshop.models.sales.SalesMan;
 import rigor.io.junkshop.utils.TaskTool;
 import rigor.io.junkshop.utils.UITools;
 
+import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.*;
@@ -106,15 +110,6 @@ public class AdminPresenter implements Initializable {
       accountBox.setItems(FXCollections.observableList(task.getValue()));
       accountBox.getSelectionModel().selectFirst();
       Account account = accountBox.getValue();
-
-      TaskTool<Cash> cashTaskTool = new TaskTool<>();
-      Task<Cash> cashTask = cashTaskTool.createTask(() -> cashHandler.today(account.getId()));
-      cashTask.setOnSucceeded(b -> {
-        cash = cashTask.getValue();
-        capitalText.setText(cash.getCapital());
-        cashText.setText(cash.getCashOnHand());
-      });
-      cashTaskTool.execute(cashTask);
       usernameText.setText(account.getUsername());
 //      initOverallTable(account.getId());
 
@@ -302,7 +297,7 @@ public class AdminPresenter implements Initializable {
   }
 
   private void initSalesTable(String accountId) {
-
+    Alert alert = UITools.quickLoadingAlert();
     dataTable.setItems(null);
     dataTable.getColumns().clear();
     String s = spanSelector.getValue();
@@ -325,6 +320,7 @@ public class AdminPresenter implements Initializable {
             .map(SalesFX::new)
             .collect(Collectors.toList());
         dataTable.setItems(FXCollections.observableList(sales1));
+        alert.close();
       });
       tool.execute(task);
     } else {
@@ -345,7 +341,7 @@ public class AdminPresenter implements Initializable {
                                     price,
                                     date);
       TaskTool<List<Sale>> tool = new TaskTool<>();
-      Task<List<Sale>> task = tool.createTask(() -> saleHandler.getSales(null, accountId));
+      Task<List<Sale>> task = tool.createTask(() -> saleHandler.getSales(null, accountId, null));
       task.setOnSucceeded(e -> {
         Stream<Sale> salesEntityStream = task.getValue()
             .stream();
@@ -358,14 +354,16 @@ public class AdminPresenter implements Initializable {
             .filter(sa -> sa.getDate().get().equals(LocalDate.now().toString()))
             .collect(Collectors.toList());
         dataTable.setItems(FXCollections.observableList(sales1));
+        alert.close();
       });
       tool.execute(task);
 
     }
-
+    alert.show();
   }
 
   private void initPurchasesTable(String accountId) {
+    Alert alert = UITools.quickLoadingAlert();
     dataTable.setItems(null);
     dataTable.getColumns().clear();
     String span = spanSelector.getValue();
@@ -381,44 +379,48 @@ public class AdminPresenter implements Initializable {
                                     t);
       TaskTool<List<PurchaseSummaryFX>> tool = new TaskTool<>();
       Task<List<PurchaseSummaryFX>> task = tool.createTask(() -> purchaseHandler.getMonthlyPurchaseSummary(accountId));
-      task.setOnSucceeded(e -> dataTable.setItems(FXCollections.observableList(task.getValue())));
+      task.setOnSucceeded(e -> {
+        dataTable.setItems(FXCollections.observableList(task.getValue()));
+        alert.close();
+      });
       tool.execute(task);
     } else {
-      TableColumn<JunkFX, String> totalPrice = new TableColumn<>("Total Price");
-      totalPrice.setCellValueFactory(e -> e.getValue().getTotalPrice());
+      TableColumn<PurchaseFX, String> receiptNumber = new TableColumn<>("Receipt #");
+      receiptNumber.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue().getReceiptNumber().get()));
 
-      TableColumn<JunkFX, String> material = new TableColumn<>("Material");
-      material.setCellValueFactory(e -> e.getValue().getMaterial());
+      TableColumn<PurchaseFX, String> price = new TableColumn<>("Total Price");
+      price.setCellValueFactory(e -> e.getValue().getTotalPrice());
 
-      TableColumn<JunkFX, String> date = new TableColumn<>("Date");
+      TableColumn<PurchaseFX, String> date = new TableColumn<>("Date");
       date.setCellValueFactory(e -> e.getValue().getDate());
 
+      TableColumn<PurchaseFX, String> items = new TableColumn<>("No. Items");
+      items.setCellValueFactory(e -> new SimpleStringProperty("" + e.getValue().getPurchaseItems().size()));
 
-      dataTable.getColumns().addAll(date,
-                                    material,
-                                    totalPrice);
-      TaskTool<List<Junk>> tool = new TaskTool<>();
-      Task<List<Junk>> task = tool.createTask(() -> purchaseHandler.getJunk(null, accountId));
+      dataTable.getColumns().addAll(receiptNumber,
+                                    items,
+                                    price,
+                                    date);
+      TaskTool<ObservableList<PurchaseFX>> tool = new TaskTool<>();
+      Task<ObservableList<PurchaseFX>> task = tool.createTask(() -> purchaseHandler.getAllPurchases(accountId, null));
       task.setOnSucceeded(e -> {
-        Stream<Junk> junkStream = task.getValue()
-            .stream();
-        List<JunkFX> junkFXList = junkStream
-            .map(JunkFX::new)
-            .collect(Collectors.toList());
-        junkFXList = span.equals(DAILY)
-            ? junkFXList
-            : junkFXList.stream()
+        List<PurchaseFX> junkStream = new ArrayList<>(task.getValue());
+        junkStream = span.equals(DAILY)
+            ? junkStream
+            : junkStream.stream()
             .filter(j -> j.getDate().get().equals(LocalDate.now().toString()))
             .collect(Collectors.toList());
-        dataTable.setItems(FXCollections.observableList(junkFXList));
+        dataTable.setItems(FXCollections.observableList(junkStream));
+        alert.close();
       });
       tool.execute(task);
     }
 
-
+    alert.show();
   }
 
   private void initOverallTable(String accountId) {
+    Alert alert = UITools.quickLoadingAlert();
     dataTable.setItems(null);
     dataTable.getColumns().clear();
     TableColumn<CashFX, String> date = new TableColumn<>("Date");
@@ -461,6 +463,7 @@ public class AdminPresenter implements Initializable {
   }
 
   private void setExpensesTable(String accountId) {
+    Alert alert = UITools.quickLoadingAlert();
     String span = spanSelector.getValue();
     dataTable.setItems(null);
     dataTable.getColumns().clear();
@@ -507,21 +510,33 @@ public class AdminPresenter implements Initializable {
         break;
       }
     }
-    TaskTool<List<Expense>> tool = new TaskTool<>();
-    Task<List<Expense>> task = tool.createTask(() -> span.equals(DAILY)
-        ? getExpenses(accountId)
-        : span.equals(MONTHLY)
-        ? expenseHandler.getMonthlyExpenses(accountId)
-        : getExpenses(accountId).stream()
-        .filter(e -> e.getDate().equals(LocalDate.now().toString()))
-        .collect(Collectors.toList()));
+    TaskTool<Map<String, Object>> tool = new TaskTool<>();
+    Task<Map<String, Object>> task = tool.createTask(() -> {
+      return expenseHandler.getExpensesAndDailies(accountId);
+    });
     task.setOnSucceeded(e -> {
-      Stream<Expense> expenseStream = task.getValue()
-          .stream();
-      List<ExpenseFX> expenses = expenseStream
-          .map(ExpenseFX::new)
-          .collect(Collectors.toList());
-      dataTable.setItems(FXCollections.observableList(expenses));
+      ObjectMapper mapper = new ObjectMapper();
+      Map<String, Object> map = task.getValue();
+      try {
+        List<Expense> expenseList = mapper.readValue(mapper.writeValueAsString(map.get("expenses")), new TypeReference<List<Expense>>() {});
+        Cash cash = mapper.readValue(mapper.writeValueAsString(map.get("cash")), new TypeReference<Cash>() {});
+        List<Expense> expenses = span.equals(DAILY)
+            ? expenseList
+            : span.equals(MONTHLY)
+            ? expenseHandler.getMonthlyExpenses(PublicCache.getAccountId())
+            : expenseList.stream()
+            .filter(ex -> ex.getDate().equals(LocalDate.now().toString()))
+            .collect(Collectors.toList());
+        dataTable.setItems(FXCollections.observableList(expenses.stream()
+                                                                .map(ExpenseFX::new)
+                                                                .collect(Collectors.toList())));
+        ha(cash);
+        alert.close();
+
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      }
+//      setAmounts();
     });
     tool.execute(task);
   }
@@ -552,4 +567,10 @@ public class AdminPresenter implements Initializable {
   }
 
 
+
+  private void ha(Cash cash) {
+    this.cash = cash;
+    capitalText.setText(cash.getCapital());
+    cashText.setText(cash.getCashOnHand());
+  }
 }

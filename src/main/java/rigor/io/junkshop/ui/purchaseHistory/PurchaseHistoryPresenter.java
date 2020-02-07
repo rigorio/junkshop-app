@@ -72,7 +72,8 @@ public class PurchaseHistoryPresenter implements Initializable {
   }
 
   private List<Sale> purchaseHistory() {
-    return saleHandler.getSales(null, PublicCache.getAccountId());
+    String date = datePicker.getValue() != null ? datePicker.getValue().toString() : null;
+    return saleHandler.getSales(null, PublicCache.getAccountId(), date);
   }
 
   @FXML
