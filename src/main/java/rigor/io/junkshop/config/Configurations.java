@@ -46,8 +46,8 @@ public class Configurations {
   }
 
   public String getHost() {
-//    return AWS_HOST;
-    return LOCALHOST;
+    return AWS_HOST;
+//    return LOCALHOST;
 //    Map<String, Object> map = getData();
 ////    System.out.println(map);
 //    Object o = map.get(ConfigKeys.DB_HOST.toString());

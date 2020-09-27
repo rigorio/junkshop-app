@@ -23,7 +23,9 @@ import rigor.io.junkshop.models.sale.SaleHandler;
 import rigor.io.junkshop.models.sale.SaleItem;
 import rigor.io.junkshop.models.sale.SaleItemFX;
 import rigor.io.junkshop.printing.PrintUtil;
+import rigor.io.junkshop.printing.PrinterService;
 import rigor.io.junkshop.ui.purchaseHistory.PurchaseHistoryView;
+import rigor.io.junkshop.utils.AutoCompleteComboBoxListener;
 import rigor.io.junkshop.utils.GuiManager;
 import rigor.io.junkshop.utils.TaskTool;
 import rigor.io.junkshop.utils.UITools;
@@ -104,6 +106,7 @@ public class SalesPresenter implements Initializable {
                                       totalPrice);
     purchaseTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     fillMaterialBox();
+    new AutoCompleteComboBoxListener<String>(materialBox);
     UITools.numberOnlyTextField(weightText);
     UITools.numberOnlyTextField(priceText);
     totalTextbox.setText("₱ 0.0");
@@ -207,22 +210,33 @@ public class SalesPresenter implements Initializable {
           .mapToDouble(item -> Double.parseDouble(item.getTotalPrice()))
           .sum();
 
-      List<String> lines = new ArrayList<>();
-      lines.add("Steelman Junkshop\n");
-      lines.add(PublicCache.getContact() + "\n");
-      lines.add("Sales\n");
-      lines.add("Client: " + clientBox.getValue().getName() + "\n");
-      lines.add("Receipt #: " + receiptNumber.getText() + "\n");
-      lines.add("Date: " + LocalDate.now().toString() + "\n");
-      lines.add("Items:" + "\n");
+      StringBuilder lines = new StringBuilder();
+      lines.append(PublicCache.getName()).append("\n");
+      lines.append(PublicCache.getContact()).append("\n");
+      lines.append("Sales\n");
+      lines.append("Client: ").append(clientBox.getValue().getName()).append("\n");
+      lines.append("Receipt #: ").append(receiptNumber.getText()).append("\n");
+      lines.append("Date: ").append(LocalDate.now().toString()).append("\n");
+      lines.append("Items:" + "\n");
 
 
       for (SaleItem purchaseItem : saleItems) {
-        lines.add(purchaseItem.getMaterial() + "\n");
-        lines.add(purchaseItem.getNote() + "\n");
-        lines.add(purchaseItem.getWeight() + "kg * ₱" + purchaseItem.getPrice() + " = ₱" + purchaseItem.getTotalPrice() + "\n");
+        lines.append(purchaseItem.getMaterial()).append("\n");
+        lines.append(purchaseItem.getNote()).append("\n");
+        lines.append(purchaseItem.getWeight())
+            .append("kg * ")
+            .append(UITools.PESO)
+            .append(purchaseItem.getPrice())
+            .append(" = ")
+            .append(UITools.PESO)
+            .append(purchaseItem.getTotalPrice())
+            .append("\n");
       }
-      lines.add("GRAND TOTAL: ₱ " + totalPrice);
+      lines.append("GRAND TOTAL: ")
+          .append(UITools.PESO)
+          .append(" ")
+          .append(totalPrice)
+          .append("\n\n\n\n");
       Client client = clientBox.getValue();
       Sale sale = Sale.builder()
           .receiptNumber(receiptNumber.getText())
@@ -233,11 +247,13 @@ public class SalesPresenter implements Initializable {
           .build();
       saleHandler.sendPurchase(sale);
       try {
-        new PrintUtil().print(lines);
-        Thread.sleep(3500L);
-        new PrintUtil().print(lines);
-        Thread.sleep(3500L);
-        new PrintUtil().print(lines);
+        String alllines = lines.toString();
+        PrinterService service = new PrinterService();
+        service.printString(alllines);
+        Thread.sleep(4000L);
+        service.printString(alllines);
+        Thread.sleep(4000L);
+        service.printString(alllines);
       } catch (InterruptedException ex) {
         ex.printStackTrace();
       }
@@ -264,6 +280,7 @@ public class SalesPresenter implements Initializable {
     clientBox.setPromptText("Select Client");
     omotteta();
     totalTextbox.setText("₱ 0.0");
+    purchaseItemList = new ArrayList<>();
 //    selectMaterial();
   }
 
@@ -275,7 +292,6 @@ public class SalesPresenter implements Initializable {
     quantityLabel.setText("0.0");
     weightText.clear();
     priceText.clear();
-    purchaseItemList = new ArrayList<>();
   }
 
   @FXML

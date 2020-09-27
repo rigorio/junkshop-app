@@ -19,6 +19,15 @@ public class PublicCache {
     return property.getValue();
   }
 
+  public static String getName() {
+    if (values.containsKey(CustomPropertyKeys.JUNKSHOP_NAME.name())) {
+      return values.get(CustomPropertyKeys.JUNKSHOP_NAME.name());
+    }
+    CustomPropertyHandler handler = new CustomPropertyHandler();
+    CustomProperty property = handler.getProperty(CustomPropertyKeys.JUNKSHOP_NAME.name());
+    return property.getValue();
+  }
+
   public static String getAccountId() {
     return values.get("id");
   }

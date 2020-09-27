@@ -35,7 +35,7 @@ import rigor.io.junkshop.models.sale.SaleHandler;
 import rigor.io.junkshop.models.sales.SalesEntity;
 import rigor.io.junkshop.models.sales.SalesFX;
 import rigor.io.junkshop.models.sales.SalesMan;
-import rigor.io.junkshop.printing.PrintUtil;
+import rigor.io.junkshop.printing.PrinterService;
 import rigor.io.junkshop.utils.TaskTool;
 import rigor.io.junkshop.utils.UITools;
 
@@ -541,22 +541,28 @@ public class CashSummaryPresenter implements Initializable {
 
   @FXML
   public void printExpenses() {
-    List<String> lines = new ArrayList<>();
-    lines.add("Steelman Junkshop\n");
-    lines.add("Expenses\n");
-    lines.add("Date: " + LocalDate.now().toString() + "\n");
+    StringBuilder lines = new StringBuilder();
+    lines.append(PublicCache.getName()).append("\n");
+    lines.append(PublicCache.getContact()).append("\n");
+    lines.append("Expenses\n");
+    lines.append("Date: ").append(LocalDate.now().toString()).append("\n");
     expensesTable.getItems().forEach(expense -> {
-      lines.add(expense.getDate().get() + "\n");
-      lines.add(expense.getName().get() + "\n");
+      lines.append(expense.getDate().get()).append("\n");
+      lines.append(expense.getName().get()).append("\n");
       if (expense.getNote() != null)
-        lines.add(expense.getNote().get() + "\n");
-      lines.add(UITools.PESO + " " + expense.getAmount().get() + "\n");
-      lines.add("-------\n");
+        lines.append(expense.getNote().get()).append("\n");
+      lines.append(UITools.PESO + " ").append(expense.getAmount() != null ? expense.getAmount().get() : "0.0").append("\n");
+      lines.append("-------\n");
     });
-    lines.add("Total: " + UITools.PESO + " " + expensesTable.getItems().stream()
-        .mapToDouble(ex -> Double.valueOf(ex.getAmount().get()))
-        .sum());
-    new PrintUtil().print(lines);
+    lines.append("Total: " + UITools.PESO + " ").append(expensesTable.getItems().stream()
+                                                            .mapToDouble(ex -> Double.valueOf(ex.getAmount()!= null ? ex.getAmount().get() : "0.0"))
+                                                            .sum());
+
+    PrinterService service = new PrinterService();
+    String text = lines.toString();
+    System.out.println(text);
+    service.printString(text);
+
   }
 
   public void deleteItem() {
@@ -573,7 +579,7 @@ public class CashSummaryPresenter implements Initializable {
           purchaseHandler.deleteJunk(junklists);
           return null;
         });
-        task.setOnSucceeded(e->{
+        task.setOnSucceeded(e -> {
           dataTable.getItems().removeAll(selectedItems);
           alert.close();
         });
@@ -589,7 +595,7 @@ public class CashSummaryPresenter implements Initializable {
           saleHandler.deleteSale(sales);
           return null;
         });
-        ta.setOnSucceeded(e->{
+        ta.setOnSucceeded(e -> {
           dataTable.getItems().removeAll(selectedSales);
           alert.close();
         });

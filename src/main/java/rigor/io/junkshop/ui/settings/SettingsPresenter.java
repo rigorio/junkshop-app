@@ -6,6 +6,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -39,6 +40,7 @@ public class SettingsPresenter implements Initializable {
   public JFXTextField priceText;
   public JFXButton addEditButton;
   public JFXButton deleteButton;
+  public JFXTextField nameText;
   @FXML
   private JFXTextField hostTextBox;
   private CustomPropertyHandler propertyHandler;
@@ -55,6 +57,8 @@ public class SettingsPresenter implements Initializable {
 //    hostTextBox.setText(host);
     CustomProperty property = propertyHandler.getProperty(CustomPropertyKeys.RECEIPT_CONTACT.name());
     contactText.setText(property.getValue());
+    CustomProperty name = propertyHandler.getProperty(CustomPropertyKeys.JUNKSHOP_NAME.name());
+    contactText.setText(name.getValue());
     setMaterialsTable();
 //    materialsTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     materialsTable.setOnMouseClicked(tableSelectionEvent());
@@ -71,6 +75,11 @@ public class SettingsPresenter implements Initializable {
     String contact = contactText.getText();
     propertyHandler.sendProperty(new CustomProperty(CustomPropertyKeys.RECEIPT_CONTACT.name(), contact));
 
+  }
+
+  public void updateName() {
+    String contact = nameText.getText();
+    propertyHandler.sendProperty(new CustomProperty(CustomPropertyKeys.JUNKSHOP_NAME.name(), contact));
   }
 
   public void addMaterial() {

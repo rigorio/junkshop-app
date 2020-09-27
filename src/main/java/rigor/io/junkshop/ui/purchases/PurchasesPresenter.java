@@ -21,8 +21,9 @@ import rigor.io.junkshop.models.junk.PurchaseHandler;
 import rigor.io.junkshop.models.junk.junklist.JunkList;
 import rigor.io.junkshop.models.materials.Material;
 import rigor.io.junkshop.models.materials.MaterialsProvider;
-import rigor.io.junkshop.printing.PrintUtil;
+import rigor.io.junkshop.printing.PrinterService;
 import rigor.io.junkshop.ui.junkSummary.JunkSummaryView;
+import rigor.io.junkshop.utils.AutoCompleteComboBoxListener;
 import rigor.io.junkshop.utils.GuiManager;
 import rigor.io.junkshop.utils.TaskTool;
 import rigor.io.junkshop.utils.UITools;
@@ -71,6 +72,7 @@ public class PurchasesPresenter implements Initializable {
     customClientCellFactory();
     grandTotal.setText("₱ 0.0");
     fillMaterialBox();
+    new AutoCompleteComboBoxListener<String>(materialBox);
     TableColumn<JunkFX, String> material = new TableColumn<>("Material");
     material.setCellValueFactory(e -> e.getValue().getMaterial());
 
@@ -269,23 +271,23 @@ public class PurchasesPresenter implements Initializable {
       return null;
     });
 
-    List<String> lines = new ArrayList<>();
-    lines.add("Steelman Junkshop\n");
-    lines.add(PublicCache.getContact() + "\n");
-    lines.add("Purchases\n");
-    lines.add("Client: " + clientBox.getValue().getName() + "\n");
-    lines.add("Receipt #" + receiptNumber.getText() + "\n");
-    lines.add("Date: " + LocalDate.now().toString() + "\n");
-    lines.add("Items:" + "\n");
+    StringBuilder lines = new StringBuilder();
+    lines.append(PublicCache.getName()).append("\n");
+    lines.append(PublicCache.getContact()).append("\n");
+    lines.append("Purchases\n");
+    lines.append("Client: ").append(clientBox.getValue().getName()).append("\n");
+    lines.append("Receipt #").append(receiptNumber.getText()).append("\n");
+    lines.append("Date: ").append(LocalDate.now().toString()).append("\n");
+    lines.append("Items:" + "\n");
     for (Junk junk : junkList) {
-      lines.add(junk.getMaterial() + "\n");
-      lines.add(junk.getNote() + "\n");
-      lines.add(junk.getWeight() + "kg * ₱" + junk.getPrice() + " = ₱" + junk.getTotalPrice() + "\n");
+      lines.append(junk.getMaterial()).append("\n");
+      lines.append(junk.getNote()).append("\n");
+      lines.append(junk.getWeight()).append("kg * ").append(UITools.PESO).append(junk.getPrice()).append(" = ").append(UITools.PESO).append(junk.getTotalPrice()).append("\n");
     }
     double grandTotal = junkList.stream()
         .mapToDouble(junk -> Double.valueOf(junk.getWeight()) * Double.valueOf(junk.getPrice()))
         .sum();
-    lines.add("GRAND TOTAL: ₱" + grandTotal);
+    lines.append("GRAND TOTAL: ").append(UITools.PESO).append(grandTotal).append("\n\n\n\n");
     task.setOnSucceeded(e -> {
       loadingLabel.setVisible(false);
       Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -294,11 +296,13 @@ public class PurchasesPresenter implements Initializable {
       alert.setContentText(null);
       alert.showAndWait();
       try {
-        new PrintUtil().print(lines);
-        Thread.sleep(3500L);
-        new PrintUtil().print(lines);
-        Thread.sleep(3500L);
-        new PrintUtil().print(lines);
+        String alllines = lines.toString();
+        PrinterService service = new PrinterService();
+        service.printString(alllines);
+        Thread.sleep(4000L);
+        service.printString(alllines);
+        Thread.sleep(4000L);
+        service.printString(alllines);
       } catch (InterruptedException ex) {
         ex.printStackTrace();
       }
@@ -317,6 +321,7 @@ public class PurchasesPresenter implements Initializable {
     omotetta();
     grandTotal.setText("₱ 0.0");
 //    selectMaterial();
+    purchaseItemList = new ArrayList<>();
   }
 
   private void omotetta() {
@@ -326,7 +331,6 @@ public class PurchasesPresenter implements Initializable {
     materialBox.setPromptText("Select Material");
     priceText.clear();
     weightText.clear();
-    purchaseItemList = new ArrayList<>();
   }
 
   @NotNull

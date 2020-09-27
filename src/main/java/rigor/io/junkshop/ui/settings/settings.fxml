@@ -1,37 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.*?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTextField?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<AnchorPane prefHeight="550" prefWidth="825" xmlns="http://javafx.com/javafx/8.0.999-ea"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.ui.settings.SettingsPresenter">
-  <BorderPane prefHeight="550.0" prefWidth="825.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="550" prefWidth="825" xmlns="http://javafx.com/javafx/8.0.999-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rigor.io.junkshop.ui.settings.SettingsPresenter">
+  <BorderPane prefHeight="550.0" prefWidth="825.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
     <left>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-        <JFXTextField fx:id="hostTextBox" layoutX="14.0" layoutY="85.0" prefHeight="25.0" prefWidth="220.0"
-                      visible="false"/>
-        <JFXButton layoutX="242.0" layoutY="85.0" mnemonicParsing="false" onAction="#updateHost" text="Update"
-                   visible="false"/>
-        <JFXTextField fx:id="contactText" layoutX="14.0" layoutY="39.0" prefHeight="37.0" prefWidth="179.0"
-                      promptText="Contact...">
+        <JFXTextField fx:id="hostTextBox" layoutX="14.0" layoutY="85.0" prefHeight="25.0" prefWidth="220.0" visible="false" />
+        <JFXButton layoutX="242.0" layoutY="85.0" mnemonicParsing="false" onAction="#updateHost" text="Update" visible="false" />
+        <JFXTextField fx:id="contactText" layoutX="14.0" layoutY="39.0" prefHeight="37.0" prefWidth="179.0" promptText="Contact...">
           <font>
-            <Font size="16.0"/>
+            <Font size="16.0" />
           </font>
         </JFXTextField>
-        <JFXButton layoutX="203.0" layoutY="39.0" mnemonicParsing="false" onAction="#updateContact"
-                   text="Update Contact">
+        <JFXButton layoutX="203.0" layoutY="39.0" mnemonicParsing="false" onAction="#updateContact" text="Update Contact">
           <font>
-            <Font size="16.0"/>
+            <Font size="16.0" />
           </font>
         </JFXButton>
         <Label layoutX="14.0" layoutY="14.0" text="Receipt Contact">
           <font>
-            <Font size="16.0"/>
+            <Font size="16.0" />
           </font>
         </Label>
+            <JFXTextField fx:id="nameText" layoutX="14.0" layoutY="85.0" prefHeight="37.0" prefWidth="179.0" promptText="Junkshop name...">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </JFXTextField>
+            <JFXButton layoutX="209.0" layoutY="85.0" mnemonicParsing="false" onAction="#updateName" text="Update Name">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </JFXButton>
       </AnchorPane>
     </left>
     <center>
@@ -39,10 +47,10 @@
         <center>
           <TableView fx:id="materialsTable" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <columnResizePolicy>
-              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
             <BorderPane.margin>
-              <Insets bottom="10.0" left="10.0" right="10.0"/>
+              <Insets bottom="10.0" left="10.0" right="10.0" />
             </BorderPane.margin>
           </TableView>
         </center>
@@ -50,35 +58,32 @@
           <AnchorPane prefHeight="89.0" prefWidth="489.0" BorderPane.alignment="CENTER">
             <JFXTextField fx:id="materialText" layoutX="14.0" layoutY="36.0" promptText="material...">
               <font>
-                <Font size="16.0"/>
+                <Font size="16.0" />
               </font>
             </JFXTextField>
             <JFXTextField fx:id="priceText" layoutX="206.0" layoutY="36.0" promptText="price...">
               <font>
-                <Font size="16.0"/>
+                <Font size="16.0" />
               </font>
             </JFXTextField>
-            <JFXButton fx:id="addEditButton" layoutX="405.0" layoutY="9.0" mnemonicParsing="false"
-                       onAction="#addMaterial" style="-fx-background-color: #8BC34A;" text="Add" textFill="WHITE">
+            <JFXButton fx:id="addEditButton" layoutX="405.0" layoutY="9.0" mnemonicParsing="false" onAction="#addMaterial" style="-fx-background-color: #8BC34A;" text="Add" textFill="WHITE">
               <font>
-                <Font name="System Bold" size="14.0"/>
+                <Font name="System Bold" size="14.0" />
               </font>
             </JFXButton>
-            <JFXButton fx:id="deleteButton" layoutX="405.0" layoutY="43.0" mnemonicParsing="false"
-                       onAction="#deleteMaterial" style="-fx-background-color: FF3D00;" text="Delete"
-                       textFill="WHITE">
+            <JFXButton fx:id="deleteButton" layoutX="405.0" layoutY="43.0" mnemonicParsing="false" onAction="#deleteMaterial" style="-fx-background-color: FF3D00;" text="Delete" textFill="WHITE">
               <font>
-                <Font name="System Bold" size="14.0"/>
+                <Font name="System Bold" size="14.0" />
               </font>
             </JFXButton>
             <Label layoutX="14.0" layoutY="11.0" text="Material">
               <font>
-                <Font size="16.0"/>
+                <Font size="16.0" />
               </font>
             </Label>
             <Label layoutX="206.0" layoutY="11.0" text="Price">
               <font>
-                <Font size="16.0"/>
+                <Font size="16.0" />
               </font>
             </Label>
           </AnchorPane>
